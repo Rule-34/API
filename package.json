@@ -1,11 +1,15 @@
 {
   "name": "rule-34-pwa-original-api",
-  "version": "0.0.0",
+  "description": "A wrapper for all rule34 related sites (Danbooru based)",
+  "version": "0.0.1",
   "private": true,
+  "main": "index.js",
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node index.js",
+    "dev": "cross-env NODE_ENV=development npm run start"
   },
   "dependencies": {
+    "apicache": "^1.5.2",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
