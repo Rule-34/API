@@ -8,7 +8,7 @@ const express = require('express'),
   compress = require('compression'),
   bodyParser = require('body-parser'),
   // Routes
-  indexerRouter = require('../routes/indexer.routes'),
+  indexerRouter = require('../routes/indexer.router'),
   // Init
   app = express(),
   // Handlers
@@ -22,8 +22,6 @@ app
   .use(compress())
   .use(cors())
   // Error handling
-  .use(errorHandler.logErrors)
-  .use(errorHandler.clientErrorHandler)
   .use(errorHandler.errorHandler)
 
 // Development plugins
@@ -33,7 +31,7 @@ if (config.env === 'development') {
 }
 
 // Import all Routes
-app.use('/', indexerRouter)
+app.use(indexerRouter)
 
 // Export
 module.exports = app

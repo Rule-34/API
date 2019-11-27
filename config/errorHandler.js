@@ -14,6 +14,6 @@ module.exports = {
 
   errorHandler: function(err, req, res, next) {
     res.status(500)
-    res.render('error', { error: err })
+    res.json({ message: err.message })
   }
 }

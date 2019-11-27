@@ -1,8 +1,8 @@
 var express = require('express')
-var defaultRouter = express.Router()
+var router = express.Router()
 
 /* GET home page. */
-defaultRouter.get('/', function(req, res, next) {
+router.get('/', function(req, res, next) {
   res.json({
     message:
       'This is an API wrapper made for https://r34.app, it gathers content from the next sites:',
@@ -12,4 +12,4 @@ defaultRouter.get('/', function(req, res, next) {
   })
 })
 
-module.exports = defaultRouter
+module.exports = router
