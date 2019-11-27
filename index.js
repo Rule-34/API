@@ -1,8 +1,15 @@
 const config = require('./config/config'),
+  configPackage = require('./package.json'),
+  debug = require('debug')(configPackage.name),
   app = require('./config/express')
 
-app.listen(config.port, () => {
-  console.info(`server started on port ${config.port} (${config.env})`) // eslint-disable-line no-console
+// Initialize server
+const server = app.listen(app.get('port'), function() {
+  debug(
+    `Express server listening on port ${server.address().port} in mode ${
+      config.env
+    } in host ${server.address().address}`
+  )
 })
 
 module.exports = app
