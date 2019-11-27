@@ -5,7 +5,7 @@ const express = require('express'),
   logger = require('morgan'),
   helmet = require('helmet'),
   cors = require('cors'),
-  compress = require('compression'),
+  compression = require('compression'),
   bodyParser = require('body-parser'),
   // Routes
   indexerRouter = require('../routes/indexer.router'),
@@ -19,15 +19,22 @@ app
   .use(bodyParser.json())
   .use(bodyParser.urlencoded({ extended: true })) // TODO: See what it does
   .use(helmet())
-  .use(compress())
+  .use(compression())
   .use(cors())
   // Error handling
   .use(errorHandler.errorHandler)
 
-// Development plugins
+// If in development log everything, otherwise only log errors
 if (config.env === 'development') {
-  //TODO: see if it works
   app.use(logger('dev'))
+} else {
+  app.use(
+    logger('dev', {
+      skip: function(req, res) {
+        return res.statusCode < 400
+      }
+    })
+  )
 }
 
 // Import all Routes
