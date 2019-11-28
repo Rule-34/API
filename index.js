@@ -1,7 +1,7 @@
 // Heroku Concurrency
 const throng = require('throng'),
 // Requirements
-  generalConfig = require('./generalConfig')
+  generalConfig = require('./config/generalConfig')
 
 throng({
   workers: generalConfig.workers,
