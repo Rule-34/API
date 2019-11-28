@@ -2,7 +2,7 @@ const express = require('express'),
   router = express.Router(),
   // Import all routes // TODO: use glob to match *.route files
   defaultRouter = require('./default'),
-  testRouter = require('./test')
+  xxxRoutes = require('./rule34xxx/rule34xxx.routes.js')
 
 /*
  ** All routes are used from here
@@ -18,7 +18,7 @@ router
   /* GET /health-check - Check service health */
   .get('/health-check', (req, res) => res.send('OK'))
   .use('/', defaultRouter)
-  .use('/test', testRouter)
+  .use('/xxx/', xxxRoutes)
 
 // Export default
 module.exports = router

@@ -1,9 +1,5 @@
 const httpGet = require('../utils/HttpGet.js'),
-  xmlToJson = require('../utils/xmlToJson.js'),
-  finalJson = {
-    count: '',
-    posts: [],
-  }
+  xmlToJson = require('../utils/xmlToJson.js')
 
 async function xmlToJsonFromUrl(url) {
   // console.log(url)
@@ -11,23 +7,13 @@ async function xmlToJsonFromUrl(url) {
   const xmlData = await httpGet(url)
   // console.log('XML DATA IS', xmlData)
 
-  // Then save count
-  finalJson.count = await xmlToJson('count', xmlData)
-
-  // Loop to save every post to the final json object
-  let posts = xmlData.getElementsByTagName('post')
-
-  for (let i = 0; i < posts.length; i++) {
-    let post = posts[i]
-    console.log(post)
-
-    // Transform xml posts to json
-    finalJson.posts[i] = await xmlToJson('posts', post)
-  }
-
+  // Then transform to Json
+  const jsonData = await xmlToJson(xmlData)
   // console.log('JSON DATA IS', jsonData)
 
-  return finalJson
+  // Then beautify json
+
+  return jsonData
 }
 
 module.exports = xmlToJsonFromUrl
