@@ -1,31 +1,18 @@
-# Rule-34-PWA-Original-API
+# Rule 34 PWA Original API
 
-### App.use
-app.use es para montar instrucciones a una url
+## What is this?
 
-Por ejemplo:
-```javascript
-app.use('/api', routes);
-```
-Bindea todas las rutas dentro de routes a /api
+It's a JSON API that you can use to access posts from various danbooru forums like rule34.xxx or rule34.paheal.net
 
-### Router.use
-Router.use es para mapear instrucciones a una url, similar a app.use
+> This API is going to be used on the [Rule 34 app](https://r34.app/).
 
-Por ejemplo:
-```javascript
-router.use('/users', userRoutes);
-```
-Bindea todas las rutas dentro de userRoutes a /users
+### Goals
+It is being developed with the following goals:
+- Being as fast as possible
+- Being as secure as it can be
+- Wasting as little data as its needed
+- Supporting various danbooru sites
 
-### Router.route
-Router.route es para mapear url locales, no globales
+For the initial version it has to have the same functionality as the currently used in [Rule 34 app](https://r34.app/).
 
-
-Por ejemplo:
-```javascript
-router.route('/')
-  /** GET /api/users - Get list of users */
-  .get(userCtrl.list)
-```
-Bindea la ruta / a /api/users
+The current API being used is from [Kurozenzen](https://github.com/kurozenzen/r34-json-api).
