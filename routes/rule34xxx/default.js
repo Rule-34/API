@@ -1,5 +1,5 @@
 const express = require('express'),
-  config = require('../../config/config'),
+  generalConfig = require('../../config/generalConfig'),
   domainConfig = require('./domainConfig'),
   router = express.Router()
 
@@ -7,10 +7,10 @@ const express = require('express'),
 router.get('/', function(req, res) {
   res.json({
     message: 'This API is for the ' + domainConfig.url + ' domain',
-    posts: config.host + domainConfig.routeUrl + 'posts',
-    comments: config.host + domainConfig.routeUrl + 'comments',
-    tags: config.host + domainConfig.routeUrl + 'tags',
-    images: config.host + domainConfig.routeUrl + 'images',
+    posts: generalConfig.host + domainConfig.routeUrl + 'posts',
+    comments: generalConfig.host + domainConfig.routeUrl + 'comments',
+    tags: generalConfig.host + domainConfig.routeUrl + 'tags',
+    images: generalConfig.host + domainConfig.routeUrl + 'images',
   })
 })
 

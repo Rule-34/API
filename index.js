@@ -1,4 +1,4 @@
-const config = require('./config/config'),
+const generalConfig = require('./config/generalConfig'),
   configPackage = require('./package.json'),
   debug = require('debug')(configPackage.name),
   app = require('./config/express')
@@ -7,7 +7,7 @@ const config = require('./config/config'),
 const server = app.listen(app.get('port'), function() {
   debug(
     `Express server listening on port ${server.address().port} in mode ${
-      config.env
+      generalConfig.env
     } in host ${server.address().address}`
   )
 })

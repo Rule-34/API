@@ -1,8 +1,8 @@
 // Defines defaults if they are available from ENV
-const config = {
+const generalConfig = {
   env: process.env.NODE_ENV || 'production',
   host: process.env.HOST || 'http://localhost/',
   port: process.env.PORT || 8000,
 }
 
-module.exports = config
+module.exports = generalConfig

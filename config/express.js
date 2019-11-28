@@ -1,6 +1,6 @@
 const express = require('express'),
   // Requirements
-  config = require('./config'),
+  generalConfig = require('./generalConfig'),
   // Plugins
   logger = require('morgan'),
   helmet = require('helmet'),
@@ -17,7 +17,7 @@ const express = require('express'),
 
 // Assigning plugins
 app
-  .set('port', config.port)
+  .set('port', generalConfig.port)
   .use(favicon(__dirname + '/../static/favicon.ico'))
   .use(bodyParser.json())
   .use(bodyParser.urlencoded({ extended: true })) // TODO: See what it does
@@ -26,7 +26,7 @@ app
   .use(cors())
 
 // If in development log everything, otherwise only log errors
-if (config.env === 'development') {
+if (generalConfig.env === 'development') {
   app
     .use(logger('dev'))
     // Error handling
