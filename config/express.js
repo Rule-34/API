@@ -1,4 +1,6 @@
 const express = require('express'),
+  // Requirements
+  generalConfig = require('./generalConfig'),
   // Plugins
   bodyParser = require('body-parser'),
   compression = require('compression'),
