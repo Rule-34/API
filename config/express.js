@@ -2,28 +2,31 @@ const express = require('express'),
   // Requirements
   generalConfig = require('./generalConfig'),
   // Plugins
+  bodyParser = require('body-parser'),
+  compression = require('compression'),
+  cors = require('cors'),
   logger = require('morgan'),
   helmet = require('helmet'),
-  cors = require('cors'),
-  compression = require('compression'),
-  bodyParser = require('body-parser'),
+  apicache = require('apicache'),
+  errorHandler = require('errorhandler'),
   favicon = require('serve-favicon'),
   // Routes
   indexerRouter = require('../routes/indexer.router'),
   // Init
   app = express(),
-  // Handlers
-  errorHandler = require('errorhandler')
+  cache = apicache.middleware
+// Handlers
 
 // Assigning plugins
 app
   .set('port', generalConfig.port)
-  .use(favicon(__dirname + '/../static/favicon.ico'))
   .use(bodyParser.json())
   .use(bodyParser.urlencoded({ extended: true })) // TODO: See what it does
-  .use(helmet())
   .use(compression())
   .use(cors())
+  .use(helmet())
+  .use(cache('1 minutes'))
+  .use(favicon(__dirname + '/../static/favicon.ico'))
 
 // If in development log everything, otherwise only log errors
 if (generalConfig.env === 'development') {

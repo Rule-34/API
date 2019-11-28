@@ -1,4 +1,5 @@
 const express = require('express'),
+  apicache = require('apicache'),
   router = express.Router(),
   // Import all routes // TODO: use glob to match *.route files
   defaultRouter = require('./default'),
@@ -17,6 +18,13 @@ router
   }) */
   /* GET /health-check - Check service health */
   .get('/health-check', (req, res) => res.send('OK'))
+  .get('/cache/performance', (req, res) => {
+    res.json(apicache.getPerformance())
+  })
+  // add route to display cache index
+  .get('/cache/index', (req, res) => {
+    res.json(apicache.getIndex())
+  })
   .use('/', defaultRouter)
   .use('/xxx/', xxxRoutes)
 
