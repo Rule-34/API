@@ -1,6 +1,15 @@
+// Heroku Concurrency
+const throng = require('throng'),
+// Requirements
+  generalConfig = require('./generalConfig')
+
+throng({
+  workers: generalConfig.workers,
+  lifetime: Infinity
+}, start)
+
+function start() {
 const express = require('express'),
-  // Requirements
-  generalConfig = require('./generalConfig'),
   // Plugins
   bodyParser = require('body-parser'),
   compression = require('compression'),
@@ -49,3 +58,5 @@ app.use(indexerRouter)
 
 // Export
 module.exports = app
+
+}
