@@ -1,3 +1,14 @@
+// Heroku Concurrency
+const throng = require('throng'),
+// Requirements
+  generalConfig = require('./generalConfig')
+
+throng({
+  workers: generalConfig.workers,
+  lifetime: Infinity
+}, start)
+
+function start() {
 const generalConfig = require('./config/generalConfig'),
   configPackage = require('./package.json'),
   debug = require('debug')(configPackage.name),
@@ -12,4 +23,4 @@ const server = app.listen(app.get('port'), function() {
   )
 })
 
-module.exports = app
+}
