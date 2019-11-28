@@ -7,7 +7,7 @@ function xmlToJson(xml) {
     // With parser
     const parser = new xml2js.Parser(/* options */)
     parser
-      .parseStringPromise(xml, { trim: true, explicitRoot: true })
+      .parseStringPromise(xml, { trim: true, explicitRoot: false })
       .then(function(result) {
         // console.dir(result)
         resolve(result)
@@ -17,7 +17,6 @@ function xmlToJson(xml) {
         reject(err)
       })
   })
-  // console.log(result)
 }
 
 module.exports = xmlToJson
