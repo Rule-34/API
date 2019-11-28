@@ -1,16 +1,33 @@
 const express = require('express'),
+  domainConfig = require('./domainConfig'),
   router = express.Router(),
   xmlToJsonFromUrl = require('../../utils/xmlToJsonFromUrl.js')
 
-const url = 'https://rule34.xxx/index.php?page=dapi&s=post&q=index'
-
-/* GET home page. */
+/* GET posts. */
 router.get('/', async (req, res) => {
-  // Process through wich the xml request gets transformed to json
-  let result = await xmlToJsonFromUrl(url)
   // console.dir(result)
 
+  // Query parameters
+  const requestUrl = applyParameters(req)
+
+  // Process through wich the xml request gets transformed to optimized json
+  let result = await xmlToJsonFromUrl(requestUrl)
+
+  // Reply to the client
   res.json(result)
 })
+
+// Separated applying of query parameters
+function applyParameters(req) {
+  // Default query parameters
+  const limit = req.query.limit | 100,
+    pageId = req.query.pid || 0,
+    tags = req.query.tags || ''
+  // score = req.query.score | 0,
+
+  return (
+    domainConfig.apiUrl + '&limit=' + limit + '&pid=' + pageId + '&tags=' + tags // + '&score:>=' score
+  )
+}
 
 module.exports = router

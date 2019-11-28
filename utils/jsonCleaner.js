@@ -5,7 +5,7 @@ const cleanJson = {
 
 function jsonCleaner(json) {
   // console.log('XML DATA IS', xml)
-  return new Promise(function(resolve, reject) {
+  return new Promise(function(resolve) {
     // Apply count with a simpler tree
     cleanJson.count = json.posts.$.count
 
