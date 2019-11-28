@@ -1,6 +1,6 @@
 const https = require('https')
 
-// Gets the passing url and returns it
+// Gets the content from the passed url and returns it
 async function httpsGet(url) {
   return new Promise((resolve, reject) => {
     https

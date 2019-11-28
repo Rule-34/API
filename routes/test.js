@@ -6,7 +6,7 @@ const url = 'https://rule34.xxx/index.php?page=dapi&s=post&q=index'
 
 /* GET home page. */
 router.get('/', async (req, res, next) => {
-  // Make http request
+  // Process through wich the xml request gets transformed to json
   res.json(await xmlToJsonFromUrl(url))
 })
 
