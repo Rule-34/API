@@ -7,7 +7,7 @@ const throng = require('throng'),
 throng({
   workers: generalConfig.workers,
   lifetime: Infinity,
-  master: generalConfig.env === 'production' ? startMaster : undefined,
+  master: generalConfig.env === 'production' ? startWorker : undefined,
   start: startWorker,
 })
 
