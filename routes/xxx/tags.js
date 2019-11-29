@@ -26,12 +26,13 @@ function applyUrlParameters(req) {
 
   // Return full url
   return (
-    domainConfig.tagsUrl +
+    domainConfig.apiUrl +
+    'tag&q=index' + // Tags api url
     '&tags=' +
     tags +
     '&order_by=' +
     order_by +
-    '&limit=' +
+    '&limit=' + // TODO: Make this work
     limit
   )
 }

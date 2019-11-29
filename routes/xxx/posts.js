@@ -27,7 +27,8 @@ function applyUrlParameters(req) {
 
   // Return full url
   return (
-    domainConfig.postsUrl +
+    domainConfig.apiUrl +
+    'post&q=index' + // Posts api url
     '&limit=' +
     limit +
     '&pid=' +
