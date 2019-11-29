@@ -1,7 +1,10 @@
 function jsonCleaner(json) {
-  // console.log('XML DATA IS', xml)
+  // Modifies every post
   json.posts.forEach(post => {
+    // Make the string of tags an array
     post.tags = post.tags.trim().split(' ')
+
+    // And add a media 'type' of the source
     if (post.high_res_file.match(/\.(jpeg|jpg|gif|png)$/)) {
       post.type = 'image'
     } else {
@@ -9,6 +12,7 @@ function jsonCleaner(json) {
     }
   })
 
+  // And returns the modified Json
   return json
 }
 
