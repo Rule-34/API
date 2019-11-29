@@ -1,15 +1,14 @@
 const express = require('express'),
   domainConfig = require('./domainConfig'),
-  router = express.Router(),
-  xmlToJsonFromUrl = require('../../utils/xmlToJsonFromUrl.js')
+  xmlToJsonFromUrl = require('../../utils/xmlToJsonFromUrl.js'),
+  router = express.Router()
 
 /* GET posts. */
 router.get('/', async (req, res) => {
   // console.dir(result)
 
-  // Query parameters
+  // Get the requested parameters and create a url to request data with it
   const requestUrl = applyParameters(req)
-  console.log(requestUrl)
 
   // Process through wich the xml request gets transformed to optimized json
   let result = await xmlToJsonFromUrl(requestUrl)
