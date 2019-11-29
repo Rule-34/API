@@ -3,14 +3,18 @@ const throng = require('throng'),
   // Requirements
   generalConfig = require('./config/generalConfig')
 
-// Use cluster (more node services executing this)
-throng(
-  {
-    workers: generalConfig.workers,
-    lifetime: Infinity,
-  },
-  start
-)
+// Use cluster (more node services executing this) if in production
+if (generalConfig.env === 'production') {
+  throng(
+    {
+      workers: generalConfig.workers,
+      lifetime: Infinity,
+    },
+    start
+  )
+} else {
+  start('Master')
+}
 
 // Express server runned by workers
 function start(workerId) {
