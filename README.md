@@ -79,12 +79,12 @@ Show latest posts with 'robot' tag that doesn't have the 'human' tag
 
 Show latest posts with a score higher or equal than 100
 ```javascript
-.../posts/?tags=+score:>=100
+.../posts/?score=100
 ```
 
 Show the latest 20 posts of the fifth page that have the tag 'disney' but not 'cars' and the post's score have to be equal to 10 and higher
 ```javascript
-.../posts/?limit=20&pid=5&tags=disney+-cars+score:>=10
+.../posts/?limit=20&pid=5&tags=disney+-cars&score=10
 ```
 
 #### Parameters explained

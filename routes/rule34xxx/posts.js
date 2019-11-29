@@ -23,11 +23,19 @@ function applyParameters(req) {
   // Default query parameters
   const limit = req.query.limit || 100,
     pageId = req.query.pid || 0,
-    tags = req.query.tags || ''
-  // score = req.query.score | 0,
+    tags = req.query.tags || '',
+    score = req.query.score | 0
 
   return (
-    domainConfig.apiUrl + '&limit=' + limit + '&pid=' + pageId + '&tags=' + tags // + '&score:>=' score
+    domainConfig.apiUrl +
+    '&limit=' +
+    limit +
+    '&pid=' +
+    pageId +
+    '&tags=' +
+    tags +
+    '+score:>=' +
+    score
   )
 }
 
