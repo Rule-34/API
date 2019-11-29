@@ -8,23 +8,24 @@ router.get('/', async (req, res) => {
   // console.dir(result)
 
   // Get the requested parameters and create a url to request data with it
-  const requestUrl = applyParameters(req)
+  const requestUrl = applyUrlParameters(req)
 
   // Process through wich the xml request gets transformed to optimized json
-  let result = await xmlToJsonFromUrl(requestUrl)
+  let jsonResult = await xmlToJsonFromUrl(requestUrl)
 
   // Reply to the client
-  res.json(result)
+  res.json(jsonResult)
 })
 
 // Separated applying of query parameters
-function applyParameters(req) {
+function applyUrlParameters(req) {
   // Default query parameters
   const limit = req.query.limit || 100,
     pageId = req.query.pid || 0,
     tags = req.query.tags || '',
     score = req.query.score | 0
 
+  // Return full url
   return (
     domainConfig.apiUrl +
     '&limit=' +
