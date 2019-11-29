@@ -4,21 +4,16 @@ const throng = require('throng'),
   generalConfig = require('./config/generalConfig')
 
 // Use cluster (more node services executing this)
-throng({
-  workers: generalConfig.workers,
-  lifetime: Infinity,
-  master: generalConfig.env === 'production' ? startWorker : undefined,
-  start: startWorker,
-})
-
-// Dummy master worker
-function startMaster() {
-  const debug = require('debug')('HTTP Master')
-  debug('Master started')
-}
+throng(
+  {
+    workers: generalConfig.workers,
+    lifetime: Infinity,
+  },
+  start
+)
 
 // Express server runned by workers
-function startWorker(workerId) {
+function start(workerId) {
   const debug = require('debug')(`HTTP Worker ${workerId}`),
     app = require('./config/express')
 
