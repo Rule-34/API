@@ -1,5 +1,6 @@
 # Rule 34 JSON API
 
+
 ### What is this?
 
 It's a JSON API that embraces the current XML being used on various danbooru sites like rule34.xxx or rule34.paheal.net.
@@ -7,6 +8,7 @@ It's a JSON API that embraces the current XML being used on various danbooru sit
 > This API objective is to be used on the [Rule 34 app](https://r34.app/).
 
  If you have any suggestion please leave a request :')
+
 
 ### Goals
 It is being developed with the following goals:
@@ -17,7 +19,8 @@ It is being developed with the following goals:
 
 For the initial version it has to have the same functionality as the currently used in [Rule 34 app](https://r34.app/).
 
-The current API being used is from [Kurozenzen](https://github.com/kurozenzen/r34-json-api).
+> The current API being used is from [Kurozenzen](https://github.com/kurozenzen/r34-json-api).
+
 
 ### Common usage
 
@@ -31,7 +34,8 @@ Then you append what you want to get from the API
 - .../tags
 - .../comments
 
-And that's it, you'll receive a JSON object with the latest data from the original site XML API
+And that's it, you'll receive a JSON object with the latest data from the original site XML API.
+
 
 ### Advanced usage 
 
@@ -48,16 +52,47 @@ And then you can append the following parameters
 - tags 
 - score
 
-> Use '&' to add more parameters.
+> Use & to add more parameters.
 
-Example
+
+#### Examples
+
+Show latest 50 posts
+```javascript
+.../posts/?limit=50
+```
+
+Show second page of latest posts
+```javascript
+.../posts/?pid=2
+```
+
+Show latest posts with 'robot' tag
+```javascript
+.../posts/?tags=robot
+```
+
+Show latest posts with 'robot' tag that doesn't have the 'human' tag
+```javascript
+.../posts/?tags=robot+-human
+```
+
+Show latest posts with a score higher or equal than 100
+```javascript
+.../posts/?tags=+score:>=100
+```
+
+Show the latest 20 posts of the fifth page that have the tag 'disney' but not 'cars' and the post's score have to be equal to 10 and higher
 ```javascript
 .../posts/?limit=20&pid=5&tags=disney+-cars+score:>=10
 ```
 
-##### Parameters explained
+#### Parameters explained
 
-**Limit** : limit of posts to show per request, maximum and defaults to 100 posts.
-**Pid** : page ID, in contrast to latest posts, defaults to 0.
-**Tags** : show posts that include the listed tags, defaults to empty (adding a '-' forbids the tag to appear).
-**Score** : show posts that have that score or more, defaults to 0.
+**Limit :** limit of posts to show per request, maximum and defaults to 100 posts.
+
+**Pid:** page ID, in contrast to latest posts, defaults to 0.
+
+**Tags:** show posts that include the listed tags, defaults to empty (adding a '-' forbids the tag to appear).
+
+**Score:** show posts that have that score or more, defaults to 0.
