@@ -3,7 +3,8 @@ const express = require('express'),
   router = express.Router(),
   // Import all routes // TODO: use glob to match *.route files
   defaultRouter = require('./default'),
-  xxxRoutes = require('./rule34xxx/rule34xxx.routes.js')
+  xxxRoutes = require('./xxx/index.routes.js'),
+  pahealRoutes = require('./paheal/index.routes.js')
 
 /*
  ** All routes are used from here
@@ -27,6 +28,7 @@ router
   })
   .use('/', defaultRouter)
   .use('/xxx/', xxxRoutes)
+  .use('/paheal/', pahealRoutes)
 
 // Export default
 module.exports = router

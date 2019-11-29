@@ -20,22 +20,19 @@ router.get('/', async (req, res) => {
 // Separated applying of query parameters
 function applyUrlParameters(req) {
   // Default query parameters
-  const limit = req.query.limit || 100,
-    pageId = req.query.pid || 0,
-    tags = req.query.tags || '',
-    score = req.query.score | 0
+  const tags = req.query.tags || '',
+    order_by = req.query.order_by || 'index_count',
+    limit = req.query.limit || 100
 
   // Return full url
   return (
-    domainConfig.apiUrl +
-    '&limit=' +
-    limit +
-    '&pid=' +
-    pageId +
+    domainConfig.tagsUrl +
     '&tags=' +
     tags +
-    '+score:>=' +
-    score
+    '&order_by=' +
+    order_by +
+    '&limit=' +
+    limit
   )
 }
 

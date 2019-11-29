@@ -3,7 +3,7 @@ const express = require('express'),
   defaultRouter = require('./default.js'),
   postsRouter = require('./posts.js')
 // ,commentsRouter = require('./comments.js'),
-// tagsRouter = require('./tags.js'),
+// tagsRouter = require('./tags.js')
 // imagesRouter = require('./images.js')
 
 /*

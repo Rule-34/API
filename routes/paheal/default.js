@@ -6,7 +6,7 @@ const express = require('express'),
 /* GET home page. */
 router.get('/', function(req, res) {
   res.json({
-    message: 'This API is for the ' + domainConfig.url + ' domain',
+    message: 'This API is for the ' + domainConfig.baseUrl + ' domain',
     posts: generalConfig.host + domainConfig.routeUrl + 'posts',
     comments: generalConfig.host + domainConfig.routeUrl + 'comments',
     tags: generalConfig.host + domainConfig.routeUrl + 'tags',
