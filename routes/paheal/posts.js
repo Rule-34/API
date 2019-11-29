@@ -25,10 +25,13 @@ function applyUrlParameters(req) {
     tags = req.query.tags || '',
     score = req.query.score | 0
 
+  console.log(domainConfig.postsUrl)
+
   // Return full url
   return (
-    domainConfig.postsUrl +
-    '&limit=' +
+    domainConfig.apiUrl +
+    'post/index.xml' + // Posts api url
+    '?limit=' +
     limit +
     '&pid=' +
     pageId +
