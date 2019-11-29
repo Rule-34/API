@@ -25,23 +25,25 @@ app
   .use(compression())
   .use(cors())
   .use(helmet())
-  .use(cache('1 minutes'))
+
   .use(favicon(__dirname + '/../static/favicon.ico'))
 
-// If in development log everything, otherwise only log errors
+// If in development log everything, otherwise only log errors and use cache
 if (generalConfig.env === 'development') {
   app
     .use(logger('dev'))
     // Error handling
     .use(errorHandler())
 } else {
-  app.use(
-    logger('dev', {
-      skip: function(req, res) {
-        return res.statusCode < 400
-      },
-    })
-  )
+  app
+    .use(
+      logger('dev', {
+        skip: function(req, res) {
+          return res.statusCode < 400
+        },
+      })
+    )
+    .use(cache('2 minutes'))
 }
 
 // Import all Routes
@@ -49,5 +51,3 @@ app.use(indexerRouter)
 
 // Export
 module.exports = app
-
-
