@@ -41,6 +41,8 @@ And that's it, you'll receive a JSON object with the latest data from the origin
 
 If you need to tweak things a little you can use the following URL parameters
 
+### Posts
+
 First start by adding a question mark 
 ```javascript
 .../posts/?
@@ -87,7 +89,41 @@ Show the latest 20 posts of the fifth page that have the tag 'disney' but not 'c
 .../posts/?limit=20&pid=5&tags=disney+-cars&score=10
 ```
 
-#### Parameters explained
+### Tags WIP
+
+
+First start by adding a question mark 
+```javascript
+.../tags/?
+```
+
+And then you can append the following parameters
+- tags 
+- order_by
+- limit
+
+> Use & to add more parameters.
+
+
+#### Examples
+
+Show information about the 'robot' tag
+```javascript
+.../tags/?tag=robot
+```
+
+Show information about all tags that start with 'robot', included 'robot_arm', 'robotic', etc.
+```javascript
+.../tags/?tag=robot*
+```
+
+Show the most popular tags starting with 'robot'
+```javascript
+.../tags/?tag=robot*&sort_by=index_count
+```
+
+
+### Parameters explained
 
 **Limit :** limit of posts to show per request, maximum and defaults to 100 posts.
 
