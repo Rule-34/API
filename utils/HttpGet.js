@@ -5,8 +5,6 @@ async function httpsGet(url) {
   return new Promise((resolve, reject) => {
     https
       .get(url, res => {
-        //   console.log('statusCode:', res.statusCode)
-        //   console.log('headers:', res.headers)
         let urlData = ''
 
         res
@@ -15,7 +13,6 @@ async function httpsGet(url) {
             urlData += d.toString()
           })
           .on('end', () => {
-            // console.log('URL DATA IS ', urlData)
             resolve(urlData)
           })
       })
