@@ -110,8 +110,6 @@ First start by adding a question mark
 
 And then you can append the following parameters
 - tag
-- tag_pattern
-- order
 - limit
 
 > Use & to add more parameters.
@@ -119,14 +117,14 @@ And then you can append the following parameters
 
 #### Examples
 
-Show information about the 'robot' tag
+Will show all tags related to 'robot' and their post count
 ```javascript
 .../tags/?tag=robot
 ```
 
-Show information about all tags that include 'robot', included 'robot_arm', 'robotic', etc.
+Will show the top 5 tags related to 'robot' and their post count
 ```javascript
-.../tags/?tag_pattern=robot
+.../tags/?tag=robot&limit=5
 ```
 
 > By default the most popular tags are shown, to remove this use '.../tags/?sort='

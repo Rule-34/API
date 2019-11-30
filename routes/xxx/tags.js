@@ -16,6 +16,8 @@ router.get('/', async (req, res) => {
   res.json(jsonResult)
 })
 
+// TODO: use internal api
+
 // Separated applying of query parameters
 function applyUrlParameters(req) {
   // Default query parameters
