@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
   const requestUrl = applyUrlParameters(req)
 
   // Process through wich the xml request gets transformed to optimized json
-  let jsonResult = await xmlToJsonFromUrl(requestUrl)
+  let jsonResult = await xmlToJsonFromUrl(requestUrl, 'posts')
 
   // Reply to the client
   res.json(jsonResult)

@@ -5,13 +5,12 @@ const express = require('express'),
 
 /* GET posts. */
 router.get('/', async (req, res) => {
-  // console.dir(result)
-
   // Get the requested parameters and create a url to request data with it
   const requestUrl = applyUrlParameters(req)
+  console.log(requestUrl)
 
   // Process through wich the xml request gets transformed to optimized json
-  let jsonResult = await xmlToJsonFromUrl(requestUrl)
+  let jsonResult = await xmlToJsonFromUrl(requestUrl, 'tags')
 
   // Reply to the client
   res.json(jsonResult)
@@ -20,19 +19,22 @@ router.get('/', async (req, res) => {
 // Separated applying of query parameters
 function applyUrlParameters(req) {
   // Default query parameters
-  const tags = req.query.tags || '',
-    order_by = req.query.order_by || 'index_count',
+  const tag = req.query.tag || '',
+    tagPattern = req.query.tag_pattern || '',
+    order = req.query.order || 'count',
     limit = req.query.limit || 100
 
   // Return full url
   return (
     domainConfig.apiUrl +
     'tag&q=index' + // Tags api url
-    '&tags=' +
-    tags +
-    '&order_by=' +
-    order_by +
-    '&limit=' + // TODO: Make this work
+    '&name=' +
+    tag +
+    '&name_pattern=' +
+    tagPattern +
+    '&order=' +
+    order +
+    '&limit=' +
     limit
   )
 }
