@@ -9,15 +9,10 @@ async function xmlToJsonFromUrl(url, template, domain, limit) {
 
   let jsonData
   // Dont transform if theres limit cause that means its a tag autocomplete json
-  switch (limit) {
-    case true:
-      jsonData = xmlData
-      break
-
-    // Then transform to Json with the passed template thanks to camaro // THANKS A LOT @tuananh
-    default:
-      jsonData = await xmlToJson(xmlData, domain)
-      break
+  if (limit) {
+    jsonData = xmlData
+  } else {
+    jsonData = await xmlToJson(xmlData, domain)
   }
 
   // Then beautify json with the passed template

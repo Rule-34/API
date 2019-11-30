@@ -5,23 +5,28 @@ const express = require('express'),
 
 /* GET tags. */
 router.get('/', async (req, res) => {
-  // Get the requested parameters and create a url to request data with it
-  const requestUrl = applyUrlParameters(req)
-  console.log(requestUrl)
+  // If theres no query then return and dont execute anything
+  if (!req.query.tag) {
+    res.json({ error: 'You should add a query' })
+  } else {
+    // Get the requested parameters and create a url to request data with it
+    const requestUrl = applyUrlParameters(req)
+    console.log(requestUrl)
 
-  // Define limit of posts to return to client
-  const limit = req.query.limit || 100
+    // Define limit of posts to return to client
+    const limit = req.query.limit || 100
 
-  // Process through wich the json gets transformed to optimized json
-  let jsonResult = await xmlToJsonFromUrl(
-    requestUrl,
-    'autocomplete',
-    'xxx',
-    limit
-  )
+    // Process through wich the json gets transformed to optimized json
+    let jsonResult = await xmlToJsonFromUrl(
+      requestUrl,
+      'autocomplete',
+      'xxx',
+      limit
+    )
 
-  // Reply to the client
-  res.json(jsonResult)
+    // Reply to the client
+    res.json(jsonResult)
+  }
 })
 
 // Separated applying of query parameters
