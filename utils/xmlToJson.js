@@ -1,7 +1,7 @@
 const { transform } = require('camaro'),
   // This is a basic template for the r34.app
   // If you need more data you should add it here or create another template
-  postsTemplate = {
+  template = {
     count: 'number(/posts/@count)',
     posts: [
       '/posts/post',
@@ -15,21 +15,12 @@ const { transform } = require('camaro'),
         type: '',
       },
     ],
-  },
-  tagsTemplate = {
-    tags: ['/tags/tag', { name: '@name', count: 'number(@count)' }],
   }
 
 // Transforms the passed xml into json and returns it
-async function xmlToJson(xml, template) {
-  // Applies the template that its specified
-  switch (template) {
-    case 'posts':
-      return await transform(xml, postsTemplate)
-
-    case 'tags':
-      return await transform(xml, tagsTemplate)
-  }
+async function xmlToJson(xml) {
+  // Applies the template
+  return await transform(xml, template)
 }
 
 module.exports = xmlToJson

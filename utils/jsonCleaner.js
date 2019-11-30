@@ -16,15 +16,6 @@ function postsCleaner(json) {
   return json
 }
 
-// Cleans tags from XML API
-function tagsCleaner(json) {
-  // Reverse tag order so it starts with higher score
-  json.tags = json.tags.reverse()
-
-  // And return it to the main function
-  return json
-}
-
 // Cleans json from autocomplete API
 function autoCompleteCleaner(json, domain, limit) {
   const parsedJson = JSON.parse(json),
@@ -84,11 +75,6 @@ function jsonCleaner(convertedJson, template, domain, limit) {
     // Clean json of unneded data
     case 'posts':
       cleanJson = postsCleaner(convertedJson)
-      break
-
-    // Comes perfectly clean
-    case 'tags':
-      cleanJson = tagsCleaner(convertedJson)
       break
 
     // Turns a json object into an array
