@@ -3,6 +3,7 @@ const express = require('express'),
   router = express.Router(),
   // Import all routes // TODO: use glob to match *.route files
   defaultRouter = require('./default'),
+  imagesRouter = require('./images'),
   xxxRoutes = require('./xxx/index.routes.js'),
   pahealRoutes = require('./paheal/index.routes.js')
 
@@ -27,6 +28,7 @@ router
     res.json(apicache.getIndex())
   })
   .use('/', defaultRouter)
+  .use('/images', imagesRouter)
   .use('/xxx/', xxxRoutes)
   .use('/paheal/', pahealRoutes)
 

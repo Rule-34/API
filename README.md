@@ -134,3 +134,11 @@ Will show the top 5 tags related to 'robot' and their post count
 **Tag:** returns all similar tags and the total of posts with that tag, defaults to nothing.
 
 **Limit:** limit of posts to show per request, defaults to 100 posts.
+
+
+### Good to know
+
+When posts are returned you'll see the images urls are being replaced with a dynamic one, this is because most webpages dont offer CORS, this way we act as a middleman (proxy) that sets CORS and allows you to view images on any site without any hassle.
+```javascript
+.../images/?url=example.com/image.png
+```

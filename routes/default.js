@@ -1,6 +1,6 @@
-var express = require('express'),
-  generalConfig = require('../config/generalConfig')
-var router = express.Router()
+const express = require('express'),
+  generalConfig = require('../config/generalConfig'),
+  router = express.Router()
 
 /* GET home page. */
 router.get('/', function(req, res) {
