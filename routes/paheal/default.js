@@ -8,9 +8,9 @@ router.get('/', function(req, res) {
   res.json({
     message: 'This API is for the ' + domainConfig.baseUrl + ' domain',
     posts: generalConfig.host + domainConfig.routeUrl + 'posts',
-    comments: generalConfig.host + domainConfig.routeUrl + 'comments',
+    // comments: generalConfig.host + domainConfig.routeUrl + 'comments',
     tags: generalConfig.host + domainConfig.routeUrl + 'tags',
-    images: generalConfig.host + domainConfig.routeUrl + 'images',
+    // images: generalConfig.host + domainConfig.routeUrl + 'images',
   })
 })
 
