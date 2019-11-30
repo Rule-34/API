@@ -49,8 +49,8 @@ function autoCompleteCleaner(json, domain, limit) {
       for (const prop in parsedJson) {
         // Add object to array
         finalJson.push({
-          tag: parsedJson[prop].value,
-          count: Number(parsedJson[prop].label.match(/\d+/g)),
+          name: parsedJson[prop].value,
+          posts: Number(parsedJson[prop].label.match(/\d+/g)),
         })
 
         // End array if we are at the specified limit
@@ -68,7 +68,7 @@ function autoCompleteCleaner(json, domain, limit) {
       // Loop through every parsed prop of json
       for (const prop in parsedJson) {
         // Add object to array
-        finalJson.push({ tag: prop, count: parsedJson[prop] })
+        finalJson.push({ name: prop, posts: parsedJson[prop] })
 
         // End array if we are at the specified limit
         if (counter >= limit) {
