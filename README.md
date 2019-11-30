@@ -127,14 +127,10 @@ Will show the top 5 tags related to 'robot' and their post count
 .../tags/?tag=robot&limit=5
 ```
 
-> By default the most popular tags are shown, to remove this use '.../tags/?sort='
+> By default the most popular tags are shown
 
 ##### Tags parameters explained
 
-**Tag:** Shows information about a tag, defaults to nothing.
+**Tag:** returns all similar tags and the total of posts with that tag, defaults to nothing.
 
-**Tag_pattern:** Shows information about multiple tags with the specified tag pattern, defaults to nothing.
-
-**Order:** Tries to order tags, defaults to order by popularity (count).
-
-**Limit:** limit of posts to show per request, maximum and defaults to 100 posts.
+**Limit:** limit of posts to show per request, defaults to 100 posts.
