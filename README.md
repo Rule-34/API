@@ -89,6 +89,17 @@ Show the latest 20 posts of the fifth page that have the tag 'disney' but not 'c
 .../posts/?limit=20&pid=5&tags=disney+-cars&score=10
 ```
 
+
+##### Posts parameters explained
+
+**Limit:** limit of posts to show per request, maximum and defaults to 100 posts.
+
+**Pid:** page ID, in contrast to latest posts, defaults to 0.
+
+**Tags:** show posts that include the listed tags, defaults to empty (adding a '-' forbids the tag to appear).
+
+**Score:** show posts that have that score or more, defaults to 0.
+
 ### Tags WIP
 
 
@@ -98,8 +109,9 @@ First start by adding a question mark
 ```
 
 And then you can append the following parameters
-- tags 
-- order_by
+- tag
+- tag_pattern
+- order
 - limit
 
 > Use & to add more parameters.
@@ -112,23 +124,19 @@ Show information about the 'robot' tag
 .../tags/?tag=robot
 ```
 
-Show information about all tags that start with 'robot', included 'robot_arm', 'robotic', etc.
+Show information about all tags that include 'robot', included 'robot_arm', 'robotic', etc.
 ```javascript
-.../tags/?tag=robot*
+.../tags/?tag_pattern=robot
 ```
 
-Show the most popular tags starting with 'robot'
-```javascript
-.../tags/?tag=robot*&sort_by=index_count
-```
+> By default the most popular tags are shown, to remove this use '.../tags/?sort='
 
+##### Tags parameters explained
 
-### Parameters explained
+**Tag:** Shows information about a tag, defaults to nothing.
 
-**Limit :** limit of posts to show per request, maximum and defaults to 100 posts.
+**Tag_pattern:** Shows information about multiple tags with the specified tag pattern, defaults to nothing.
 
-**Pid:** page ID, in contrast to latest posts, defaults to 0.
+**Order:** Tries to order tags, defaults to order by popularity (count).
 
-**Tags:** show posts that include the listed tags, defaults to empty (adding a '-' forbids the tag to appear).
-
-**Score:** show posts that have that score or more, defaults to 0.
+**Limit:** limit of posts to show per request, maximum and defaults to 100 posts.
