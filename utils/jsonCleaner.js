@@ -1,9 +1,29 @@
+const generalConfig = require('../config/generalConfig')
+
 // Cleans individual posts from XML API
-function postsCleaner(json) {
+function postsCleaner(json, domain) {
   json.posts.forEach(post => {
     // Make the string of tags an array
     post.tags = post.tags.trim().split(' ')
 
+    // Images should be proxified so they can be cached and have CORS
+    post.high_res_file = generalConfig.host + 'images?url=' + post.high_res_file
+    post.low_res_file = generalConfig.host + 'images?url=' + post.low_res_file
+    post.preview_file = generalConfig.host + 'images?url=' + post.preview_file
+
+    // Quirks of every domain
+    switch (domain) {
+      // This is done for rule34.xxx so it doesnt redirect you to the post of the image
+      case 'xxx':
+        post.high_res_file = post.high_res_file.replace('xxx/', 'xxx//')
+        post.low_res_file = post.low_res_file.replace('xxx/', 'xxx//')
+        post.preview_file = post.preview_file.replace('xxx/', 'xxx//')
+        break
+
+      case 'paheal':
+        // Nothing
+        break
+    }
     // Add a media 'type' of the source
     if (post.high_res_file.match(/\.(jpeg|jpg|gif|png)$/)) {
       post.type = 'image'
@@ -74,7 +94,7 @@ function jsonCleaner(convertedJson, template, domain, limit) {
   switch (template) {
     // Clean json of unneded data
     case 'posts':
-      cleanJson = postsCleaner(convertedJson)
+      cleanJson = postsCleaner(convertedJson, domain)
       break
 
     // Turns a json object into an array

@@ -15,12 +15,32 @@ const { transform } = require('camaro'),
         type: '',
       },
     ],
+  },
+  pahealTemplate = {
+    count: 'number(/posts/@count)',
+    posts: [
+      '/posts/post',
+      {
+        id: 'number(@id)',
+        high_res_file: '@file_url',
+        preview_file: '@preview_url',
+        tags: '@tags',
+        source: '@source',
+        type: '',
+      },
+    ],
   }
 
 // Transforms the passed xml into json and returns it
-async function xmlToJson(xml) {
+async function xmlToJson(xml, domain) {
   // Applies the template
-  return await transform(xml, template)
+  switch (domain) {
+    case 'paheal':
+      return await transform(xml, pahealTemplate)
+
+    default:
+      return await transform(xml, template)
+  }
 }
 
 module.exports = xmlToJson
