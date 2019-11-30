@@ -1,4 +1,4 @@
-// Modifies every post
+// Cleans individual posts from XML API
 function postsCleaner(json) {
   json.posts.forEach(post => {
     // Make the string of tags an array
@@ -15,6 +15,8 @@ function postsCleaner(json) {
   // And return it to the main function
   return json
 }
+
+// Cleans tags from XML API
 function tagsCleaner(json) {
   // Reverse tag order so it starts with higher score
   json.tags = json.tags.reverse()
@@ -23,8 +25,32 @@ function tagsCleaner(json) {
   return json
 }
 
+// Cleans json from autocomplete API
+function autoCompleteCleaner(json, limit) {
+  const parsedJson = JSON.parse(json),
+    finalJson = []
+  let counter = 0
+
+  // Loop through every parsed prop of json
+  for (const prop in parsedJson) {
+    // Add object to array
+    finalJson.push({ tag: prop, count: parsedJson[prop] })
+
+    // End array if we are at the specified limit
+    if (counter >= limit) {
+      break
+    }
+
+    // Add one to counter
+    counter++
+  }
+
+  // And return it to the main function
+  return finalJson
+}
+
 // Exported function that calls all the specified one based on template
-function jsonCleaner(convertedJson, template) {
+function jsonCleaner(convertedJson, template, limit) {
   let cleanJson = {}
 
   switch (template) {
@@ -36,6 +62,11 @@ function jsonCleaner(convertedJson, template) {
     // Comes perfectly clean
     case 'tags':
       cleanJson = tagsCleaner(convertedJson)
+      break
+
+    // Turns a json object into an array
+    case 'autocomplete':
+      cleanJson = autoCompleteCleaner(convertedJson, limit) // In this case template is really 'limit'
       break
   }
 
