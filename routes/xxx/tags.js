@@ -1,44 +1,31 @@
 const express = require('express'),
+  cleanAutoComplete = require('../../utils/cleanAutoComplete.js'),
   domainConfig = require('./domainConfig'),
-  xmlToJsonFromUrl = require('../../utils/xmlToJsonFromUrl.js'),
   router = express.Router()
 
-/* GET posts. */
+/* GET tags. */
 router.get('/', async (req, res) => {
   // Get the requested parameters and create a url to request data with it
   const requestUrl = applyUrlParameters(req)
   console.log(requestUrl)
 
-  // Process through wich the xml request gets transformed to optimized json
-  let jsonResult = await xmlToJsonFromUrl(requestUrl, 'tags')
+  // Define limit of posts to return to client
+  const limit = req.query.limit || 100
+
+  // Process through wich the json gets transformed to optimized json
+  let jsonResult = await cleanAutoComplete(requestUrl, 'xxx', limit)
 
   // Reply to the client
   res.json(jsonResult)
 })
 
-// TODO: use internal api
-
 // Separated applying of query parameters
 function applyUrlParameters(req) {
   // Default query parameters
-  const tag = req.query.tag || '',
-    tagPattern = req.query.tag_pattern || '',
-    order = req.query.order || 'count',
-    limit = req.query.limit || 100
+  const tag = req.query.tag || ''
 
   // Return full url
-  return (
-    domainConfig.apiUrl +
-    'tag&q=index' + // Tags api url
-    '&name=' +
-    tag +
-    '&name_pattern=' +
-    tagPattern +
-    '&order=' +
-    order +
-    '&limit=' +
-    limit
-  )
+  return domainConfig.tagApiUrl + 'q=' + tag
 }
 
 module.exports = router

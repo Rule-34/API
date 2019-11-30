@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
   const limit = req.query.limit || 100
 
   // Process through wich the json gets transformed to optimized json
-  let jsonResult = await cleanAutoComplete(requestUrl, limit)
+  let jsonResult = await cleanAutoComplete(requestUrl, 'paheal', limit)
 
   // Reply to the client
   res.json(jsonResult)

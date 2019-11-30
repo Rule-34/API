@@ -26,23 +26,50 @@ function tagsCleaner(json) {
 }
 
 // Cleans json from autocomplete API
-function autoCompleteCleaner(json, limit) {
+function autoCompleteCleaner(json, domain, limit) {
   const parsedJson = JSON.parse(json),
     finalJson = []
   let counter = 0
 
-  // Loop through every parsed prop of json
-  for (const prop in parsedJson) {
-    // Add object to array
-    finalJson.push({ tag: prop, count: parsedJson[prop] })
+  switch (domain) {
+    case 'xxx':
+      console.log(parsedJson)
 
-    // End array if we are at the specified limit
-    if (counter >= limit) {
+      for (const prop in parsedJson) {
+        // Add object to array
+        finalJson.push({
+          tag: parsedJson[prop].value,
+          count: Number(parsedJson[prop].label.match(/\d+/g)),
+        })
+
+        // End array if we are at the specified limit
+        if (counter >= limit) {
+          break
+        }
+
+        // Add one to counter
+        counter++
+      }
+
       break
-    }
 
-    // Add one to counter
-    counter++
+    case 'paheal':
+      // Loop through every parsed prop of json
+      for (const prop in parsedJson) {
+        // Add object to array
+        finalJson.push({ tag: prop, count: parsedJson[prop] })
+
+        // End array if we are at the specified limit
+        if (counter >= limit) {
+          break
+        }
+
+        // Add one to counter
+        counter++
+      }
+      // End of loop
+
+      break
   }
 
   // And return it to the main function
@@ -50,7 +77,7 @@ function autoCompleteCleaner(json, limit) {
 }
 
 // Exported function that calls all the specified one based on template
-function jsonCleaner(convertedJson, template, limit) {
+function jsonCleaner(convertedJson, template, domain, limit) {
   let cleanJson = {}
 
   switch (template) {
@@ -66,7 +93,7 @@ function jsonCleaner(convertedJson, template, limit) {
 
     // Turns a json object into an array
     case 'autocomplete':
-      cleanJson = autoCompleteCleaner(convertedJson, limit) // In this case template is really 'limit'
+      cleanJson = autoCompleteCleaner(convertedJson, domain, limit)
       break
   }
 
