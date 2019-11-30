@@ -4,6 +4,12 @@ function postsCleaner(json) {
     // Make the string of tags an array
     post.tags = post.tags.trim().split(' ')
 
+    // Test to see if images could be loaded directly or we need a middleman
+    post.high_res_file =
+      post.high_res_file.slice(0, 23) + '/' + post.high_res_file.slice(23)
+    post.low_res_file =
+      post.low_res_file.slice(0, 23) + '/' + post.low_res_file.slice(23)
+
     // Add a media 'type' of the source
     if (post.high_res_file.match(/\.(jpeg|jpg|gif|png)$/)) {
       post.type = 'image'
