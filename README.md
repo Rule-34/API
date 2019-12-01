@@ -25,12 +25,23 @@ It is being developed with the following goals:
 
 The following sites are supported and their API is fully working
 - https://rule34.xxx
-- rule34.paheal.net
+- https://rule34.paheal.net
 
-> The public API is used for getting posts.
+> Site's public API is used for getting posts.
 
-> The inner autocomplete API is used for getting tags.
+> Site's inner autocomplete API is used for getting tags.
 
+
+### Information
+
+As you may know this API transforms then original's API XML response to JSON, so it's more flexible.
+
+
+##### Speed
+
+Thanks to a utility package called Camaro we transform XML to JSON as fast as possible, as this package is using C++ underneath to do the transformation.
+
+Then when we get a client request, the information is transformed and cached, making sequential requests very fast :')
 
 ### Common usage
 
