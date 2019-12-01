@@ -11,6 +11,7 @@ It's a JSON API that embraces the current XML being used on various danbooru sit
 
 
 ### Goals
+
 It is being developed with the following goals:
 - Being as fast as possible
 - Being as secure as it can be
@@ -22,19 +23,37 @@ For the initial version it has to have the same functionality as the currently u
 > The current API being used is from [Kurozenzen](https://github.com/kurozenzen/r34-json-api).
 
 
+### Support
+
+The following sites are supported and their API is fully working
+- https://rule34.xxx
+- rule34.paheal.net
+
+> The public API is used for getting posts.
+> The inner autocomplete API is used for getting tags.
+
+
 ### Common usage
 
 First you have to select from which site you want to use the API
 - .../xxx/ for rule34.xxx
-- .../paheal/ for rule34.paheal.xxx
+- .../paheal/ for rule34.paheal.net
 
 Then you append what you want to get from the API
-- .../posts 
-- .../images
+- .../posts
 - .../tags
-- .../comments
+- .../comments // In progress
 
 And that's it, you'll receive a JSON object with the latest data from the original site XML API.
+
+
+### Good to know
+
+When posts are returned you'll see the images urls are being replaced with a dynamic one, this is because most webpages dont offer CORS, this way we act as a middleman (proxy) that sets CORS and allows you to view images on any site without any hassle.
+
+```javascript
+.../images/?url=example.com/image.png
+```
 
 
 ### Advanced usage 
@@ -100,8 +119,8 @@ Show the latest 20 posts of the fifth page that have the tag 'disney' but not 'c
 
 **Score:** show posts that have that score or more, defaults to 0.
 
-### Tags WIP
 
+### Tags 
 
 First start by adding a question mark 
 ```javascript
@@ -134,11 +153,3 @@ Will show the top 5 tags related to 'robot' and their post count
 **Tag:** returns all similar tags and the total of posts with that tag, defaults to nothing.
 
 **Limit:** limit of posts to show per request, defaults to 100 posts.
-
-
-### Good to know
-
-When posts are returned you'll see the images urls are being replaced with a dynamic one, this is because most webpages dont offer CORS, this way we act as a middleman (proxy) that sets CORS and allows you to view images on any site without any hassle.
-```javascript
-.../images/?url=example.com/image.png
-```
