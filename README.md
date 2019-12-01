@@ -5,7 +5,7 @@
 
 It's a JSON API that embraces the current XML being used on various danbooru sites like rule34.xxx or rule34.paheal.net.
 
-> This API objective is to be used on the [Rule 34 app](https://r34.app/).
+> This API is used on the [Rule 34 PWA app](https://r34.app/).
 
  If you have any suggestion please leave a request :')
 
@@ -18,9 +18,7 @@ It is being developed with the following goals:
 - Wasting as little data as its needed
 - Supporting various danbooru sites
 
-For the initial version it has to have the same functionality as the currently used in [Rule 34 app](https://r34.app/).
-
-> The current API being used is from [Kurozenzen](https://github.com/kurozenzen/r34-json-api).
+> This API was inspired by  [Kurozenzen's API](https://github.com/kurozenzen/r34-json-api)
 
 
 ### Support
@@ -30,6 +28,7 @@ The following sites are supported and their API is fully working
 - rule34.paheal.net
 
 > The public API is used for getting posts.
+
 > The inner autocomplete API is used for getting tags.
 
 
