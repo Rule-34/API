@@ -1,5 +1,6 @@
 const express = require('express'),
   apicache = require('apicache'),
+  cache = apicache.middleware,
   router = express.Router(),
   // Import all routes // TODO: use glob to match *.route files
   defaultRouter = require('./default'),
@@ -18,8 +19,9 @@ router
       next(new Error('woops'))
     })
   }) */
-  /* GET /health-check - Check service health */
+  /* Check service health */
   .get('/health-check', (req, res) => res.send('OK'))
+  // Check cache performance
   .get('/cache/performance', (req, res) => {
     res.json(apicache.getPerformance())
   })
@@ -27,8 +29,9 @@ router
   .get('/cache/index', (req, res) => {
     res.json(apicache.getIndex())
   })
+  // Normal routes
   .use('/', defaultRouter)
-  .use('/images', imagesRouter)
+  .use('/images', cache('10 minutes'), imagesRouter)
   .use('/xxx/', xxxRoutes)
   .use('/paheal/', pahealRoutes)
 
