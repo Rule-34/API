@@ -5,36 +5,65 @@
 
 It's a JSON API that embraces the current XML being used on various danbooru sites like rule34.xxx or rule34.paheal.net.
 
-> This API objective is to be used on the [Rule 34 app](https://r34.app/).
+> This API is used on the [Rule 34 PWA app](https://r34.app/).
 
  If you have any suggestion please leave a request :')
 
 
 ### Goals
+
 It is being developed with the following goals:
 - Being as fast as possible
 - Being as secure as it can be
 - Wasting as little data as its needed
 - Supporting various danbooru sites
 
-For the initial version it has to have the same functionality as the currently used in [Rule 34 app](https://r34.app/).
+> This API was inspired by  [Kurozenzen's API](https://github.com/kurozenzen/r34-json-api)
 
-> The current API being used is from [Kurozenzen](https://github.com/kurozenzen/r34-json-api).
 
+### Support
+
+The following sites are supported and their API is fully working
+- https://rule34.xxx
+- https://rule34.paheal.net
+
+> Site's public API is used for getting posts.
+
+> Site's inner autocomplete API is used for getting tags.
+
+
+### Information
+
+As you may know this API transforms then original's API XML response to JSON, so it's more flexible.
+
+
+##### Speed
+
+Thanks to a utility package called Camaro we transform XML to JSON as fast as possible, as this package is using C++ underneath to do the transformation.
+
+Then when we get a client request, the information is transformed and cached, making sequential requests very fast :')
 
 ### Common usage
 
 First you have to select from which site you want to use the API
 - .../xxx/ for rule34.xxx
-- .../paheal/ for rule34.paheal.xxx
+- .../paheal/ for rule34.paheal.net
 
 Then you append what you want to get from the API
-- .../posts 
-- .../images
+- .../posts
 - .../tags
-- .../comments
+- .../comments // In progress
 
 And that's it, you'll receive a JSON object with the latest data from the original site XML API.
+
+
+### Good to know
+
+When posts are returned you'll see the images urls are being replaced with a dynamic one, this is because most webpages dont offer CORS, this way we act as a middleman (proxy) that sets CORS and allows you to view images on any site without any hassle.
+
+```javascript
+.../images/?url=example.com/image.png
+```
 
 
 ### Advanced usage 
@@ -100,8 +129,8 @@ Show the latest 20 posts of the fifth page that have the tag 'disney' but not 'c
 
 **Score:** show posts that have that score or more, defaults to 0.
 
-### Tags WIP
 
+### Tags 
 
 First start by adding a question mark 
 ```javascript
@@ -134,11 +163,3 @@ Will show the top 5 tags related to 'robot' and their post count
 **Tag:** returns all similar tags and the total of posts with that tag, defaults to nothing.
 
 **Limit:** limit of posts to show per request, defaults to 100 posts.
-
-
-### Good to know
-
-When posts are returned you'll see the images urls are being replaced with a dynamic one, this is because most webpages dont offer CORS, this way we act as a middleman (proxy) that sets CORS and allows you to view images on any site without any hassle.
-```javascript
-.../images/?url=example.com/image.png
-```
