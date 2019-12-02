@@ -1,4 +1,5 @@
-const generalConfig = require('../config/generalConfig')
+const generalConfig = require('../config/generalConfig'),
+  he = require('he')
 
 // Cleans individual posts from XML API
 function postsCleaner(json, domain) {
@@ -38,13 +39,18 @@ function postsCleaner(json, domain) {
 
 // Cleans json from autocomplete API
 function autoCompleteCleaner(json, domain, limit) {
-  const parsedJson = JSON.parse(json),
-    finalJson = []
-  let counter = 0
+  let parsedJson = {},
+    finalJson = [],
+    counter = 0
 
   switch (domain) {
     case 'xxx':
-      console.log(parsedJson)
+      // XXX Api's returns html code so we need to decode it first
+      parsedJson = JSON.parse(
+        he.decode(json, {
+          strict: generalConfig.env === 'development' ? true : false,
+        })
+      )
 
       for (const prop in parsedJson) {
         // Add object to array
@@ -65,6 +71,7 @@ function autoCompleteCleaner(json, domain, limit) {
       break
 
     case 'paheal':
+      parsedJson = JSON.parse(json)
       // Loop through every parsed prop of json
       for (const prop in parsedJson) {
         // Add object to array
