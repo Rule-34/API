@@ -22,7 +22,7 @@ function postsCleaner(json, domain) {
         break
 
       case 'paheal':
-        // Nothing
+        delete post.low_res_file
         break
     }
     // Add a media 'type' of the source
