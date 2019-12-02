@@ -10,7 +10,7 @@ async function xmlToJsonFromUrl(url, template, domain, limit) {
   let jsonData
   // Dont transform if theres limit cause that means its a tag autocomplete json
   if (limit) {
-    jsonData = xmlData
+    jsonData = JSON.parse(xmlData)
   } else {
     jsonData = await xmlToJson(xmlData, domain)
   }
