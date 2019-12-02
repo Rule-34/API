@@ -21,7 +21,7 @@ const express = require('express'),
 app
   .set('port', generalConfig.port)
   .use(bodyParser.json())
-  .use(bodyParser.urlencoded({ extended: true }))
+  .use(bodyParser.urlencoded({ extended: true })) // TODO: See what it does
   .use(compression())
   .use(cors())
   .use(helmet())
@@ -43,7 +43,7 @@ if (generalConfig.env === 'development') {
         },
       })
     )
-    .use(cache('3 minutes'))
+    .use(cache('2 minutes'))
 }
 
 // Import all Routes
