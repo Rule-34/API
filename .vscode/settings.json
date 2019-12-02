@@ -11,5 +11,6 @@
     ],
     "eslint.autoFixOnSave": true,
     "editor.formatOnSave": false,
-    "files.eol": "\n"
+    "files.eol": "\n",
+    "debug.node.autoAttach": "on"
 }
