@@ -3,6 +3,11 @@ const generalConfig = require('../config/generalConfig'),
 
 // Cleans individual posts from XML API
 function postsCleaner(json, domain) {
+  // Error handling
+  if (json.posts === undefined) {
+    return { error: 'No data to return, maybe you have too many tags?' }
+  }
+
   json.posts.forEach(post => {
     // Make the string of tags an array
     post.tags = post.tags.trim().split(' ')
