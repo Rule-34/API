@@ -1,14 +1,27 @@
 const express = require('express'),
   xmlToJsonFromUrl = require('../../utils/xmlToJsonFromUrl.js'),
   domainConfig = require('./domainConfig'),
-  router = express.Router()
+  router = express.Router(),
+  { check, validationResult } = require('express-validator')
 
 /* GET tags. */
-router.get('/', async (req, res) => {
-  // If theres no query then return and dont execute anything
-  if (!req.query.tag) {
-    res.json({ error: 'You should add a query' })
-  } else {
+router.get(
+  '/',
+  [
+    check('tag')
+      .isString()
+      .notEmpty(),
+    check('limit')
+      .isInt()
+      .optional(),
+  ],
+  async function(req, res) {
+    // Finds the validation errors in this request and wraps them in an object with handy functions
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() })
+    }
+
     // Get the requested parameters and create a url to request data with it
     const requestUrl = applyUrlParameters(req)
     console.log(requestUrl)
@@ -27,7 +40,7 @@ router.get('/', async (req, res) => {
     // Reply to the client
     res.json(jsonResult)
   }
-})
+)
 
 // Separated applying of query parameters
 function applyUrlParameters(req) {

@@ -22,8 +22,6 @@ router.get(
       .optional(),
   ],
   async function(req, res) {
-    // Validation
-
     // Finds the validation errors in this request and wraps them in an object with handy functions
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
