@@ -59,14 +59,15 @@ function autoCompleteCleaner(json, domain, limit) {
           posts: Number(parsedJson[prop].label.match(/\d+/g)),
         })
 
+        // Add one to counter
+        counter++
+
         // End array if we are at the specified limit
         if (counter >= limit) {
           break
         }
-
-        // Add one to counter
-        counter++
       }
+      // End of loop
 
       break
 
@@ -77,13 +78,13 @@ function autoCompleteCleaner(json, domain, limit) {
         // Add object to array
         finalJson.push({ name: prop, posts: parsedJson[prop] })
 
+        // Add one to counter
+        counter++
+
         // End array if we are at the specified limit
         if (counter >= limit) {
           break
         }
-
-        // Add one to counter
-        counter++
       }
       // End of loop
 
