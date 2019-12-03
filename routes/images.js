@@ -1,12 +1,22 @@
 const express = require('express'),
   https = require('https'),
-  router = express.Router()
+  router = express.Router(),
+  urlRegex = require('url-regex')
 
 /* Act as a proxy with cors for images */
-router.get('/', function(req, res) {
-  // There needs to be a url for a image
+router.get('/', function(req, res, next) {
+  // If theres no url
   if (!req.query.url) {
-    res.sendStatus(404)
+    res.status(400)
+    res.json({ error: 'Please use ?url=' })
+    return next()
+  }
+
+  // If url is not valid
+  if (!urlRegex().test(req.query.url)) {
+    res.status(400)
+    res.json({ error: 'Please send a valid URL' })
+    return next()
   }
 
   // Get the requested url image and respond with it
