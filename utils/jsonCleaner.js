@@ -26,10 +26,10 @@ function postsCleaner(json, domain) {
         break
     }
     // Add a media 'type' of the source
-    if (post.high_res_file.match(/\.(jpeg|jpg|gif|png)$/)) {
-      post.type = 'image'
-    } else {
+    if (post.high_res_file.match(/\.(webm|mp4|ogg)$/)) {
       post.type = 'video'
+    } else {
+      post.type = 'image'
     }
   })
 
