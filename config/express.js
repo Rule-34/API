@@ -1,5 +1,5 @@
+// Requirements
 const express = require('express'),
-  // Requirements
   generalConfig = require('./generalConfig'),
   // Plugins
   bodyParser = require('body-parser'),
@@ -15,26 +15,30 @@ const express = require('express'),
   // Init
   app = express(),
   cache = apicache.middleware
-// Handlers
 
-// Assigning plugins
+// Security and default plugins
 app
   .set('port', generalConfig.port)
   .use(bodyParser.json())
   .use(bodyParser.urlencoded({ extended: true })) // TODO: See what it does
-  .use(compression())
-  .use(cors())
+  .use(compression({ threshold: 0 }))
+  .use(
+    cors({
+      methods: ['GET'],
+      allowedHeaders: ['Content-Type'],
+    })
+  )
   .use(helmet())
+  .disable('x-powered-by') // Remove powered by
 
+  // Cosmetic plugins
   .use(favicon(__dirname + '/../static/favicon.ico'))
 
-// If in development log everything, otherwise only log errors and use cache
 if (generalConfig.env === 'development') {
-  app
-    .use(logger('dev'))
-    // Error handling
-    .use(errorHandler())
+  // Log everything and show full errors
+  app.use(logger('dev')).use(errorHandler())
 } else {
+  // Log errors only and use cache
   app
     .use(
       logger('dev', {
@@ -43,7 +47,7 @@ if (generalConfig.env === 'development') {
         },
       })
     )
-    .use(cache('2 minutes'))
+    .use(cache('3 minutes'))
 }
 
 // Import all Routes
