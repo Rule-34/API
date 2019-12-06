@@ -1,7 +1,8 @@
 const express = require('express'),
   https = require('https'),
   router = express.Router(),
-  urlRegex = require('url-regex')
+  urlRegex = require('url-regex'),
+  debug = require('debug')(`images`)
 
 /* Act as a proxy with cors for images */
 router.get('/', function(req, res, next) {
@@ -28,7 +29,7 @@ router.get('/', function(req, res, next) {
 
   request.on('error', function(e) {
     res.json({ error: e })
-    console.error(e)
+    debug(e)
   })
 })
 

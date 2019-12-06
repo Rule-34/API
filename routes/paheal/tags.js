@@ -2,7 +2,8 @@ const express = require('express'),
   xmlToJsonFromUrl = require('../../utils/xmlToJsonFromUrl.js'),
   domainConfig = require('./domainConfig'),
   router = express.Router(),
-  { check, validationResult } = require('express-validator')
+  { check, validationResult } = require('express-validator'),
+  debug = require('debug')(`paheal tags`)
 
 /* GET tags. */
 router.get(
@@ -24,7 +25,7 @@ router.get(
 
     // Get the requested parameters and create a url to request data with it
     const requestUrl = applyUrlParameters(req)
-    console.log(requestUrl)
+    debug(requestUrl)
 
     // Define limit of posts to return to client
     const limit = req.query.limit || 100
