@@ -2,8 +2,8 @@
 const domainConfig = {
   routeUrl: 'loli/',
   baseUrl: 'https://lolibooru.moe/',
-  apiUrl: 'https://lolibooru.moe/post/index.xml',
-  tagApiUrl: 'https://lolibooru.moe/tag/index.xml',
+  apiUrl: 'https://lolibooru.moe/post/index.json',
+  tagApiUrl: 'https://lolibooru.moe/tag/index.json',
 }
 
 module.exports = domainConfig

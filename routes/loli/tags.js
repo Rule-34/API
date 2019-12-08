@@ -36,7 +36,7 @@ router.get(
     // Define limit of posts to return to client
 
     // Process through wich the json gets transformed to optimized json
-    let jsonResult = await xmlToJsonFromUrl(requestUrl, 'tags', 'loli')
+    let jsonResult = await xmlToJsonFromUrl(requestUrl, 'tags', 'loli', true)
 
     // Reply to the client
     res.json(jsonResult)

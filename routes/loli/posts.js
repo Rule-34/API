@@ -34,7 +34,7 @@ router.get(
     debug(requestUrl)
 
     // Process through wich the xml request gets transformed to optimized json
-    let jsonResult = await xmlToJsonFromUrl(requestUrl, 'posts', 'loli')
+    let jsonResult = await xmlToJsonFromUrl(requestUrl, 'posts', 'loli', true)
 
     // Reply to the client
     res.json(jsonResult)

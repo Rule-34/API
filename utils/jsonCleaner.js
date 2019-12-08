@@ -1,6 +1,80 @@
 const generalConfig = require('../config/generalConfig'),
   he = require('he')
 
+// Util for returning arrays from strings
+function stringToArray(string) {
+  return string.trim().split(' ')
+}
+
+// Util for returning boolean if matches video extension
+function isVideo(media) {
+  return media.match(/\.(webm|mp4|ogg)$/)
+}
+
+// Clean json from unnecessary info
+function jsonPostsCleaner(json) {
+  let parsedJson = JSON.parse(json),
+    finalJson = { count: parsedJson.count, posts: [] }
+
+  // Error handling
+  if (json === undefined) {
+    return { error: 'No data to return, maybe you have too many tags?' }
+  }
+
+  // Loop so we can extract only the things that we are gonna use
+  parsedJson.forEach(post => {
+    let tempJson = {}
+
+    // Add id
+    tempJson.id = post.id
+
+    // Images should be proxified so they can be cached and have CORS
+    tempJson.high_res_file = generalConfig.host + 'images?url=' + post.file_url
+    tempJson.low_res_file = generalConfig.host + 'images?url=' + post.sample_url
+    tempJson.preview_file =
+      generalConfig.host + 'images?url=' + post.preview_url
+
+    // Make the string of tags an array
+    tempJson.tags = stringToArray(post.tags)
+
+    // Add source
+    tempJson.source = post.source
+
+    // Add a media 'type' of the source
+    if (isVideo(tempJson.high_res_file)) {
+      tempJson.type = 'video'
+    } else {
+      tempJson.type = 'image'
+    }
+
+    //
+    finalJson.posts.push(tempJson)
+  })
+
+  // And return it to the main function
+  return finalJson
+}
+
+// Clean json tags from unnecessary info
+function jsonTagsCleaner(json) {
+  let parsedJson = JSON.parse(json),
+    finalJson = []
+
+  // Error handling
+  if (json === undefined) {
+    return { error: 'No data to return, maybe you have too many tags?' }
+  }
+
+  // Loop so we can extract only the things that we are gonna use
+  parsedJson.forEach(tag => {
+    //
+    finalJson.push({ name: tag.name, posts: Number(tag.post_count) })
+  })
+
+  // And return it to the main function
+  return finalJson
+}
+
 // Cleans individual posts from XML API
 function postsCleaner(json, domain) {
   // Error handling
@@ -10,7 +84,7 @@ function postsCleaner(json, domain) {
 
   json.posts.forEach(post => {
     // Make the string of tags an array
-    post.tags = post.tags.trim().split(' ')
+    post.tags = stringToArray(post.tags)
 
     // Images should be proxified so they can be cached and have CORS
     post.high_res_file = generalConfig.host + 'images?url=' + post.high_res_file
@@ -31,7 +105,7 @@ function postsCleaner(json, domain) {
         break
     }
     // Add a media 'type' of the source
-    if (post.high_res_file.match(/\.(webm|mp4|ogg)$/)) {
+    if (isVideo(post.high_res_file)) {
       post.type = 'video'
     } else {
       post.type = 'image'
@@ -101,23 +175,27 @@ function autoCompleteCleaner(json, domain, limit) {
 }
 
 // Exported function that calls all the specified one based on template
-function jsonCleaner(convertedJson, template, domain, limit) {
+function jsonCleaner(convertedJson, template, domain, limit, isJson) {
   let cleanJson = {}
 
   switch (template) {
     // Clean json of unneded data
     case 'posts':
-      cleanJson = postsCleaner(convertedJson, domain)
+      if (isJson) {
+        cleanJson = jsonPostsCleaner(convertedJson)
+      } else {
+        cleanJson = postsCleaner(convertedJson, domain)
+      }
+      break
+
+    // Returns an array from the json object at position 0
+    case 'tags':
+      cleanJson = jsonTagsCleaner(convertedJson)
       break
 
     // Turns a json object into an array
     case 'autocomplete':
       cleanJson = autoCompleteCleaner(convertedJson, domain, limit)
-      break
-
-    // Returns an array from the json object at position 0
-    case 'tags':
-      cleanJson = convertedJson[0]
       break
   }
 
