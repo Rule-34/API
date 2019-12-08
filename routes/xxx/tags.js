@@ -35,6 +35,7 @@ router.get(
       requestUrl,
       'autocomplete',
       'xxx',
+      true,
       limit
     )
 

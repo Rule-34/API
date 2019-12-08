@@ -29,9 +29,31 @@ const { transform } = require('camaro'),
         type: '',
       },
     ],
-  },
-  // Using 0 as a workaround since camaro doesnt like to use arrays
-  tagTemplate = {
+  }
+
+// Transforms the passed xml into json and returns it
+async function xmlToJson(xml, domain) {
+  switch (domain) {
+    case 'xxx':
+      return await transform(xml, xxxTemplate)
+
+    case 'paheal':
+      return await transform(xml, pahealTemplate)
+  }
+}
+
+module.exports = xmlToJson
+
+/* case 'loli': // This is for tags
+  return await transform(xml, xxxTemplate) */
+
+// If its a tag template
+/* case 'tags':
+      return await transform(xml, tagTemplate) */
+
+// Using 0 as a workaround since camaro doesnt like to use arrays
+// At this moment it is not used, but could be useful for the future
+/* tagTemplate = {
     0: [
       '/tags/tag',
       {
@@ -39,30 +61,4 @@ const { transform } = require('camaro'),
         posts: 'number(@count)',
       },
     ],
-  }
-
-// Transforms the passed xml into json and returns it
-async function xmlToJson(xml, template, domain) {
-  switch (template) {
-    // If its a post template
-    case 'posts':
-      // If its a specific domain
-      switch (domain) {
-        case 'paheal': // This is for posts
-          return await transform(xml, pahealTemplate)
-
-        case 'xxx': // This is for posts
-          return await transform(xml, xxxTemplate)
-
-        case 'loli': // This is for tags
-          return await transform(xml, xxxTemplate)
-      }
-      break
-
-    // If its a tag template
-    case 'tags':
-      return await transform(xml, tagTemplate)
-  }
-}
-
-module.exports = xmlToJson
+  } */

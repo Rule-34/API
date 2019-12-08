@@ -20,11 +20,11 @@ async function xmlToJsonFromUrl(url, template, domain, isJson, limit) {
   if (isJson) {
     jsonData = xmlData
   } else {
-    jsonData = await xmlToJson(xmlData, template, domain)
+    jsonData = await xmlToJson(xmlData, domain)
   }
 
   // Then beautify json with the passed template
-  const cleanJson = jsonCleaner(jsonData, template, domain, limit, isJson)
+  const cleanJson = jsonCleaner(jsonData, template, domain, isJson, limit)
 
   // And return it
   return cleanJson
