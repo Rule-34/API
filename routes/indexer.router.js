@@ -5,7 +5,8 @@ const express = require('express'),
   defaultRouter = require('./default'),
   imagesRouter = require('./images'),
   xxxRoutes = require('./xxx/index.routes.js'),
-  pahealRoutes = require('./paheal/index.routes.js')
+  pahealRoutes = require('./paheal/index.routes.js'),
+  loliRoutes = require('./loli/index.routes.js')
 
 /*
  ** All routes are used from here
@@ -31,6 +32,7 @@ router
   .use('/images', imagesRouter)
   .use('/xxx/', xxxRoutes)
   .use('/paheal/', pahealRoutes)
+  .use('/loli/', loliRoutes)
 
 // Export default
 module.exports = router

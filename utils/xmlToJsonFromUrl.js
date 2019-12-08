@@ -12,7 +12,7 @@ async function xmlToJsonFromUrl(url, template, domain, limit) {
   if (limit) {
     jsonData = xmlData
   } else {
-    jsonData = await xmlToJson(xmlData, domain)
+    jsonData = await xmlToJson(xmlData, template, domain)
   }
 
   // Then beautify json with the passed template

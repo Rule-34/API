@@ -17,7 +17,7 @@ function postsCleaner(json, domain) {
     post.low_res_file = generalConfig.host + 'images?url=' + post.low_res_file
     post.preview_file = generalConfig.host + 'images?url=' + post.preview_file
 
-    // Quirks of every domain
+    // Quirks of every domain, optional
     switch (domain) {
       // This is done for rule34.xxx so it doesnt redirect you to the post of the image
       case 'xxx':
@@ -58,7 +58,7 @@ function autoCompleteCleaner(json, domain, limit) {
       )
 
       for (const prop in parsedJson) {
-        // Add object to array
+        // Add object to array while extracting only numbers
         finalJson.push({
           name: parsedJson[prop].value,
           posts: Number(parsedJson[prop].label.match(/\d+/g)),
@@ -113,6 +113,11 @@ function jsonCleaner(convertedJson, template, domain, limit) {
     // Turns a json object into an array
     case 'autocomplete':
       cleanJson = autoCompleteCleaner(convertedJson, domain, limit)
+      break
+
+    // Returns an array from the json object at position 0
+    case 'tags':
+      cleanJson = convertedJson[0]
       break
   }
 
