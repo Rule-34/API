@@ -1,29 +1,28 @@
 # Rule 34 JSON API
 
-
 ### What is this?
 
 It's a JSON API that embraces the current XML being used on various danbooru sites like rule34.xxx or rule34.paheal.net.
 
 > This API is used on the [Rule 34 PWA app](https://r34.app/).
 
- If you have any suggestion please leave a request :')
-
+If you have any suggestion please leave a request :')
 
 ### Goals
 
 It is being developed with the following goals:
+
 - Being as fast as possible
 - Being as secure as it can be
 - Wasting as little data as its needed
 - Supporting various danbooru sites
 
-> This API was inspired by  [Kurozenzen's API](https://github.com/kurozenzen/r34-json-api)
-
+> This API was inspired by [Kurozenzen's API](https://github.com/kurozenzen/r34-json-api)
 
 ### Support
 
 The following sites are supported and their API is fully working
+
 - https://rule34.xxx
 - https://rule34.paheal.net
 
@@ -31,11 +30,9 @@ The following sites are supported and their API is fully working
 
 > Site's inner autocomplete API is used for getting tags.
 
-
 ### Information
 
 As you may know this API transforms then original's API XML response to JSON, so it's more flexible.
-
 
 ##### Speed
 
@@ -46,78 +43,84 @@ Then when we get a client request, the information is transformed and cached, ma
 ### Common usage
 
 First you have to select from which site you want to use the API
+
 - .../xxx/ for rule34.xxx
 - .../paheal/ for rule34.paheal.net
 
 Then you append what you want to get from the API
+
 - .../posts
 - .../tags
 - .../comments // In progress
 
 And that's it, you'll receive a JSON object with the latest data from the original site XML API.
 
-
 ### Good to know
 
-When posts are returned you'll see the images urls are being replaced with a dynamic one, this is because most webpages dont offer CORS, this way we act as a middleman (proxy) that sets CORS and allows you to view images on any site without any hassle.
+When posts are returned you'll see the images urls are being replaced with a dynamic one, this is because most webpages dont offer CORS, this way we act as a middleman (proxy) that sets CORS and allows you to view proxy on any site without any hassle.
 
 ```javascript
-.../images/?url=example.com/image.png
+.../proxy/?url=example.com/image.png
 ```
 
-
-### Advanced usage 
+### Advanced usage
 
 If you need to tweak things a little you can use the following URL parameters
 
 ### Posts
 
-First start by adding a question mark 
+First start by adding a question mark
+
 ```javascript
 .../posts/?
 ```
 
 And then you can append the following parameters
-- limit 
+
+- limit
 - pid
-- tags 
+- tags
 - score
 
 > Use & to add more parameters.
 
-
 #### Examples
 
 Show latest 50 posts
+
 ```javascript
 .../posts/?limit=50
 ```
 
 Show second page of latest posts
+
 ```javascript
 .../posts/?pid=2
 ```
 
 Show latest posts with 'robot' tag
+
 ```javascript
 .../posts/?tags=robot
 ```
 
 Show latest posts with 'robot' tag that doesn't have the 'human' tag
+
 ```javascript
 .../posts/?tags=robot+-human
 ```
 
 Show latest posts with a score higher or equal than 100
+
 ```javascript
 .../posts/?score=100
 ```
 
 Show the latest 20 posts of the fifth page that have the tag 'disney' but not 'cars' and the post's score have to be equal to 10 and higher
+
 ```javascript
 .../posts/?limit=20&pid=5&tags=disney+-cars&score=10
 ```
-
 
 ##### Posts parameters explained
 
@@ -129,29 +132,31 @@ Show the latest 20 posts of the fifth page that have the tag 'disney' but not 'c
 
 **Score:** show posts that have that score or more, defaults to 0.
 
+### Tags
 
-### Tags 
+First start by adding a question mark
 
-First start by adding a question mark 
 ```javascript
 .../tags/?
 ```
 
 And then you can append the following parameters
+
 - tag
 - limit
 
 > Use & to add more parameters.
 
-
 #### Examples
 
 Will show all tags related to 'robot' and their post count
+
 ```javascript
 .../tags/?tag=robot
 ```
 
 Will show the top 5 tags related to 'robot' and their post count
+
 ```javascript
 .../tags/?tag=robot&limit=5
 ```

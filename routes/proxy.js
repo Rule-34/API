@@ -2,9 +2,9 @@ const express = require('express'),
   https = require('https'),
   router = express.Router(),
   urlRegex = require('url-regex'),
-  debug = require('debug')(`images`)
+  debug = require('debug')(`Proxy`)
 
-/* Act as a proxy with cors for images */
+/* Act as a proxy with cors for data */
 router.get('/', function(req, res, next) {
   // If theres no url
   if (!req.query.url) {
