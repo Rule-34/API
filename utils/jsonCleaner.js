@@ -29,9 +29,15 @@ function jsonPostsCleaner(json) {
     tempJson.id = post.id
 
     // Images should be proxified so they can be cached and have CORS
-    tempJson.high_res_file = generalConfig.host + 'proxy?url=' + post.file_url
-    tempJson.low_res_file = generalConfig.host + 'proxy?url=' + post.sample_url
-    tempJson.preview_file = generalConfig.host + 'proxy?url=' + post.preview_url
+    tempJson.high_res_file =
+      'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
+      post.file_url
+    tempJson.low_res_file =
+      'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
+      post.sample_url
+    tempJson.preview_file =
+      'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
+      post.preview_url
 
     // Make the string of tags an array
     tempJson.tags = stringToArray(post.tags)
@@ -139,9 +145,15 @@ function postsCleaner(json, domain) {
     post.tags = stringToArray(post.tags)
 
     // Images should be proxified so they can be cached and have CORS
-    post.high_res_file = generalConfig.host + 'proxy?url=' + post.high_res_file
-    post.low_res_file = generalConfig.host + 'proxy?url=' + post.low_res_file
-    post.preview_file = generalConfig.host + 'proxy?url=' + post.preview_file
+    post.high_res_file =
+      'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
+      post.high_res_file
+    post.low_res_file =
+      'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
+      post.low_res_file
+    post.preview_file =
+      'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
+      post.preview_file
 
     // Quirks of every domain, optional
     switch (domain) {
