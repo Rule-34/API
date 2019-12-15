@@ -25,14 +25,14 @@ The following sites are supported and their API is fully working
 
 - https://rule34.xxx
 - https://rule34.paheal.net
+- https://lolibooru.moe
 
 > Site's public API is used for getting posts.
-
 > Site's inner autocomplete API is used for getting tags.
 
 ### Information
 
-As you may know this API transforms then original's API XML response to JSON, so it's more flexible.
+As you may know this API transforms the original's API XML response to JSON, so it's more flexible.
 
 ##### Speed
 
@@ -46,14 +46,17 @@ First you have to select from which site you want to use the API
 
 - .../xxx/ for rule34.xxx
 - .../paheal/ for rule34.paheal.net
+- .../loli/ for lolibooru.moe
 
 Then you append what you want to get from the API
 
 - .../posts
-- .../tags
-- .../comments // In progress
+- .../tags (*)
+
+> (*) Tags need query parameters, otherwise it will fail
 
 And that's it, you'll receive a JSON object with the latest data from the original site XML API.
+
 
 ### Good to know
 
