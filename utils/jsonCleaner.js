@@ -23,8 +23,8 @@ function isVideo(media) {
  * @param {String} domain Domain for specific quirk treatment
  */
 function postCleaner(json, domain) {
-  let finalJson = { count: json.count, posts: [] },
-    evaluatedJson = { posts: [] }
+  let finalJson = [],
+    evaluatedJson = []
 
   // Error handling
   if (json === undefined) {
@@ -35,16 +35,16 @@ function postCleaner(json, domain) {
   switch (domain) {
     case 'danbooru':
     case 'loli':
-      evaluatedJson.posts = JSON.parse(json)
+      evaluatedJson = JSON.parse(json)
       break
 
     default:
-      evaluatedJson = json
+      evaluatedJson = json[0] // Typically Json from XML
       break
   }
 
   // Loop so we can extract only the things that we are gonna use
-  evaluatedJson.posts.forEach(post => {
+  evaluatedJson.forEach(post => {
     let tempJson = {}
 
     // Add id
@@ -130,7 +130,7 @@ function postCleaner(json, domain) {
     }
 
     // Push it to the real json
-    finalJson.posts.push(tempJson)
+    finalJson.push(tempJson)
   })
 
   // And return it to the main function
