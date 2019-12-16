@@ -6,7 +6,8 @@ const express = require('express'),
   proxyRouter = require('./proxy'),
   xxxRoutes = require('./xxx/index.routes.js'),
   pahealRoutes = require('./paheal/index.routes.js'),
-  loliRoutes = require('./loli/index.routes.js')
+  loliRoutes = require('./loli/index.routes.js'),
+  danbooruRoutes = require('./danbooru/index.routes.js')
 
 /*
  ** All routes are used from here
@@ -33,6 +34,7 @@ router
   .use('/xxx/', xxxRoutes)
   .use('/paheal/', pahealRoutes)
   .use('/loli/', loliRoutes)
+  .use('/danbooru/', danbooruRoutes)
 
 // Export default
 module.exports = router
