@@ -138,6 +138,12 @@ function postCleaner(json, domain) {
 }
 
 // Clean json tags from unnecessary info
+/**
+ * Cleans a Json object that contains tags
+ * @param {Object} json Object containing tags to be cleaned
+ * @param {String} domain Domain specific quirk treatment
+ * @param {Number} limit Number to limit how many tags should be processed (Only used on some domains that do not have queries)
+ */
 function jsonTagsCleaner(json, domain, limit) {
   let parsedJson = {},
     finalJson = [],
