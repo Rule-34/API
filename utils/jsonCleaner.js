@@ -72,9 +72,15 @@ function postCleaner(json, domain) {
 
       case 'xxx':
         // Images should be proxified so they can be cached and have CORS
-        tempJson.high_res_file = post.high_res_file.replace('xxx/', 'xxx//')
-        tempJson.low_res_file = post.low_res_file.replace('xxx/', 'xxx//')
-        tempJson.preview_file = post.preview_file.replace('xxx/', 'xxx//')
+        tempJson.high_res_file =
+          'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
+          post.high_res_file.replace('xxx/', 'xxx//')
+        tempJson.low_res_file =
+          'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
+          post.low_res_file.replace('xxx/', 'xxx//')
+        tempJson.preview_file =
+          'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
+          post.preview_file.replace('xxx/', 'xxx//')
 
         // Make the string of tags an array
         tempJson.tags = stringToArray(post.tags)
