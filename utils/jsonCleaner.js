@@ -1,4 +1,5 @@
 const generalConfig = require('../config/generalConfig'),
+  debug = require('debug')(`Json Cleaner`),
   he = require('he')
 
 /**
@@ -27,7 +28,7 @@ function postCleaner(json, domain) {
     evaluatedJson = []
 
   // Error handling
-  if (json === undefined) {
+  if (!json) {
     return { error: 'No data to return, maybe you have too many tags?' }
   }
 
@@ -52,7 +53,13 @@ function postCleaner(json, domain) {
 
     // Quirks of every domain
     switch (domain) {
-      case 'danbooru': // Everything is different here as it doesnt come from the Camaro XML template
+      // Everything is different here as it doesnt come from the Camaro XML template
+      case 'danbooru':
+        // If for some reason (Mainly cause it's a deleted post or similar) it doesnt have an Image, then skip it and continue execution
+        if (!post.file_url) {
+          debug(`Empty media: Skipping execution of ${tempJson.id}`)
+          return
+        }
         // Images should be proxified so they can be cached and have CORS
         tempJson.high_res_file =
           'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
@@ -71,6 +78,11 @@ function postCleaner(json, domain) {
         break
 
       case 'xxx':
+        // If for some reason (Mainly cause it's a deleted post or similar) it doesnt have an Image, then skip it and continue execution
+        if (!post.high_res_file) {
+          debug(`Empty media: Skipping execution of ${tempJson.id}`)
+          return
+        }
         // Images should be proxified so they can be cached and have CORS
         tempJson.high_res_file =
           'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
@@ -87,6 +99,11 @@ function postCleaner(json, domain) {
         break
 
       case 'paheal':
+        // If for some reason (Mainly cause it's a deleted post or similar) it doesnt have an Image, then skip it and continue execution
+        if (!post.high_res_file) {
+          debug(`Empty media: Skipping execution of ${tempJson.id}`)
+          return
+        }
         // Images should be proxified so they can be cached and have CORS
         tempJson.high_res_file =
           'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
@@ -103,6 +120,11 @@ function postCleaner(json, domain) {
         break
 
       case 'loli': // Everything is different here as it doesnt come from the Camaro XML template
+        // If for some reason (Mainly cause it's a deleted post or similar) it doesnt have an Image, then skip it and continue execution
+        if (!post.file_url) {
+          debug(`Empty media: Skipping execution of ${tempJson.id}`)
+          return
+        }
         // Images should be proxified so they can be cached and have CORS
         tempJson.high_res_file =
           'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
