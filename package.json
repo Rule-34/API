@@ -17,7 +17,7 @@
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "errorhandler": "^1.5.1",
-    "express": "~4.16.1",
+    "express": "~4.17.1",
     "express-validator": "^6.3.0",
     "he": "^1.2.0",
     "helmet": "^3.21.2",
