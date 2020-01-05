@@ -55,17 +55,20 @@ function applyUrlParameters(req) {
     score = req.query.score | 0
 
   // Return full url
-  return (
-    domainConfig.apiUrl +
-    '?limit=' +
-    limit +
-    '&page=' +
-    pageId +
-    '&tags=' +
-    tags +
-    '+score:>=' +
-    score
-  )
+  let builtUrl = domainConfig.apiUrl + '?limit=' + limit
+
+  if (pageId) {
+    builtUrl += '&page=' + pageId
+  }
+  if (tags) {
+    builtUrl += '&tags=' + tags
+  }
+  if (score) {
+    builtUrl += '+score:>=' + score
+  }
+
+  // Return the complete built url
+  return builtUrl
 }
 
 module.exports = router
