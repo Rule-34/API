@@ -179,4 +179,5 @@ This makes that some funtionality like getting a single post from its ID very di
 
 #### Unsupported
 
-- Only rule34xxx and rule34paheal have Posts from its ID
+- Only rule34xxx and rule34paheal can search for Posts from its ID
+- Only danbooru and loli allow limit, pid or order in the /tag route
