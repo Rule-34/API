@@ -2,7 +2,8 @@ const express = require('express'),
   domainConfig = require('./domainConfig'),
   xmlToJsonFromUrl = require('../../utils/xmlToJsonFromUrl.js'),
   router = express.Router(),
-  { check, validationResult } = require('express-validator')
+  { check, validationResult } = require('express-validator'),
+  debug = require('debug')(`paheal posts`)
 
 /* GET posts. */
 router.get(
@@ -12,6 +13,9 @@ router.get(
       .isInt()
       .optional(),
     check('pid')
+      .isInt()
+      .optional(),
+    check('id')
       .isInt()
       .optional(),
     check('tags')
@@ -30,6 +34,7 @@ router.get(
 
     // Get the requested parameters and create a url to request data with it
     const requestUrl = applyUrlParameters(req)
+    debug(requestUrl)
 
     // Process through wich the xml request gets transformed to optimized json
     let jsonResult = await xmlToJsonFromUrl(requestUrl, 'posts', 'paheal')
@@ -42,24 +47,30 @@ router.get(
 // Separated applying of query parameters
 function applyUrlParameters(req) {
   // Default query parameters
-  const limit = req.query.limit || 100,
-    pageId = req.query.pid || 0,
-    tags = req.query.tags || '',
-    score = req.query.score | 0
+  const limit = req.query.limit || 100, // Default is 100
+    pageId = req.query.pid, // Default is ?
+    postId = req.query.id, // Default is 0
+    tags = req.query.tags, // Default is ''
+    score = req.query.score // Default is 0
 
   // Return full url
-  return (
-    domainConfig.apiUrl +
-    'post/index.xml' + // Posts api url
-    '?limit=' +
-    limit +
-    '&pid=' +
-    pageId +
-    '&tags=' +
-    tags +
-    '+score:>=' +
-    score
-  )
+  let builtUrl = domainConfig.apiUrl + 'post/index.xml' + '?limit=' + limit
+
+  if (pageId) {
+    builtUrl += '&pid=' + pageId
+  }
+  if (postId) {
+    builtUrl += '&id=' + postId
+  }
+  if (tags) {
+    builtUrl += '&tags=' + tags
+  }
+  if (score) {
+    builtUrl += '+score:>=' + score
+  }
+
+  // Return the complete built url
+  return builtUrl
 }
 
 module.exports = router

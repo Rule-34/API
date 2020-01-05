@@ -1,6 +1,6 @@
 # Rule 34 JSON API
 
-### What is this?
+## What is this
 
 It's a JSON API that embraces the current XML being used on various danbooru sites like rule34.xxx or rule34.paheal.net.
 
@@ -23,9 +23,9 @@ It is being developed with the following goals:
 
 The following sites are supported and their API is fully working
 
-- https://rule34.xxx
-- https://rule34.paheal.net
-- https://lolibooru.moe
+- <https://rule34.xxx>
+- <https://rule34.paheal.net>
+- <https://lolibooru.moe>
 
 > Site's public API is used for getting posts.
 > Site's inner autocomplete API is used for getting tags.
@@ -34,7 +34,7 @@ The following sites are supported and their API is fully working
 
 As you may know this API transforms the original's API XML response to JSON, so it's more flexible.
 
-##### Speed
+#### Speed
 
 Thanks to a utility package called Camaro we transform XML to JSON as fast as possible, as this package is using C++ underneath to do the transformation.
 
@@ -51,14 +51,13 @@ First you have to select from which site you want to use the API
 Then you append what you want to get from the API
 
 - .../posts
-- .../tags (*)
+- .../tags (\*)
 
-> (*) Tags need query parameters, otherwise it will fail
+> (\*) Tags need query parameters, otherwise it will fail
 
 And that's it, you'll receive a JSON object with the latest data from the original site XML API.
 
-
-### Good to know
+#### Good to know
 
 When posts are returned you'll see the images urls are being replaced with a dynamic one, this is because most webpages dont offer CORS, this way we act as a middleman (proxy) that sets CORS and allows you to view proxy on any site without any hassle.
 
@@ -66,7 +65,7 @@ When posts are returned you'll see the images urls are being replaced with a dyn
 .../proxy/?url=example.com/image.png
 ```
 
-### Advanced usage
+## Advanced usage
 
 If you need to tweak things a little you can use the following URL parameters
 
@@ -171,3 +170,13 @@ Will show the top 5 tags related to 'robot' and their post count
 **Tag:** returns all similar tags and the total of posts with that tag, defaults to nothing.
 
 **Limit:** limit of posts to show per request, defaults to 100 posts.
+
+### Differences
+
+You should know that every API is different, for example, danbooru and rule34xxx are nothing similar
+
+This makes that some funtionality like getting a single post from its ID very difficult and on some cases, not possible.
+
+#### Unsupported
+
+- Only rule34xxx and rule34paheal have Posts from its ID
