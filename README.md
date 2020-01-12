@@ -25,6 +25,7 @@ The following sites are supported and their API is fully working
 
 - <https://rule34.xxx>
 - <https://rule34.paheal.net>
+- <https://danbooru.donmai.us>
 - <https://lolibooru.moe>
 
 > Site's public API is used for getting posts.
@@ -46,6 +47,7 @@ First you have to select from which site you want to use the API
 
 - .../xxx/ for rule34.xxx
 - .../paheal/ for rule34.paheal.net
+- .../danbooru/ for danbooru.donmai.us
 - .../loli/ for lolibooru.moe
 
 Then you append what you want to get from the API
