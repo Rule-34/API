@@ -2,9 +2,9 @@
 
 ## What is this
 
-It's a JSON API that embraces the current XML being used on various danbooru sites like rule34.xxx or rule34.paheal.net.
+It's a JSON API that embraces the current XML being used on various danbooru sites like rule34.xxx, rule34.paheal.net, etc.
 
-> This API is used on the [Rule 34 PWA app](https://r34.app/).
+> This API is used on the [Rule 34 App](https://r34.app/).
 
 If you have any suggestion please leave a request :')
 
