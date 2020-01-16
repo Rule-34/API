@@ -2,6 +2,9 @@ const generalConfig = require('../config/generalConfig'),
   debug = require('debug')(`Json Cleaner`),
   he = require('he')
 
+// Define CORS Proxy URL
+const corsProxyUrl = 'https://cors-proxy.rule34app.workers.dev/?q='
+
 /**
  * Helper function that returns an array from a passed String
  * @param {String} string String to get converted to array
@@ -61,17 +64,11 @@ function postCleaner(json, domain) {
           return
         }
         // Images should be proxified so they can be cached and have CORS
-        tempJson.high_res_file =
-          'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
-          post.file_url
+        tempJson.high_res_file = corsProxyUrl + post.file_url
 
-        tempJson.low_res_file =
-          'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
-          post.large_file_url // Yes, for some reason 'large_file_url' is actually the low resolution one, blame danbooru
+        tempJson.low_res_file = corsProxyUrl + post.large_file_url // Yes, for some reason 'large_file_url' is actually the low resolution one, blame danbooru
 
-        tempJson.preview_file =
-          'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
-          post.preview_file_url
+        tempJson.preview_file = corsProxyUrl + post.preview_file_url
 
         // Make the string of tags an array
         tempJson.tags = stringToArray(post.tag_string)
@@ -85,14 +82,11 @@ function postCleaner(json, domain) {
         }
         // Images should be proxified so they can be cached and have CORS
         tempJson.high_res_file =
-          'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
-          post.high_res_file.replace('xxx/', 'xxx//')
+          corsProxyUrl + post.high_res_file.replace('xxx/', 'xxx//')
         tempJson.low_res_file =
-          'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
-          post.low_res_file.replace('xxx/', 'xxx//')
+          corsProxyUrl + post.low_res_file.replace('xxx/', 'xxx//')
         tempJson.preview_file =
-          'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
-          post.preview_file.replace('xxx/', 'xxx//')
+          corsProxyUrl + post.preview_file.replace('xxx/', 'xxx//')
 
         // Make the string of tags an array
         tempJson.tags = stringToArray(post.tags)
@@ -105,15 +99,11 @@ function postCleaner(json, domain) {
           return
         }
         // Images should be proxified so they can be cached and have CORS
-        tempJson.high_res_file =
-          'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
-          post.high_res_file
+        tempJson.high_res_file = corsProxyUrl + post.high_res_file
 
         // We skip low_res_file as it doesnt exist on paheal
 
-        tempJson.preview_file =
-          'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
-          post.preview_file
+        tempJson.preview_file = corsProxyUrl + post.preview_file
 
         // Make the string of tags an array
         tempJson.tags = stringToArray(post.tags)
@@ -126,17 +116,11 @@ function postCleaner(json, domain) {
           return
         }
         // Images should be proxified so they can be cached and have CORS
-        tempJson.high_res_file =
-          'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
-          post.file_url
+        tempJson.high_res_file = corsProxyUrl + post.file_url
 
-        tempJson.low_res_file =
-          'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
-          post.sample_url
+        tempJson.low_res_file = corsProxyUrl + post.sample_url
 
-        tempJson.preview_file =
-          'https://cors-proxy.rule34app.workers.dev/corsproxy/?apiurl=' +
-          post.preview_url
+        tempJson.preview_file = corsProxyUrl + post.preview_url
 
         // Make the string of tags an array
         tempJson.tags = stringToArray(post.tags)
