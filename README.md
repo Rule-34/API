@@ -63,10 +63,6 @@ And that's it, you'll receive a JSON object with the latest data from the origin
 
 When posts are returned you'll see the images urls are being replaced with a dynamic one, this is because most webpages dont offer CORS, this way we act as a middleman (proxy) that sets CORS and allows you to view proxy on any site without any hassle.
 
-```javascript
-.../proxy/?url=example.com/image.png
-```
-
 ## Advanced usage
 
 If you need to tweak things a little you can use the following URL parameters

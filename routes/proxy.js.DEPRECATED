@@ -1,3 +1,4 @@
+// DEPRECATED because we're using a Cloudflare worker to do this
 const express = require('express'),
   https = require('https'),
   router = express.Router(),

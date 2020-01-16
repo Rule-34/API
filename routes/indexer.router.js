@@ -3,7 +3,7 @@ const express = require('express'),
   router = express.Router(),
   // Import all routes // TODO: use glob to match *.route files
   defaultRouter = require('./default'),
-  proxyRouter = require('./proxy'),
+  // proxyRouter = require('./proxy'), DEPRECATED because we're using a Cloudflare worker to do this
   xxxRoutes = require('./xxx/index.routes.js'),
   pahealRoutes = require('./paheal/index.routes.js'),
   loliRoutes = require('./loli/index.routes.js'),
@@ -30,7 +30,7 @@ router
     res.json(apicache.getIndex())
   })
   .use('/', defaultRouter)
-  .use('/proxy', proxyRouter)
+  // .use('/proxy', proxyRouter) DEPRECATED because we're using a Cloudflare worker to do this
   .use('/xxx/', xxxRoutes)
   .use('/paheal/', pahealRoutes)
   .use('/loli/', loliRoutes)
