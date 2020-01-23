@@ -11,10 +11,22 @@ router.get('/', function(req, res) {
       domain: 'https://rule34.xxx/',
       api: generalConfig.host + 'xxx/',
     },
+
     rule34_paheal_net: {
       domain: 'https://rule34.paheal.net/',
       api: generalConfig.host + 'paheal/',
     },
+
+    danbooru_donmai_us: {
+      domain: 'https://danbooru.donmai.us/',
+      api: generalConfig.host + 'danbooru/',
+    },
+
+    chan_sankakucomplex_com: {
+      domain: 'https://beta.sankakucomplex.com/',
+      api: generalConfig.host + 'sankaku/',
+    },
+
     lolibooru_moe: {
       domain: 'https://lolibooru.moe/',
       api: generalConfig.host + 'loli/',
