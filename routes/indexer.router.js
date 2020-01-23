@@ -6,8 +6,9 @@ const express = require('express'),
   // proxyRouter = require('./proxy'), DEPRECATED because we're using a Cloudflare worker to do this
   xxxRoutes = require('./xxx/index.routes.js'),
   pahealRoutes = require('./paheal/index.routes.js'),
-  loliRoutes = require('./loli/index.routes.js'),
-  danbooruRoutes = require('./danbooru/index.routes.js')
+  danbooruRoutes = require('./danbooru/index.routes.js'),
+  sankakuRoutes = require('./sankaku/index.routes.js'),
+  loliRoutes = require('./loli/index.routes.js')
 
 /*
  ** All routes are used from here
@@ -33,8 +34,9 @@ router
   // .use('/proxy', proxyRouter) DEPRECATED because we're using a Cloudflare worker to do this
   .use('/xxx/', xxxRoutes)
   .use('/paheal/', pahealRoutes)
-  .use('/loli/', loliRoutes)
   .use('/danbooru/', danbooruRoutes)
+  .use('/sankaku/', sankakuRoutes)
+  .use('/loli/', loliRoutes)
 
 // Export default
 module.exports = router

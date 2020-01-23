@@ -38,6 +38,7 @@ function postCleaner(json, domain) {
   // Depending on domain we need to parse or not
   switch (domain) {
     case 'danbooru':
+    case 'sankaku':
     case 'loli':
       evaluatedJson = JSON.parse(json)
       break
@@ -124,6 +125,27 @@ function postCleaner(json, domain) {
 
         // Make the string of tags an array
         tempJson.tags = stringToArray(post.tags)
+        break
+
+      case 'sankaku': // Everything is different here as it doesnt come from the Camaro XML template
+        // If for some reason (Mainly cause it's a deleted post or similar) it doesnt have an Image, then skip it and continue execution
+        if (!post.file_url) {
+          debug(`Empty media: Skipping execution of ${tempJson.id}`)
+          return
+        }
+        // Images should be proxified so they can be cached and have CORS
+        tempJson.high_res_file = corsProxyUrl + post.file_url
+
+        tempJson.low_res_file = corsProxyUrl + post.sample_url
+
+        tempJson.preview_file = corsProxyUrl + post.preview_url
+
+        // Clean every object to a string in an array
+        tempJson.tags = []
+
+        post.tags.forEach(tag => {
+          tempJson.tags.push(tag.name)
+        })
         break
 
       default:
