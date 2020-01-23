@@ -1,26 +1,17 @@
-const https = require('https')
+const fetch = require('node-fetch')
+// debug = require('debug')(`HTTP GET`)
 
 // Gets the content from the passed url and returns it
 async function httpsGet(url) {
-  return new Promise((resolve, reject) => {
-    https
-      .get(url, res => {
-        let urlData = ''
+  try {
+    const data = await fetch(url)
+    const response = await data.text()
+    return response
 
-        res
-          .on('data', d => {
-            //   process.stdout.write(d)
-            urlData += d.toString()
-          })
-          .on('end', () => {
-            resolve(urlData)
-          })
-      })
-      .on('error', e => {
-        //   console.error(e)
-        reject(e)
-      })
-  })
+    // Error handling
+  } catch (error) {
+    throw Error(error)
+  }
 }
 
 module.exports = httpsGet
