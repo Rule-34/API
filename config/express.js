@@ -7,12 +7,14 @@ const express = require('express'),
   cors = require('cors'),
   logger = require('morgan'),
   helmet = require('helmet'),
+  apicache = require('apicache'),
   errorHandler = require('errorhandler'),
   favicon = require('serve-favicon'),
   // Routes
   indexerRouter = require('../routes/indexer.router'),
   // Init
-  app = express()
+  app = express(),
+  cache = apicache.middleware
 
 // Security and default plugins
 app
@@ -37,13 +39,15 @@ if (generalConfig.env === 'development') {
   app.use(logger('dev')).use(errorHandler())
 } else {
   // Log errors only and use cache
-  app.use(
-    logger('dev', {
-      skip: function(req, res) {
-        return res.statusCode < 400
-      },
-    })
-  )
+  app
+    .use(
+      logger('dev', {
+        skip: function(req, res) {
+          return res.statusCode < 400
+        },
+      })
+    )
+    .use(cache('3 minutes'))
 }
 
 // Import all Routes
