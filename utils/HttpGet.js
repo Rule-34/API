@@ -9,9 +9,9 @@ async function httpsGet(url) {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0',
       },
-    })
-    const response = await data.text()
-    return response
+    }).then(res => res.text())
+
+    return data
 
     // Error handling
   } catch (error) {
