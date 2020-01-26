@@ -36,16 +36,22 @@ function postCleaner(json, domain) {
   }
 
   // Depending on domain we need to parse or not
-  switch (domain) {
-    case 'danbooru':
-    case 'sankaku':
-    case 'loli':
-      evaluatedJson = JSON.parse(json)
-      break
 
-    default:
-      evaluatedJson = json[0] // Typically Json from XML
-      break
+  try {
+    switch (domain) {
+      case 'danbooru':
+      case 'sankaku':
+      case 'loli':
+        evaluatedJson = JSON.parse(json)
+        break
+
+      default:
+        evaluatedJson = json[0] // Typically Json from XML
+        break
+    }
+  } catch (error) {
+    console.log(error, 'LOOOL', json)
+    return
   }
 
   // Loop so we can extract only the things that we are gonna use
