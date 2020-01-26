@@ -22,11 +22,6 @@ router.get('/', function(req, res) {
       api: generalConfig.host + 'danbooru/',
     },
 
-    chan_sankakucomplex_com: {
-      domain: 'https://beta.sankakucomplex.com/',
-      api: generalConfig.host + 'sankaku/',
-    },
-
     lolibooru_moe: {
       domain: 'https://lolibooru.moe/',
       api: generalConfig.host + 'loli/',

@@ -7,7 +7,6 @@ const express = require('express'),
   xxxRoutes = require('./xxx/index.routes.js'),
   pahealRoutes = require('./paheal/index.routes.js'),
   danbooruRoutes = require('./danbooru/index.routes.js'),
-  sankakuRoutes = require('./sankaku/index.routes.js'),
   loliRoutes = require('./loli/index.routes.js')
 
 /*
@@ -35,7 +34,6 @@ router
   .use('/xxx/', xxxRoutes)
   .use('/paheal/', pahealRoutes)
   .use('/danbooru/', danbooruRoutes)
-  .use('/sankaku/', sankakuRoutes)
   .use('/loli/', loliRoutes)
 
 // Export default
