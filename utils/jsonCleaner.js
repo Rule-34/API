@@ -50,7 +50,7 @@ function postCleaner(json, domain) {
         break
     }
   } catch (error) {
-    console.log(error, 'LOOOL', json)
+    console.error(error, '\nSeparator\n', json)
     return
   }
 
