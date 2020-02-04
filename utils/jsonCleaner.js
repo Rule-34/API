@@ -168,7 +168,7 @@ function jsonTagsCleaner(json, domain, limit) {
     counter = 0
 
   // Error handling
-  if (json === undefined) {
+  if (!json || json === undefined) {
     return { error: 'No data to return, maybe you have too many tags?' }
   }
 
@@ -226,6 +226,17 @@ function jsonTagsCleaner(json, domain, limit) {
       parsedJson.forEach(tag => {
         // Push only things we use
         finalJson.push({ name: tag.name, posts: Number(tag.post_count) })
+      })
+      break
+
+    // Same as loli but post count changes
+    case 'e621':
+      parsedJson = JSON.parse(json)
+
+      // Loop so we can extract only the things that we are gonna use
+      parsedJson.forEach(tag => {
+        // Push only things we use
+        finalJson.push({ name: tag.name, posts: Number(tag.count) })
       })
       break
   }
