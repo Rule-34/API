@@ -48,6 +48,14 @@ if (generalConfig.env === 'development') {
       })
     )
     .use(cache('3 minutes'))
+    // Cache performance
+    .get('/cache/performance', (req, res) => {
+      res.json(apicache.getPerformance())
+    })
+    // Cache index
+    .get('/cache/index', (req, res) => {
+      res.json(apicache.getIndex())
+    })
 }
 
 // Import all Routes
