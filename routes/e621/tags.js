@@ -58,6 +58,7 @@ function applyUrlParameters(req) {
     domainConfig.userAgent + // Necessary for this site's API
     '&name=' +
     tag +
+    '*' +
     '&limit=' +
     limit +
     '&page=' +
