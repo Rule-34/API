@@ -47,7 +47,7 @@ router.get(
 // Separated applying of query parameters
 function applyUrlParameters(req) {
   // Default query parameters
-  const tag = req.query.tag || ''
+  const tag = encodeURIComponent(req.query.tag) || ''
 
   // Return full url
   return domainConfig.tagApiUrl + 'q=' + tag
