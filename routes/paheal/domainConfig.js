@@ -6,4 +6,6 @@ const domainConfig = {
   tagApiUrl: 'https://rule34.paheal.net/api/internal/autocomplete?',
 }
 
+// API help page --> It has no documentation at all
+
 module.exports = domainConfig
