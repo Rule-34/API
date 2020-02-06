@@ -3,7 +3,7 @@ const express = require('express'),
   xmlToJsonFromUrl = require('../../utils/xmlToJsonFromUrl.js'),
   router = express.Router(),
   { check, validationResult } = require('express-validator'),
-  debug = require('debug')(`paheal posts`)
+  debug = require('debug')(`paheal single-post`)
 
 /* GET posts. */
 router.get('/', [check('id').isInt()], async function(req, res) {
