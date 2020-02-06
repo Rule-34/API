@@ -46,12 +46,13 @@ function applyUrlParameters(req) {
   // Default query parameters
   const limit = req.query.limit || 100, // Default is 100
     pageId = req.query.pid, // Default is ?
-    tags = encodeURIComponent(req.query.tags) || '', // Default is ''
+    tags = encodeURIComponent(req.query.tags), // Default is ''
     score = req.query.score // Default is 0
 
   // Return full url
   let builtUrl =
     domainConfig.apiUrl +
+    'index.json' +
     '?' +
     domainConfig.userAgent + // Necessary for this site's API
     '&limit=' +
