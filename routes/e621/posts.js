@@ -62,7 +62,13 @@ function applyUrlParameters(req) {
   }
 
   // Always add tags in case score is added
-  builtUrl += '&tags=' + tags
+
+  // Weird encodeURIComponent workflow
+  if (tags === 'undefined') {
+    builtUrl += '&tags='
+  } else {
+    builtUrl += '&tags=' + tags
+  }
 
   if (score) {
     builtUrl += '+score:>=' + score
