@@ -55,7 +55,7 @@ function applyUrlParameters(req) {
     score = req.query.score // Default is 0
 
   // Return full url
-  let builtUrl = domainConfig.apiUrl + '?limit=' + limit
+  let builtUrl = domainConfig.apiUrl + '.json' + '?limit=' + limit
 
   if (pageId) {
     builtUrl += '&page=' + pageId

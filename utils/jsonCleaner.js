@@ -44,6 +44,7 @@ function postCleaner(json, domain) {
         evaluatedJson = JSON.parse(json)
         break
 
+      case 'danbooru-single': // This is only for single-post viewing
       case 'e621-single': // This is only for single-post viewing
         evaluatedJson = [JSON.parse(json)]
         break
@@ -66,8 +67,8 @@ function postCleaner(json, domain) {
 
     // Quirks of every domain
     switch (domain) {
-      // Everything is different here as it doesnt come from the Camaro XML template
-      case 'danbooru':
+      case 'danbooru-single': // This is only for single-post viewing
+      case 'danbooru': // Everything is different here as it doesnt come from the Camaro XML template
         // If for some reason (Mainly cause it's a deleted post or similar) it doesnt have an Image, then skip it and continue execution
         if (!post.file_url) {
           debug(`Empty media: Skipping execution of ${tempJson.id}`)
