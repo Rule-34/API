@@ -22,12 +22,6 @@ app
   .use(bodyParser.json())
   .use(bodyParser.urlencoded({ extended: true })) // TODO: See what it does
   .use(compression({ threshold: 0 }))
-  .use(
-    cors({
-      methods: ['GET'],
-      allowedHeaders: ['Content-Type'],
-    })
-  )
   .use(helmet())
   .disable('x-powered-by') // Remove powered by
 
@@ -35,8 +29,18 @@ app
   .use(favicon(__dirname + '/../static/favicon.ico'))
 
 if (generalConfig.env === 'development') {
-  // Log everything and show full errors
-  app.use(logger('dev')).use(errorHandler())
+  app
+    // Log everything and show full errors
+    .use(logger('dev'))
+    .use(errorHandler())
+
+    // Allow all origins
+    .use(
+      cors({
+        methods: ['GET'],
+        allowedHeaders: ['Content-Type'],
+      })
+    )
 } else {
   // Log errors only and use cache
   app
@@ -47,12 +51,23 @@ if (generalConfig.env === 'development') {
         },
       })
     )
+
+    // Allow only access from my app
+    .use(
+      cors({
+        origin: /r34\.app$/, // Only allow use from the Rule34 App
+        methods: ['GET'],
+        allowedHeaders: ['Content-Type'],
+      })
+    )
+
+    // Use a memory based cache
     .use(cache('3 minutes'))
-    // Cache performance
+
     .get('/cache/performance', (req, res) => {
       res.json(apicache.getPerformance())
     })
-    // Cache index
+
     .get('/cache/index', (req, res) => {
       res.json(apicache.getIndex())
     })
