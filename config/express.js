@@ -53,6 +53,7 @@ if (generalConfig.env === 'development') {
     )
 
     // Allow only access from my app
+    // EDIT: For some reason it does not return a 'Access-Control-Origin' header when its not from this site, otherwise it perfectly works
     .use(
       cors({
         origin: /r34\.app$/, // Only allow use from the Rule34 App
