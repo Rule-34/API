@@ -56,7 +56,7 @@ if (generalConfig.env === 'development') {
     // EDIT: For some reason it does not return a 'Access-Control-Origin' header when its not from this site, otherwise it perfectly works
     .use(
       cors({
-        origin: /r34\.app$/, // Only allow use from the Rule34 App
+        origin: 'https://r34.app', // Only allow use from the Rule34 App
         methods: ['GET'],
         allowedHeaders: ['Content-Type'],
       })
