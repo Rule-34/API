@@ -10,7 +10,9 @@ router.get('/', [check('id').isInt()], async function(req, res) {
     return res.status(422).json({ errors: errors.array() })
   }
 
-  res.json({ Error: "This site doesn't allow to search for single posts" })
+  return res
+    .status(410)
+    .json({ Error: "This site doesn't allow to search for single posts" })
 })
 
 module.exports = router
