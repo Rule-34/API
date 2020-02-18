@@ -30,7 +30,7 @@ function applyUrlParameters(req) {
   const postId = req.query.id
 
   // Return full url
-  let builtUrl = domainConfig.apiUrl + 'post&q=index' + '&id=' + postId
+  let builtUrl = domainConfig.apiUrl + '&id=' + postId
 
   // Return the complete built url
   return builtUrl
