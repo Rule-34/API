@@ -46,7 +46,7 @@ function applyUrlParameters(req) {
   // Default query parameters
   const limit = req.query.limit || 100, // Default is 100
     pageId = req.query.pid, // Default is ?
-    tags = encodeURIComponent(req.query.tags) || '', // Default is ''
+    tags = encodeURIComponent(req.query.tags), // Default is ''
     score = req.query.score // Default is 0
 
   // Return full url
@@ -56,8 +56,12 @@ function applyUrlParameters(req) {
     builtUrl += '&pid=' + pageId
   }
 
-  // Always add tags in case score is added
-  builtUrl += '&tags=' + tags
+  // Weird encodeURIComponent workflow, because this doesnt have a default
+  if (tags === 'undefined') {
+    builtUrl += '&tags='
+  } else {
+    builtUrl += '&tags=' + tags
+  }
 
   if (score) {
     builtUrl += '+score:>=' + score

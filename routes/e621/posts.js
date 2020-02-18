@@ -34,7 +34,7 @@ router.get(
     debug(requestUrl)
 
     // Process through wich the xml request gets transformed to optimized json
-    let jsonResult = await xmlToJsonFromUrl(requestUrl, 'posts', 'loli', true)
+    let jsonResult = await xmlToJsonFromUrl(requestUrl, 'posts', 'e621', true)
 
     // Reply to the client
     res.json(jsonResult)
@@ -64,7 +64,7 @@ function applyUrlParameters(req) {
 
   // Always add tags in case score is added
 
-  // Weird encodeURIComponent workflow
+  // Weird encodeURIComponent workflow, because this doesnt have a default, because this doesnt have a default
   if (tags === 'undefined') {
     builtUrl += '&tags='
   } else {

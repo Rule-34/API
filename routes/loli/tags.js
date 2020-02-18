@@ -46,12 +46,12 @@ router.get(
 // Separated applying of query parameters
 function applyUrlParameters(req) {
   // Default query parameters
-  const tag = req.query.tag || '',
+  const tag = req.query.tag,
     limit = req.query.limit || 25,
     pageId = req.query.pid || 0,
     order = req.query.order || 'count'
 
-  // Return full url
+  // Return full url, no IFs because they already have defaults
   return (
     domainConfig.tagApiUrl +
     '?name=' +
