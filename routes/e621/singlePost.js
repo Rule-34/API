@@ -18,7 +18,12 @@ router.get('/', [check('id').isInt()], async function(req, res) {
   debug(requestUrl)
 
   // Process through wich the xml request gets transformed to optimized json
-  let jsonResult = await xmlToJsonFromUrl(requestUrl, 'posts', 'e621', true)
+  let jsonResult = await xmlToJsonFromUrl(
+    requestUrl,
+    'posts',
+    'e621-single',
+    true
+  )
 
   // Reply to the client
   res.json(jsonResult)

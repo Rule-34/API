@@ -135,6 +135,7 @@ function postCleaner(json, domain) {
 
       // Close to danbooru but low_res_file is different
       case 'e621':
+      case 'e621-single':
       case 'loli':
         if (!post.file_url) {
           debug(`Empty media: Skipping execution of ${tempJson.id}`)
