@@ -1,6 +1,4 @@
 const { transform } = require('camaro'),
-  // This is a basic template for the r34.app
-  // If you need more data you should add it here or create another template
   xxxTemplate = {
     0: [
       '/posts/post',
@@ -31,12 +29,17 @@ const { transform } = require('camaro'),
 
 // Transforms the passed xml into json and returns it
 async function xmlToJson(xml, domain) {
+  let result
+
   switch (domain) {
     case 'xxx':
-      return await transform(xml, xxxTemplate)
+    case 'gelbooru':
+      result = await transform(xml, xxxTemplate)
+      return result
 
     case 'paheal':
-      return await transform(xml, pahealTemplate)
+      result = await transform(xml, pahealTemplate)
+      return result
   }
 }
 

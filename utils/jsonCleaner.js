@@ -32,114 +32,133 @@ function postCleaner(json, domain) {
 
   // Error handling
   if (!json) {
-    return { error: 'No data to return, maybe you have too many tags?' }
+    throw 'No data to parse'
   }
 
-  // Depending on domain we need to parse or not
+  // Parse JSON
+  switch (domain) {
+    // Converted from XML to JSON
+    case 'xxx':
+    case 'paheal':
+    case 'gelbooru':
+      evaluatedJson = json[0]
+      break
 
-  try {
-    switch (domain) {
-      case 'danbooru':
-      case 'loli':
-        evaluatedJson = JSON.parse(json)
-        break
+    // Simple parse
+    case 'danbooru':
+    case 'e621':
+    case 'loli':
+      evaluatedJson = JSON.parse(json)
+      break
 
-      case 'danbooru-single': // This is only for single-post viewing
-      case 'e621-single': // This is only for single-post viewing
-        evaluatedJson = [JSON.parse(json)]
-        break
+    // Encapsulate on array
+    case 'danbooru-single': // This is only for single-post viewing
+    case 'e621-single': // This is only for single-post viewing
+      evaluatedJson = [JSON.parse(json)]
+      break
 
-      default:
-        evaluatedJson = json[0] // Typically Json from XML
-        break
-    }
-  } catch (error) {
-    console.error(error, '\nSeparator\n', json)
-    return
+    // Exit with error as a domain is needed
+    default:
+      throw 'No domain supplied, a domain is needed'
   }
 
-  // Loop so we can extract only the things that we are gonna use
+  // Loop each post to extract only the things that we are gonna use
   evaluatedJson.forEach(post => {
     let tempJson = {}
 
     // Add id
     tempJson.id = post.id
 
-    // Quirks of every domain
+    // Proxy media files and skip to next if they have any media assigned
     switch (domain) {
-      case 'danbooru-single': // This is only for single-post viewing
-      case 'danbooru': // Everything is different here as it doesnt come from the Camaro XML template
-        // If for some reason (Mainly cause it's a deleted post or similar) it doesnt have an Image, then skip it and continue execution
+      case 'xxx':
+        if (!post.high_res_file) {
+          debug(`Empty media: Skipping execution of ${tempJson.id}`)
+          return
+        }
+
+        tempJson.high_res_file =
+          corsProxyUrl + post.high_res_file.replace('xxx/', 'xxx//')
+
+        tempJson.low_res_file =
+          corsProxyUrl + post.low_res_file.replace('xxx/', 'xxx//')
+
+        tempJson.preview_file =
+          corsProxyUrl + post.preview_file.replace('xxx/', 'xxx//')
+
+        break
+
+      case 'paheal':
+        if (!post.high_res_file) {
+          debug(`Empty media: Skipping execution of ${tempJson.id}`)
+          return
+        }
+
+        tempJson.high_res_file = corsProxyUrl + post.high_res_file
+
+        // We skip low_res_file as it doesnt exist on paheal
+
+        // TODO: THIS MIGHT BECAUSE OF THE XML TO JSON TRANSFORMATION
+
+        tempJson.preview_file = corsProxyUrl + post.preview_file
+
+        break
+
+      case 'danbooru-single':
+      case 'danbooru':
         if (!post.file_url) {
           debug(`Empty media: Skipping execution of ${tempJson.id}`)
           return
         }
-        // Images should be proxified so they can be cached and have CORS
+
         tempJson.high_res_file = corsProxyUrl + post.file_url
 
         tempJson.low_res_file = corsProxyUrl + post.large_file_url // Yes, for some reason 'large_file_url' is actually the low resolution one, blame danbooru
 
         tempJson.preview_file = corsProxyUrl + post.preview_file_url
 
-        // Make the string of tags an array
-        tempJson.tags = stringToArray(post.tag_string)
         break
 
-      case 'xxx':
-        // If for some reason (Mainly cause it's a deleted post or similar) it doesnt have an Image, then skip it and continue execution
+      case 'gelbooru':
         if (!post.high_res_file) {
           debug(`Empty media: Skipping execution of ${tempJson.id}`)
           return
         }
-        // Images should be proxified so they can be cached and have CORS
-        tempJson.high_res_file =
-          corsProxyUrl + post.high_res_file.replace('xxx/', 'xxx//')
-        tempJson.low_res_file =
-          corsProxyUrl + post.low_res_file.replace('xxx/', 'xxx//')
-        tempJson.preview_file =
-          corsProxyUrl + post.preview_file.replace('xxx/', 'xxx//')
 
-        // Make the string of tags an array
-        tempJson.tags = stringToArray(post.tags)
-        break
-
-      case 'paheal':
-        // If for some reason (Mainly cause it's a deleted post or similar) it doesnt have an Image, then skip it and continue execution
-        if (!post.high_res_file) {
-          debug(`Empty media: Skipping execution of ${tempJson.id}`)
-          return
-        }
-        // Images should be proxified so they can be cached and have CORS
         tempJson.high_res_file = corsProxyUrl + post.high_res_file
 
-        // We skip low_res_file as it doesnt exist on paheal
+        tempJson.low_res_file = corsProxyUrl + post.low_res_file
 
         tempJson.preview_file = corsProxyUrl + post.preview_file
 
-        // Make the string of tags an array
-        tempJson.tags = stringToArray(post.tags)
         break
 
-      case 'e621-single': // This is only for single-post viewing
-      case 'loli': // Everything is different here as it doesnt come from the Camaro XML template
-        // If for some reason (Mainly cause it's a deleted post or similar) it doesnt have an Image, then skip it and continue execution
+      // Close to danbooru but low_res_file is different
+      case 'e621':
+      case 'loli':
         if (!post.file_url) {
           debug(`Empty media: Skipping execution of ${tempJson.id}`)
           return
         }
-        // Images should be proxified so they can be cached and have CORS
+
         tempJson.high_res_file = corsProxyUrl + post.file_url
 
         tempJson.low_res_file = corsProxyUrl + post.sample_url
 
         tempJson.preview_file = corsProxyUrl + post.preview_url
 
-        // Make the string of tags an array
-        tempJson.tags = stringToArray(post.tags)
+        break
+    }
+
+    // Convert the string to an array
+    switch (domain) {
+      case 'danbooru-single':
+      case 'danbooru':
+        tempJson.tags = stringToArray(post.tag_string)
         break
 
       default:
-        console.error('No valid domain supplied')
+        tempJson.tags = stringToArray(post.tags)
         break
     }
 
@@ -174,10 +193,11 @@ function jsonTagsCleaner(json, domain, limit) {
     counter = 0
 
   // Error handling
-  if (!json || json === undefined) {
+  if (!json) {
     return { error: 'No data to return, maybe you have too many tags?' }
   }
 
+  // Parse every tag result
   switch (domain) {
     case 'xxx':
       // XXX Api's returns html code so we need to decode it first
@@ -188,13 +208,12 @@ function jsonTagsCleaner(json, domain, limit) {
       )
 
       for (const prop in parsedJson) {
-        // Add object to array while extracting only numbers
+        // Add object to array while extracting only digits
         finalJson.push({
           name: parsedJson[prop].value,
-          posts: Number(parsedJson[prop].label.match(/\d+/g)),
+          count: Number(parsedJson[prop].label.match(/\d+/g)),
         })
 
-        // Add one to counter
         counter++
 
         // End array if we are at the specified limit
@@ -202,18 +221,15 @@ function jsonTagsCleaner(json, domain, limit) {
           break
         }
       }
-      // End of loop
 
       break
 
     case 'paheal':
       parsedJson = JSON.parse(json)
-      // Loop through every parsed prop of json
-      for (const prop in parsedJson) {
-        // Add object to array
-        finalJson.push({ name: prop, posts: parsedJson[prop] })
 
-        // Add one to counter
+      for (const prop in parsedJson) {
+        finalJson.push({ name: prop, count: parsedJson[prop] })
+
         counter++
 
         // End array if we are at the specified limit
@@ -221,28 +237,31 @@ function jsonTagsCleaner(json, domain, limit) {
           break
         }
       }
-      // End of loop
 
       break
 
-    case 'loli':
+    case 'gelbooru':
       parsedJson = JSON.parse(json)
 
-      // Loop so we can extract only the things that we are gonna use
       parsedJson.forEach(tag => {
-        // Push only things we use
-        finalJson.push({ name: tag.name, posts: Number(tag.post_count) })
+        finalJson.push({ name: tag.tag, count: Number(tag.count) })
       })
       break
 
-    // Same as loli but post count changes
     case 'e621':
       parsedJson = JSON.parse(json)
 
-      // Loop so we can extract only the things that we are gonna use
       parsedJson.forEach(tag => {
-        // Push only things we use
-        finalJson.push({ name: tag.name, posts: Number(tag.count) })
+        finalJson.push({ name: tag.name, count: Number(tag.count) })
+      })
+      break
+
+    // Same as e621 but post count changes
+    case 'loli':
+      parsedJson = JSON.parse(json)
+
+      parsedJson.forEach(tag => {
+        finalJson.push({ name: tag.name, count: Number(tag.post_count) })
       })
       break
   }
