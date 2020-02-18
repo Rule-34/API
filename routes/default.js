@@ -12,17 +12,27 @@ router.get('/', function(req, res) {
       api: generalConfig.host + 'xxx/',
     },
 
-    rule34_paheal_net: {
+    rule34_paheal: {
       domain: 'https://rule34.paheal.net/',
       api: generalConfig.host + 'paheal/',
     },
 
-    danbooru_donmai_us: {
+    danbooru: {
       domain: 'https://danbooru.donmai.us/',
       api: generalConfig.host + 'danbooru/',
     },
 
-    lolibooru_moe: {
+    gelbooru: {
+      domain: 'https://gelbooru.com/',
+      api: generalConfig.host + 'gelbooru/',
+    },
+
+    e621: {
+      domain: 'https://e621.net/',
+      api: generalConfig.host + 'e621/',
+    },
+
+    lolibooru: {
       domain: 'https://lolibooru.moe/',
       api: generalConfig.host + 'loli/',
     },
