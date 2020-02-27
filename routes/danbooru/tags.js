@@ -36,7 +36,12 @@ router.get(
     // Define limit of posts to return to client
 
     // Process through wich the json gets transformed to optimized json
-    let jsonResult = await xmlToJsonFromUrl(requestUrl, 'tags', 'loli', true) // We use this one for danbooru as it works fine (And it should work fine with any similar json api)
+    let jsonResult = await xmlToJsonFromUrl({
+      url: requestUrl,
+      template: 'tags',
+      domain: 'danbooru',
+      isJson: true,
+    })
 
     // Reply to the client
     res.json(jsonResult)

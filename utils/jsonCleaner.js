@@ -258,6 +258,7 @@ function jsonTagsCleaner(json, domain, limit) {
       break
 
     // Same as e621 but post count changes
+    case 'danbooru':
     case 'loli':
       parsedJson = JSON.parse(json)
 
