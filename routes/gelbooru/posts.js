@@ -21,6 +21,10 @@ router.get(
     check('score')
       .isInt()
       .optional(),
+    check('corsProxy')
+      .isBoolean()
+      .toBoolean()
+      .optional(),
   ],
   async function(req, res) {
     // Finds the validation errors in this request and wraps them in an object with handy functions
@@ -38,6 +42,7 @@ router.get(
       url: requestUrl,
       template: 'posts',
       domain: 'gelbooru',
+      useCorsProxy: req.query.corsProxy,
     })
 
     // Reply to the client
