@@ -2,9 +2,7 @@ const generalConfig = require('../config/generalConfig'),
   debug = require('debug')(`Json Cleaner`),
   he = require('he')
 
-// Define CORS Proxy URL
-const corsProxyUrl = 'https://cors-proxy.rule34app.workers.dev/?q='
-
+let corsProxyUrl
 /**
  * Helper function that returns an array from a passed String
  * @param {String} string String to get converted to array
@@ -280,8 +278,15 @@ function jsonTagsCleaner(json, domain, limit) {
  * @param {String} domain Domain specific quirk treatment
  * @param {Number} limit Number to limit how many tags should be processed
  */
-function jsonCleaner({ template, domain, json, limit }) {
+function jsonCleaner({ template, domain, json, limit, useCorsProxy }) {
   let cleanJson = {}
+
+  // Define CORS Proxy URL
+  if (useCorsProxy) {
+    corsProxyUrl = 'https://cors-proxy.rule34app.workers.dev/?q='
+  } else {
+    corsProxyUrl = ''
+  }
 
   switch (template) {
     // Clean json of unnecessary data

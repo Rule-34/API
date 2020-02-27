@@ -9,30 +9,37 @@ const httpGet = require('../utils/HttpGet.js'),
  * @param {String} domain
  * @param {Boolean} isJson
  * @param {Number} limit
+ * @param {Boolean} useCorsProxy Should the request return the proxied url, defaults to true
  */
-async function xmlToJsonFromUrl({ url, template, domain, isJson, limit }) {
+async function xmlToJsonFromUrl({
+  url,
+  template,
+  domain,
+  isJson,
+  limit,
+  useCorsProxy = true,
+}) {
+  // Initialize variable
   let json
 
   // First get XML from url
-  const xmlData = await httpGet(url)
+  const data = await httpGet(url)
 
-  // Dont transform if theres limit cause that means its a tag autocomplete json
+  // Dont transform if its already JSON
   if (isJson) {
-    json = xmlData
+    json = data
   } else {
-    json = await xmlToJson(xmlData, domain)
+    json = await xmlToJson(data, domain)
   }
 
-  // Then beautify json with the passed template
-  const cleanJson = jsonCleaner({
+  // Then clean the JSON with the passed template, and return it
+  return jsonCleaner({
     template,
     domain,
     json,
     limit,
+    useCorsProxy,
   })
-
-  // And return it
-  return cleanJson
 }
 
 module.exports = xmlToJsonFromUrl
