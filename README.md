@@ -6,7 +6,7 @@ It's a JSON API that embraces the current XML being used on various danbooru sit
 
 > This API is used on the [Rule 34 App](https://r34.app/).
 
-If you have any suggestion please leave a request :')
+If you have any suggestion please leave an issue :')
 
 ### Goals
 
@@ -26,7 +26,9 @@ The following sites are supported and their API is fully working
 - <https://rule34.xxx>
 - <https://rule34.paheal.net>
 - <https://danbooru.donmai.us>
+- <https://gelbooru.com>
 - <https://lolibooru.moe>
+- <https://e621.net>
 
 > Site's public API is used for getting posts.
 > Site's inner autocomplete API is used for getting tags.
@@ -48,20 +50,29 @@ First you have to select from which site you want to use the API
 - .../xxx/ for rule34.xxx
 - .../paheal/ for rule34.paheal.net
 - .../danbooru/ for danbooru.donmai.us
+- .../gelbooru/ for gelbooru.com
 - .../loli/ for lolibooru.moe
+- .../e621/ for e621.net
 
 Then you append what you want to get from the API
 
 - .../posts
+- .../single-post (\*)
 - .../tags (\*)
 
-> (\*) Tags need query parameters, otherwise it will fail
+> (\*) Needs query parameters, otherwise request will return a HTTP 422 error
 
-And that's it, you'll receive a JSON object with the latest data from the original site XML API.
+And that's it, you'll receive a clean JSON object with the latest data from the original site API.
 
 #### Good to know
 
-When posts are returned you'll see the images urls are being replaced with a dynamic one, this is because most webpages dont offer CORS, this way we act as a middleman (proxy) that sets CORS and allows you to view proxy on any site without any hassle.
+When posts are returned you'll see the images urls are being replaced with a dynamic one, this is because most sites dont offer CORS, this way we act as a middleman (proxy) that sets CORS and allows you to view proxy on any site without any hassle.
+
+You can disable this behaviour with the following query
+
+```javascript
+?corsProxy=false
+```
 
 ## Advanced usage
 
@@ -84,7 +95,7 @@ And then you can append the following parameters
 
 > Use & to add more parameters.
 
-#### Examples
+#### Post examples
 
 Show latest 50 posts
 
@@ -122,7 +133,7 @@ Show the latest 20 posts of the fifth page that have the tag 'disney' but not 'c
 .../posts/?limit=20&pid=5&tags=disney+-cars&score=10
 ```
 
-##### Posts parameters explained
+##### Post parameters explained
 
 **Limit:** limit of posts to show per request, maximum and defaults to 100 posts.
 
@@ -131,6 +142,30 @@ Show the latest 20 posts of the fifth page that have the tag 'disney' but not 'c
 **Tags:** show posts that include the listed tags, defaults to empty (adding a '-' forbids the tag to appear).
 
 **Score:** show posts that have that score or more, defaults to 0.
+
+### Single post
+
+First start by adding a question mark
+
+```javascript
+.../single-post/?
+```
+
+And then you can append the following parameters
+
+- id
+
+#### Single post examples
+
+Show the post with 100 as its ID
+
+```javascript
+.../single-post/?id=100
+```
+
+##### Single post parameters explained
+
+**ID:** the ID of the post
 
 ### Tags
 
@@ -147,7 +182,7 @@ And then you can append the following parameters
 
 > Use & to add more parameters.
 
-#### Examples
+#### Tags examples
 
 Will show all tags related to 'robot' and their post count
 
@@ -178,4 +213,4 @@ This makes that some funtionality like getting a single post from its ID very di
 #### Unsupported
 
 - Only rule34xxx and rule34paheal can search for Posts from its ID
-- Only danbooru and loli allow limit, pid or order in the /tag route
+- Only danbooru and lolibooru allow limit, pid or order in the /tag route
