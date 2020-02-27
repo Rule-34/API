@@ -7,7 +7,8 @@
   "scripts": {
     "start": "nodemon -q index.js",
     "dev": "cross-env NODE_ENV=development DEBUG=* npm run start",
-    "debug": "cross-env NODE_ENV=development DEBUG=* node --inspect index.js"
+    "debug": "cross-env NODE_ENV=development DEBUG=* node --inspect index.js",
+    "test": "cross-env NODE_ENV=test jest --testTimeout=10000"
   },
   "dependencies": {
     "apicache": "^1.5.3",
@@ -32,7 +33,15 @@
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-prettier": "^3.1.2",
+    "jest": "^25.1.0",
     "nodemon": "^2.0.2",
-    "prettier": "^1.19.1"
+    "prettier": "^1.19.1",
+    "supertest": "^4.0.2"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
   }
 }
