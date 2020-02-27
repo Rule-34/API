@@ -119,6 +119,7 @@ function postCleaner(json, domain) {
 
         break
 
+      // Similar to XXX but without replacing
       case 'gelbooru':
         if (!post.high_res_file) {
           debug(`Empty media: Skipping execution of ${tempJson.id}`)
