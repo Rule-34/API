@@ -7,6 +7,7 @@ const express = require('express'),
 router.get('/', function(req, res) {
   res.json({
     message: 'This API is for the ' + domainConfig.baseUrl + ' domain',
+    'single-post': generalConfig.host + domainConfig.routeUrl + 'single-post',
     posts: generalConfig.host + domainConfig.routeUrl + 'posts',
     tags: generalConfig.host + domainConfig.routeUrl + 'tags',
   })
