@@ -20,7 +20,7 @@
     "express": "~4.17.1",
     "express-validator": "^6.4.0",
     "he": "^1.2.0",
-    "helmet": "^3.21.2",
+    "helmet": "^3.21.3",
     "morgan": "~1.9.1",
     "node-fetch": "^2.6.0",
     "serve-favicon": "^2.5.0",
@@ -28,7 +28,7 @@
     "url-regex": "^5.0.0"
   },
   "devDependencies": {
-    "babel-eslint": "^10.0.3",
+    "babel-eslint": "^10.1.0",
     "cross-env": "^7.0.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
