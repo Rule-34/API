@@ -272,30 +272,29 @@ function jsonTagsCleaner(json, domain, limit) {
 }
 
 /**
- *
- * @param {Object} convertedJson Json Object to be cleaned
+ * Cleans a JSON object according to its template and domain
+ * @param {Object} json Json Object to be cleaned
  * @param {String} template Specific treatment for the Json Object (posts, tags, autocomplete)
  * @param {String} domain Domain specific quirk treatment
- * @param {Boolean} isJson Boolean that tells if it was a Json payload or a XML one
  * @param {Number} limit Number to limit how many tags should be processed
  */
-function jsonCleaner(convertedJson, template, domain, isJson, limit) {
+function jsonCleaner({ template, domain, json, limit }) {
   let cleanJson = {}
 
   switch (template) {
     // Clean json of unnecessary data
     case 'posts':
-      cleanJson = postCleaner(convertedJson, domain)
+      cleanJson = postCleaner(json, domain)
       break
 
     // Returns an array from the json object at position 0
     case 'tags':
-      cleanJson = jsonTagsCleaner(convertedJson, domain)
+      cleanJson = jsonTagsCleaner(json, domain)
       break
 
     // Turns a json object into an array
     case 'autocomplete':
-      cleanJson = jsonTagsCleaner(convertedJson, domain, limit)
+      cleanJson = jsonTagsCleaner(json, domain, limit)
       break
   }
 

@@ -10,21 +10,26 @@ const httpGet = require('../utils/HttpGet.js'),
  * @param {Boolean} isJson
  * @param {Number} limit
  */
-async function xmlToJsonFromUrl(url, template, domain, isJson, limit) {
-  let jsonData
+async function xmlToJsonFromUrl({ url, template, domain, isJson, limit }) {
+  let json
 
   // First get XML from url
   const xmlData = await httpGet(url)
 
   // Dont transform if theres limit cause that means its a tag autocomplete json
   if (isJson) {
-    jsonData = xmlData
+    json = xmlData
   } else {
-    jsonData = await xmlToJson(xmlData, domain)
+    json = await xmlToJson(xmlData, domain)
   }
 
   // Then beautify json with the passed template
-  const cleanJson = jsonCleaner(jsonData, template, domain, isJson, limit)
+  const cleanJson = jsonCleaner({
+    template,
+    domain,
+    json,
+    limit,
+  })
 
   // And return it
   return cleanJson
