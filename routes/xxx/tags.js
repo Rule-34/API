@@ -31,13 +31,13 @@ router.get(
     const limit = req.query.limit || 100
 
     // Process through wich the json gets transformed to optimized json
-    let jsonResult = await xmlToJsonFromUrl(
-      requestUrl,
-      'autocomplete',
-      'xxx',
-      true,
-      limit
-    )
+    let jsonResult = await xmlToJsonFromUrl({
+      url: requestUrl,
+      template: 'autocomplete',
+      domain: 'xxx',
+      isJson: true,
+      limit,
+    })
 
     // Reply to the client
     res.json(jsonResult)
