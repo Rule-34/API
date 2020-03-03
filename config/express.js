@@ -71,7 +71,7 @@ if (generalConfig.env === 'development') {
     )
 
     // Use a memory based cache
-    .use(cache('3 minutes'))
+    .use(cache('5 minutes'))
 
     .get('/cache/performance', (req, res) => {
       res.json(apicache.getPerformance())
