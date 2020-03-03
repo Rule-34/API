@@ -28,10 +28,13 @@ app
   // Common config
   .set('port', generalConfig.port)
   .use(bodyParser.json())
-  .use(bodyParser.urlencoded({ extended: true })) // TODO: See what it does
+  // TODO: See what it does
+  .use(bodyParser.urlencoded({ extended: true }))
+  // Always use compression
   .use(compression({ threshold: 0 }))
   .use(helmet())
-  .disable('x-powered-by') // Remove powered by
+  // Remove powered by
+  .disable('x-powered-by')
 
   // Cosmetic plugins
   .use(favicon(__dirname + '/../static/favicon.ico'))
@@ -45,12 +48,13 @@ if (generalConfig.env === 'development') {
     // Allow all origins
     .use(
       cors({
+        origin: '*',
         methods: ['GET'],
         allowedHeaders: ['Content-Type'],
       })
     )
 } else {
-  // Log errors only and use cache
+  // Log errors only
   app
     .use(
       logger('dev', {
@@ -61,7 +65,6 @@ if (generalConfig.env === 'development') {
     )
 
     // Allow only access from my app
-    // EDIT: For some reason it does not return a 'Access-Control-Origin' header when its not from this site, otherwise it perfectly works
     .use(
       cors({
         origin: 'https://r34.app', // Only allow use from the Rule34 App
