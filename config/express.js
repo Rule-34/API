@@ -8,16 +8,24 @@ const express = require('express'),
   logger = require('morgan'),
   helmet = require('helmet'),
   apicache = require('apicache'),
+  rateLimit = require('express-rate-limit'),
   errorHandler = require('errorhandler'),
   favicon = require('serve-favicon'),
   // Routes
   indexerRouter = require('../routes/indexer.router'),
   // Init
   app = express(),
-  cache = apicache.middleware
+  cache = apicache.middleware,
+  rateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 225, // 15 requests per minute
+  })
 
 // Security and default plugins
 app
+  // Because of Heroku
+  .set('trust proxy', 1)
+  // Common config
   .set('port', generalConfig.port)
   .use(bodyParser.json())
   .use(bodyParser.urlencoded({ extended: true })) // TODO: See what it does
@@ -72,6 +80,9 @@ if (generalConfig.env === 'development') {
     .get('/cache/index', (req, res) => {
       res.json(apicache.getIndex())
     })
+
+    // Rate limit
+    .use(rateLimiter)
 }
 
 // Import all Routes
