@@ -1,5 +1,4 @@
 const express = require('express'),
-  apicache = require('apicache'),
   router = express.Router(),
   // Import all routes // TODO: use glob to match *.route files
   defaultRouter = require('./default'),
@@ -11,28 +10,15 @@ const express = require('express'),
   loliRoutes = require('./loli/index.routes.js'),
   e621Routes = require('./e621/index.routes.js')
 
-/*
- ** All routes are used from here
- */
+// All routes are added here
 router
-  // Error debugger
-  /*.get('*', function(req, res, next) { 
-    // Reporting async errors *must* go through `next()`
-    setImmediate(() => {
-      next(new Error('woops'))
-    })
-  }) */
   /* GET /health-check - Check service health */
-  .get('/health-check', (req, res) => res.send('OK'))
-  .get('/cache/performance', (req, res) => {
-    res.json(apicache.getPerformance())
-  })
-  // add route to display cache index
-  .get('/cache/index', (req, res) => {
-    res.json(apicache.getIndex())
-  })
+  // .get('/health-check', (req, res) => res.send('OK'))
+
+  // Default screen
   .use('/', defaultRouter)
-  // .use('/proxy', proxyRouter) DEPRECATED because we're using a Cloudflare worker to do this
+
+  // Booru routes
   .use('/xxx/', xxxRoutes)
   .use('/paheal/', pahealRoutes)
   .use('/danbooru/', danbooruRoutes)

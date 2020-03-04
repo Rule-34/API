@@ -21,22 +21,23 @@ const express = require('express'),
     max: 225, // 15 requests per minute
   })
 
-// Security and default plugins
 app
   // Because of Heroku
   .set('trust proxy', 1)
+
   // Common config
   .set('port', generalConfig.port)
   .use(bodyParser.json())
-  // TODO: See what it does
+
+  // TODO: See what this does
   .use(bodyParser.urlencoded({ extended: true }))
-  // Always use compression
+
+  // Compression and security
   .use(compression({ threshold: 0 }))
   .use(helmet())
-  // Remove powered by
-  .disable('x-powered-by')
 
   // Cosmetic plugins
+  .disable('x-powered-by')
   .use(favicon(__dirname + '/../static/favicon.ico'))
 
 if (generalConfig.env === 'development') {
