@@ -18,6 +18,9 @@ router.get(
     check('tags')
       .isString()
       .optional(),
+    check('rating')
+      .isString()
+      .optional(),
     check('score')
       .isInt()
       .optional(),
@@ -54,9 +57,10 @@ router.get(
 function applyUrlParameters(req) {
   // Default query parameters
   const limit = req.query.limit || 100, // Default is 100
-    pageId = req.query.pid, // Default is ?
-    tags = encodeURIComponent(req.query.tags), // Default is ''
-    score = req.query.score // Default is 0
+    pageId = req.query.pid,
+    tags = encodeURIComponent(req.query.tags),
+    rating = req.query.rating,
+    score = req.query.score
 
   // Return full url
   let builtUrl = domainConfig.apiUrl + 'post&q=index' + '&limit=' + limit
@@ -70,6 +74,13 @@ function applyUrlParameters(req) {
     builtUrl += '&tags='
   } else {
     builtUrl += '&tags=' + tags
+  }
+
+  if (rating) {
+    // Test if it starts with a minus
+    const prefix = rating.startsWith('-') ? '-' : '+'
+
+    builtUrl += prefix + 'rating:' + rating.substring(1)
   }
 
   if (score) {
