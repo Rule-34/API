@@ -1,5 +1,5 @@
 const { transform } = require('camaro'),
-  xxxTemplate = {
+  template = {
     0: [
       '/posts/post',
       {
@@ -12,35 +12,14 @@ const { transform } = require('camaro'),
         type: '',
       },
     ],
-  },
-  pahealTemplate = {
-    0: [
-      '/posts/post',
-      {
-        id: 'number(@id)',
-        high_res_file: '@file_url',
-        preview_file: '@preview_url',
-        tags: '@tags',
-        source: '@source',
-        type: '',
-      },
-    ],
   }
 
 // Transforms the passed xml into json and returns it
-async function xmlToJson(xml, domain) {
+async function xmlToJson(xml) {
   let result
 
-  switch (domain) {
-    case 'xxx':
-    case 'gelbooru':
-      result = await transform(xml, xxxTemplate)
-      return result
-
-    case 'paheal':
-      result = await transform(xml, pahealTemplate)
-      return result
-  }
+  result = await transform(xml, template)
+  return result
 }
 
 module.exports = xmlToJson
