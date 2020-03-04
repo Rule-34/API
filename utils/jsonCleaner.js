@@ -109,11 +109,11 @@ function postCleaner(json, domain) {
           return
         }
 
-        tempJson.high_res_file = corsProxyUrl + post.file_url
+        tempJson.high_res_file = post.file_url
 
-        tempJson.low_res_file = corsProxyUrl + post.large_file_url // Yes, for some reason 'large_file_url' is actually the low resolution one, blame danbooru
+        tempJson.low_res_file = post.large_file_url // Yes, for some reason 'large_file_url' is actually the low resolution one, blame danbooru
 
-        tempJson.preview_file = corsProxyUrl + post.preview_file_url
+        tempJson.preview_file = post.preview_file_url
 
         break
 
