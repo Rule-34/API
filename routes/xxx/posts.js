@@ -80,6 +80,9 @@ function applyUrlParameters(req) {
     // Test if it starts with a minus
     const prefix = rating.startsWith('-') ? '-' : '+'
 
+    // Unused as we cant use multiple rating
+    // rating.split(/(?=\s|-)/g)
+
     builtUrl += prefix + 'rating:' + rating.substring(1)
   }
 
