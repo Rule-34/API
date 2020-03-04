@@ -53,10 +53,10 @@ router.get(
 // Separated applying of query parameters
 function applyUrlParameters(req) {
   // Default query parameters
-  const limit = req.query.limit || 100, // Default is 100
-    pageId = req.query.pid, // Default is ?
-    tags = req.query.tags || '', // Default is ''
-    score = req.query.score // Default is 0
+  const limit = req.query.limit || 20,
+    pageId = req.query.pid,
+    tags = req.query.tags || '',
+    score = req.query.score
 
   // Return full url
   let builtUrl = domainConfig.apiUrl + 'post/index.xml' + '?limit=' + limit

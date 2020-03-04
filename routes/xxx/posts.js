@@ -56,7 +56,7 @@ router.get(
 // Separated applying of query parameters
 function applyUrlParameters(req) {
   // Default query parameters
-  const limit = req.query.limit || 100, // Default is 100
+  const limit = req.query.limit || 20,
     pageId = req.query.pid,
     tags = encodeURIComponent(req.query.tags),
     rating = req.query.rating,
