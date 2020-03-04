@@ -162,6 +162,26 @@ function postCleaner(json, domain) {
         break
     }
 
+    // Add rating
+    switch (post.rating) {
+      case 'e':
+        tempJson.rating = 'explicit'
+        break
+
+      case 'q':
+        tempJson.rating = 'questionable'
+        break
+
+      case 's':
+        tempJson.rating = 'safe'
+        break
+
+      default:
+        // debug(post.rating)
+        tempJson.rating = undefined
+        break
+    }
+
     // Add source
     tempJson.source = post.source
 
