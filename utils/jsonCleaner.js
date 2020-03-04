@@ -64,7 +64,7 @@ function postCleaner(json, domain) {
   evaluatedJson.forEach(post => {
     let tempJson = {}
 
-    // Add id
+    // Add ID
     tempJson.id = post.id
 
     // Proxy media files and skip to next if they have any media assigned
@@ -150,7 +150,7 @@ function postCleaner(json, domain) {
         break
     }
 
-    // Convert the string to an array
+    // Add tags
     switch (domain) {
       case 'danbooru-single':
       case 'danbooru':
@@ -161,6 +161,9 @@ function postCleaner(json, domain) {
         tempJson.tags = stringToArray(post.tags)
         break
     }
+
+    // Add source
+    tempJson.source = post.source
 
     // Add rating
     switch (post.rating) {
@@ -182,10 +185,7 @@ function postCleaner(json, domain) {
         break
     }
 
-    // Add source
-    tempJson.source = post.source
-
-    // Add a media 'type' of the source
+    // Add type
     if (isVideo(tempJson.high_res_file)) {
       tempJson.type = 'video'
     } else {
