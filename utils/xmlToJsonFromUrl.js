@@ -17,7 +17,7 @@ async function xmlToJsonFromUrl({
   domain,
   isJson,
   limit,
-  useCorsProxy = true,
+  useCorsProxy = false,
 }) {
   // Initialize variable
   let json
