@@ -46,13 +46,7 @@ function applyUrlParameters(req) {
   const postId = req.query.id
 
   // Return full url
-  let builtUrl =
-    domainConfig.apiUrl +
-    'show.json' +
-    '?' +
-    domainConfig.userAgent + // Necessary for this site's API
-    '&id=' +
-    postId
+  let builtUrl = domainConfig.apiUrl + '/' + postId + '.json'
 
   // Return the complete built url
   return builtUrl

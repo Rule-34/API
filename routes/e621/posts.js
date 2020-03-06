@@ -66,8 +66,7 @@ function applyUrlParameters(req) {
   // Return full url
   let builtUrl =
     domainConfig.apiUrl +
-    'index.json' +
-    '?' +
+    '.json?' +
     domainConfig.userAgent + // Necessary for this site's API
     '&limit=' +
     limit

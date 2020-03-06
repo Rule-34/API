@@ -61,14 +61,14 @@ function applyUrlParameters(req) {
     domainConfig.tagApiUrl +
     '?' +
     domainConfig.userAgent + // Necessary for this site's API
-    '&name=' +
+    '&search[name_matches]=' +
     tag +
     '*' +
     '&limit=' +
     limit +
     '&page=' +
     pageId +
-    '&order=' +
+    '&search[order]=' +
     order
   )
 }

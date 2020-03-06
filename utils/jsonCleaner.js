@@ -44,15 +44,22 @@ function postCleaner(json, domain) {
 
     // Simple parse
     case 'danbooru':
-    case 'e621':
     case 'loli':
       evaluatedJson = JSON.parse(json)
       break
 
     // Encapsulate on array
-    case 'danbooru-single': // This is only for single-post viewing
-    case 'e621-single': // This is only for single-post viewing
+    case 'danbooru-single':
       evaluatedJson = [JSON.parse(json)]
+      break
+
+    // Simple parse and acess .posts
+    case 'e621':
+      evaluatedJson = JSON.parse(json).posts
+      break
+
+    case 'e621-single':
+      evaluatedJson = [JSON.parse(json).post]
       break
 
     // Exit with error as a domain is needed
@@ -102,8 +109,8 @@ function postCleaner(json, domain) {
 
         break
 
-      case 'danbooru-single':
       case 'danbooru':
+      case 'danbooru-single':
         if (!post.file_url) {
           debug(`Empty media: Skipping execution of ${tempJson.id}`)
           return
@@ -135,6 +142,19 @@ function postCleaner(json, domain) {
       // Close to danbooru but low_res_file is different
       case 'e621':
       case 'e621-single':
+        if (!post.file.url) {
+          debug(`Empty media: Skipping execution of ${tempJson.id}`)
+          return
+        }
+
+        tempJson.high_res_file = corsProxyUrl + post.file.url
+
+        tempJson.low_res_file = corsProxyUrl + post.sample.url
+
+        tempJson.preview_file = corsProxyUrl + post.preview.url
+
+        break
+
       case 'loli':
         if (!post.file_url) {
           debug(`Empty media: Skipping execution of ${tempJson.id}`)
@@ -152,6 +172,16 @@ function postCleaner(json, domain) {
 
     // Add tags
     switch (domain) {
+      // Concatenate every array inside
+      case 'e621':
+      case 'e621-single':
+        tempJson.tags = []
+
+        Object.values(post.tags).forEach(tagContainer => {
+          tempJson.tags = tempJson.tags.concat(tagContainer)
+        })
+        break
+
       case 'danbooru-single':
       case 'danbooru':
         tempJson.tags = stringToArray(post.tag_string)
@@ -163,7 +193,16 @@ function postCleaner(json, domain) {
     }
 
     // Add source
-    tempJson.source = post.source
+    switch (domain) {
+      case 'e621':
+      case 'e621-single':
+        tempJson.source = post.sources[0]
+        break
+
+      default:
+        tempJson.source = post.source
+        break
+    }
 
     // Add rating
     switch (post.rating) {
@@ -268,16 +307,8 @@ function jsonTagsCleaner(json, domain, limit) {
       })
       break
 
-    case 'e621':
-      parsedJson = JSON.parse(json)
-
-      parsedJson.forEach(tag => {
-        finalJson.push({ name: tag.name, count: Number(tag.count) })
-      })
-      break
-
-    // Same as e621 but post count changes
     case 'danbooru':
+    case 'e621':
     case 'loli':
       parsedJson = JSON.parse(json)
 
