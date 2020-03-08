@@ -1,6 +1,6 @@
 // Defines defaults for domain
 const domainConfig = {
-  routeUrl: 'loli/',
+  routeUrl: 'lolibooru/',
   baseUrl: 'https://lolibooru.moe/',
   apiUrl: 'https://lolibooru.moe/post/index.json',
   tagApiUrl: 'https://lolibooru.moe/tag/index.json',
