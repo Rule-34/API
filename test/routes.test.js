@@ -1,21 +1,13 @@
 const request = require('supertest'),
   app = require('../config/express'),
-  domains = [
-    'xxx',
-    'paheal',
-    'danbooru',
-    'gelbooru',
-    'loli',
-    'e621',
-    'safebooru',
-  ]
+  domains = require('../assets/lib/rule-34-shared-resources/booru-list.json')
 
 /* ---------------- POSTS ---------------- */
 describe.each(domains)('Posts', domain => {
   // Valid response
-  it(`Route ${domain} responds with valid JSON array`, function(done) {
+  it(`Route ${domain.short} responds with valid JSON array`, function(done) {
     request(app)
-      .get(`/${domain}/posts`)
+      .get(`/${domain.short}/posts`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -34,9 +26,9 @@ describe.each(domains)('Posts', domain => {
   })
 
   // Post ID
-  it(`Route ${domain} responds with valid post ID`, function(done) {
+  it(`Route ${domain.short} responds with valid post ID`, function(done) {
     request(app)
-      .get(`/${domain}/posts`)
+      .get(`/${domain.short}/posts`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -55,9 +47,9 @@ describe.each(domains)('Posts', domain => {
   })
 
   // File URL
-  it(`Route ${domain} responds with valid file URL`, function(done) {
+  it(`Route ${domain.short} responds with valid file URL`, function(done) {
     request(app)
-      .get(`/${domain}/posts`)
+      .get(`/${domain.short}/posts`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -78,9 +70,9 @@ describe.each(domains)('Posts', domain => {
   })
 
   //  Media type
-  it(`Route ${domain} responds with valid media type`, function(done) {
+  it(`Route ${domain.short} responds with valid media type`, function(done) {
     request(app)
-      .get(`/${domain}/posts`)
+      .get(`/${domain.short}/posts`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -107,9 +99,9 @@ describe.each(domains)('Posts', domain => {
 /* ---------------- SINGLE POST ---------------- */
 describe.each(domains)('Single Post', domain => {
   // Valid response
-  it(`Route ${domain} responds with same ID`, function(done) {
+  it(`Route ${domain.short} responds with same ID`, function(done) {
     request(app)
-      .get(`/${domain}/single-post/?id=100`)
+      .get(`/${domain.short}/single-post/?id=100`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -131,9 +123,9 @@ describe.each(domains)('Single Post', domain => {
 /* ---------------- TAGS ---------------- */
 describe.each(domains)('Tags', domain => {
   // Valid response
-  it(`Route ${domain} responds with valid count`, function(done) {
+  it(`Route ${domain.short} responds with valid count`, function(done) {
     request(app)
-      .get(`/${domain}/tags?tag=pok`)
+      .get(`/${domain.short}/tags?tag=pok`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
