@@ -1,6 +1,14 @@
 const request = require('supertest'),
   app = require('../config/express'),
-  domains = ['xxx', 'paheal', 'danbooru', 'gelbooru', 'loli', 'e621']
+  domains = [
+    'xxx',
+    'paheal',
+    'danbooru',
+    'gelbooru',
+    'loli',
+    'e621',
+    'safebooru',
+  ]
 
 /* ---------------- POSTS ---------------- */
 describe.each(domains)('Posts', domain => {
