@@ -39,6 +39,7 @@ function postCleaner(json, domain) {
     case 'xxx':
     case 'paheal':
     case 'gelbooru':
+    case 'safebooru':
       evaluatedJson = json[0]
       break
 
@@ -126,6 +127,7 @@ function postCleaner(json, domain) {
 
       // Similar to XXX but without replacing
       case 'gelbooru':
+      case 'safebooru':
         if (!post.high_res_file) {
           debug(`Empty media: Skipping execution of ${tempJson.id}`)
           return
@@ -259,6 +261,7 @@ function jsonTagsCleaner(json, domain, limit) {
   // Parse every tag result
   switch (domain) {
     case 'xxx':
+    case 'safebooru':
       // XXX Api's returns html code so we need to decode it first
       parsedJson = JSON.parse(
         he.decode(json, {
