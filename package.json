@@ -8,8 +8,8 @@
     "start": "nodemon -q index.js",
     "dev": "cross-env NODE_ENV=development DEBUG=* npm run start",
     "debug": "cross-env NODE_ENV=development DEBUG=* node --inspect index.js",
-    "test:dev": "cross-env NODE_ENV=development jest --testTimeout=10000",
-    "test:prod": "cross-env NODE_ENV=production jest --testTimeout=10000"
+    "test:dev": "cross-env NODE_ENV=development jest",
+    "test:prod": "cross-env NODE_ENV=production jest"
   },
   "dependencies": {
     "apicache": "^1.5.3",
