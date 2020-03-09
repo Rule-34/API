@@ -28,7 +28,7 @@ router.get(
     debug(requestUrl)
 
     // Define limit of posts to return to client
-    const limit = req.query.limit || 100
+    const limit = req.query.limit || 25
 
     // Process through wich the json gets transformed to optimized json
     let jsonResult = await xmlToJsonFromUrl({
