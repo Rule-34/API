@@ -8,7 +8,7 @@ if (generalConfig.env === 'production') {
   throng(
     {
       workers: generalConfig.workers,
-      lifetime: Infinity,
+      lifetime: Infinity
     },
     start
   )
@@ -28,13 +28,14 @@ function start(workerId) {
   })
 
   // Initialize server
-  const server = app.listen(app.get('port'), function() {
+  const server = app.listen(generalConfig.port, function() {
     debug(
       `
       Express server
       Listening on port ${server.address().port}
       In ${generalConfig.env} mode
-      On host ${server.address().address}`
+      On host ${server.address().address}
+      `
     )
   })
 }
