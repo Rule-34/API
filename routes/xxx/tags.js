@@ -1,48 +1,37 @@
 const express = require('express'),
   xmlToJsonFromUrl = require('../../utils/xmlToJsonFromUrl.js'),
   domainConfig = require('./domainConfig'),
+  // Init
   router = express.Router(),
-  { check, validationResult } = require('express-validator'),
   debug = require('debug')(`xxx tags`)
 
 /* GET tags. */
-router.get(
-  '/',
-  [
-    check('tag')
-      .isString()
-      .notEmpty(),
-    check('limit')
-      .isInt()
-      .optional(),
-  ],
-  async function(req, res) {
-    // Finds the validation errors in this request and wraps them in an object with handy functions
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() })
-    }
+router.get('/', async function(req, res, next) {
+  // Get the requested parameters and create a url to request data with it
+  const requestUrl = applyUrlParameters(req)
+  debug(requestUrl)
 
-    // Get the requested parameters and create a url to request data with it
-    const requestUrl = applyUrlParameters(req)
-    debug(requestUrl)
+  // Define limit of posts to return to client
+  const limit = req.query.limit || 25
 
-    // Define limit of posts to return to client
-    const limit = req.query.limit || 25
-
+  try {
     // Process through wich the json gets transformed to optimized json
     let jsonResult = await xmlToJsonFromUrl({
       url: requestUrl,
       template: 'autocomplete',
       domain: 'xxx',
       isJson: true,
-      limit,
+      limit
     })
 
-    // Reply to the client
+    // Reply
     res.json(jsonResult)
+
+    // Pass error to middleware
+  } catch (error) {
+    next(error)
   }
-)
+})
 
 // Separated applying of query parameters
 function applyUrlParameters(req) {
