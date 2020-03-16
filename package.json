@@ -26,7 +26,6 @@
     "helmet": "^3.21.3",
     "morgan": "~1.9.1",
     "node-fetch": "^2.6.0",
-    "serve-favicon": "^2.5.0",
     "throng": "^4.0.0"
   },
   "devDependencies": {

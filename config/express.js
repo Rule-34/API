@@ -10,7 +10,6 @@ const express = require('express'),
   apicache = require('apicache'),
   rateLimit = require('express-rate-limit'),
   errorHandler = require('errorhandler'),
-  favicon = require('serve-favicon'),
   // Routes
   indexerRouter = require('../routes/indexer.router'),
   // Init
@@ -18,7 +17,7 @@ const express = require('express'),
   cache = apicache.middleware,
   rateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 225, // 15 requests per minute
+    max: 225 // 15 requests per minute
   })
 
 app
@@ -38,7 +37,6 @@ app
 
   // Cosmetic plugins
   .disable('x-powered-by')
-  .use(favicon(__dirname + '/../static/favicon.ico'))
 
 if (generalConfig.env === 'development') {
   app
@@ -51,7 +49,7 @@ if (generalConfig.env === 'development') {
       cors({
         origin: '*',
         methods: ['GET'],
-        allowedHeaders: ['Content-Type'],
+        allowedHeaders: ['Content-Type']
       })
     )
 } else {
@@ -61,7 +59,7 @@ if (generalConfig.env === 'development') {
       logger('dev', {
         skip: function(req, res) {
           return res.statusCode < 400
-        },
+        }
       })
     )
 
@@ -70,7 +68,7 @@ if (generalConfig.env === 'development') {
       cors({
         origin: 'https://r34.app', // Only allow use from the Rule34 App
         methods: ['GET'],
-        allowedHeaders: ['Content-Type'],
+        allowedHeaders: ['Content-Type']
       })
     )
 
