@@ -1,5 +1,7 @@
 const express = require('express'),
   router = express.Router(),
+  // Middleware
+  { validationRules, validate } = require('../middleware/queryValidation.js'),
   // Import all routes
   defaultRouter = require('./default'),
   // debug = require('debug')(`Indexer`),
@@ -12,11 +14,13 @@ router
 
   // Default router
   .use('/', defaultRouter)
+  // Middleware checking
+  .use('/*/posts', validationRules(), validate)
 
 // Dynamic routes
 fs.readdirSync(__dirname, { withFileTypes: true })
-  .filter(dir => dir.isDirectory())
-  .map(dir =>
+  .filter((dir) => dir.isDirectory())
+  .map((dir) =>
     router.use(`/${dir.name}`, require(`./${dir.name}/index.routes.js`))
   )
 
