@@ -3,20 +3,27 @@ const fetch = require('node-fetch')
 
 // Gets the content from the passed url and returns it
 async function httpsGet(url) {
-  try {
-    const data = await fetch(url, {
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0',
-      },
-    }).then(res => res.text())
+  const data = await fetch(url, {
+    headers: {
+      'User-Agent':
+        'Rule 34 API (https://github.com/VoidlessSeven7/Rule-34-API)'
+    }
+  })
+    .then((res) => {
+      // Check for HTTP status errors
+      if (!res.ok) {
+        throw new Error('Fetch: Network response was not ok')
+      }
 
-    return data
+      return res.text()
+    })
+    .catch((error) => {
+      throw new Error(`Fetch: ${error}`)
+    })
 
-    // Error handling
-  } catch (error) {
-    throw Error(error)
-  }
+  // debug(data)
+
+  return data
 }
 
 module.exports = httpsGet
