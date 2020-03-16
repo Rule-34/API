@@ -1,7 +1,12 @@
 const express = require('express'),
   router = express.Router(),
   // Middleware
-  { validationRules, validate } = require('../middleware/queryValidation.js'),
+  { queryValidate } = require('../middleware/query_validation/validate.js'),
+  { postsValidation } = require('../middleware/query_validation/posts.js'),
+  { tagsValidation } = require('../middleware/query_validation/tags.js'),
+  {
+    singlePostValidation
+  } = require('../middleware/query_validation/singlePost.js'),
   // Import all routes
   defaultRouter = require('./default'),
   // debug = require('debug')(`Indexer`),
@@ -15,7 +20,9 @@ router
   // Default router
   .use('/', defaultRouter)
   // Middleware checking
-  .use('/*/posts', validationRules(), validate)
+  .use('/*/posts', postsValidation(), queryValidate)
+  .use('/*/single-post', singlePostValidation(), queryValidate)
+  .use('/*/tags', tagsValidation(), queryValidate)
 
 // Dynamic routes
 fs.readdirSync(__dirname, { withFileTypes: true })

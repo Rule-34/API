@@ -11,7 +11,7 @@ const express = require('express'),
   rateLimit = require('express-rate-limit'),
   // Own middleware
 
-  errorHandler = require('../middleware/errorHandler'),
+  errorHandler = require('../middleware/error/errorHandler'),
   // Routes
   indexerRouter = require('../routes/indexer.router'),
   // Init

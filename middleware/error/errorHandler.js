@@ -1,4 +1,4 @@
-const generalConfig = require('../config/generalConfig'),
+const generalConfig = require('../../config/generalConfig'),
   debug = require('debug')(`Error Handler`)
 
 module.exports = function errorHandler(err, req, res, next) {
