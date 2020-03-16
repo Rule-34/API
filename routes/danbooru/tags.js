@@ -2,51 +2,31 @@ const express = require('express'),
   xmlToJsonFromUrl = require('../../utils/xmlToJsonFromUrl.js'),
   domainConfig = require('./domainConfig'),
   router = express.Router(),
-  { check, validationResult } = require('express-validator'),
   debug = require('debug')(`danbooru tags`)
 
 /* GET tags. */
-router.get(
-  '/',
-  [
-    check('tag')
-      .isString()
-      .notEmpty(),
-    check('limit')
-      .isInt()
-      .optional(),
-    check('order')
-      .isString()
-      .optional(),
-    check('pid')
-      .isInt()
-      .optional(),
-  ],
-  async function(req, res) {
-    // Finds the validation errors in this request and wraps them in an object with handy functions
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() })
-    }
+router.get('/', async function(req, res, next) {
+  // Get the requested parameters and create a url to request data with it
+  const requestUrl = applyUrlParameters(req)
+  debug(requestUrl)
 
-    // Get the requested parameters and create a url to request data with it
-    const requestUrl = applyUrlParameters(req)
-    debug(requestUrl)
-
-    // Define limit of posts to return to client
-
-    // Process through wich the json gets transformed to optimized json
-    let jsonResult = await xmlToJsonFromUrl({
+  try {
+    // Process through wich the xml request gets transformed to optimized json
+    const jsonResult = await xmlToJsonFromUrl({
       url: requestUrl,
       template: 'tags',
       domain: 'danbooru',
-      isJson: true,
+      isJson: true
     })
 
-    // Reply to the client
+    // Reply
     res.json(jsonResult)
+
+    // Pass error to middleware
+  } catch (error) {
+    next(error)
   }
-)
+})
 
 // Separated applying of query parameters
 function applyUrlParameters(req) {
