@@ -24,26 +24,8 @@ app
   // Because of Heroku
   .set('trust proxy', 1)
 
-  // Common config
-  .set('port', generalConfig.port)
-  .use(bodyParser.json())
-
-  // TODO: See what this does
-  .use(bodyParser.urlencoded({ extended: true }))
-
-  // Compression and security
-  .use(compression({ threshold: 0 }))
-  .use(helmet())
-
-  // Cosmetic plugins
-  .disable('x-powered-by')
-
 if (generalConfig.env === 'development') {
   app
-    // Log everything and show full errors
-    .use(logger('dev'))
-    .use(errorHandler())
-
     // Allow all origins
     .use(
       cors({
@@ -52,9 +34,19 @@ if (generalConfig.env === 'development') {
         allowedHeaders: ['Content-Type']
       })
     )
+    // Log everything
+    .use(logger('dev'))
 } else {
-  // Log errors only
   app
+    // Only allow use from the Rule34 App
+    .use(
+      cors({
+        origin: 'https://r34.app',
+        methods: ['GET'],
+        allowedHeaders: ['Content-Type']
+      })
+    )
+    // Only log errors
     .use(
       logger('dev', {
         skip: function(req, res) {
@@ -62,17 +54,23 @@ if (generalConfig.env === 'development') {
         }
       })
     )
+}
 
-    // Allow only access from my app
-    .use(
-      cors({
-        origin: 'https://r34.app', // Only allow use from the Rule34 App
-        methods: ['GET'],
-        allowedHeaders: ['Content-Type']
-      })
-    )
+// Common config
+app
+  .use(bodyParser.urlencoded({ extended: false }))
+  .use(bodyParser.json())
 
-    // Use a memory based cache
+  // Compression and security
+  .use(compression({ threshold: 0 }))
+  .use(helmet())
+
+  // Cosmetic plugins
+  .disable('x-powered-by')
+
+if (generalConfig.env !== 'development') {
+  // Use a memory based cache
+  app
     .use(cache('5 minutes'))
 
     .get('/cache/performance', (req, res) => {
@@ -88,7 +86,11 @@ if (generalConfig.env === 'development') {
 }
 
 // Import all Routes
-app.use(indexerRouter)
+app
+  .use(indexerRouter)
+
+  // Use error handler
+  .use(errorHandler)
 
 // Export
 module.exports = app
