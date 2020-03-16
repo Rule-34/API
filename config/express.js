@@ -9,7 +9,9 @@ const express = require('express'),
   helmet = require('helmet'),
   apicache = require('apicache'),
   rateLimit = require('express-rate-limit'),
-  errorHandler = require('errorhandler'),
+  // Own middleware
+
+  errorHandler = require('../middleware/errorHandler'),
   // Routes
   indexerRouter = require('../routes/indexer.router'),
   // Init
