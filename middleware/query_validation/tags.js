@@ -8,6 +8,12 @@ const tagsValidation = () => {
       .notEmpty(),
     query('limit')
       .isInt()
+      .optional(),
+    query('order')
+      .isString()
+      .optional(),
+    query('pid')
+      .isInt()
       .optional()
   ]
 }
