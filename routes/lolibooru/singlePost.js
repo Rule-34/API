@@ -1,15 +1,9 @@
 const express = require('express'),
-  router = express.Router(),
-  { check, validationResult } = require('express-validator')
+  // Init
+  router = express.Router()
 
 /* GET posts. */
-router.get('/', [check('id').isInt()], async function(req, res) {
-  // Finds the validation errors in this request and wraps them in an object with handy functions
-  const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array() })
-  }
-
+router.get('/', async function(req, res, next) {
   return res
     .status(410)
     .json({ Error: "This site doesn't allow to search for single posts" })
