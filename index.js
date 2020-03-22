@@ -1,14 +1,16 @@
+require('module-alias/register')
+
 // Heroku Concurrency
 const throng = require('throng'),
   // Requirements
-  generalConfig = require('./config/generalConfig')
+  generalConfig = require('@server/config/generalConfig.js')
 
 // Use cluster (more node services executing this) if in production
 if (generalConfig.env === 'production') {
   throng(
     {
       workers: generalConfig.workers,
-      lifetime: Infinity
+      lifetime: Infinity,
     },
     start
   )
@@ -19,7 +21,7 @@ if (generalConfig.env === 'production') {
 // Express server runned by workers
 function start(workerId) {
   const debug = require('debug')(`HTTP Worker ${workerId}`),
-    app = require('./config/express')
+    app = require('@server/config/express.js')
 
   // If server is turned off
   process.on('SIGTERM', () => {
@@ -28,7 +30,7 @@ function start(workerId) {
   })
 
   // Initialize server
-  const server = app.listen(generalConfig.port, function() {
+  const server = app.listen(generalConfig.port, function () {
     debug(
       `
       Express server

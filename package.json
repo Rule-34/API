@@ -24,7 +24,8 @@
     "express-validator": "^6.4.0",
     "he": "^1.2.0",
     "helmet": "^3.21.3",
-    "morgan": "~1.9.1",
+    "module-alias": "^2.2.2",
+    "morgan": "~1.10.0",
     "node-fetch": "^2.6.0",
     "throng": "^4.0.0"
   },
@@ -32,17 +33,28 @@
     "babel-eslint": "^10.1.0",
     "cross-env": "^7.0.2",
     "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.10.0",
+    "eslint-config-prettier": "^6.10.1",
     "eslint-plugin-prettier": "^3.1.2",
     "jest": "^25.1.0",
     "nodemon": "^2.0.2",
-    "prettier": "^1.19.1",
+    "prettier": "^2.0.1",
     "supertest": "^4.0.2"
+  },
+  "_moduleAliases": {
+    "@root": ".",
+    "@server": "server/",
+    "@assets": "assets/",
+    "@boorus": "server/routes/boorus"
   },
   "jest": {
     "testEnvironment": "node",
     "coveragePathIgnorePatterns": [
       "/node_modules/"
-    ]
+    ],
+    "moduleNameMapper": {
+      "@server/(.*)": "<rootDir>/server/$1",
+      "@assets/(.*)": "<rootDir>/assets/$1",
+      "@boorus/(.*)": "<rootDir>/server/routes/boorus/$1"
+    }
   }
 }
