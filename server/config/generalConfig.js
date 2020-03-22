@@ -11,6 +11,10 @@ const generalConfig = {
   host: process.env.HOST || 'http://localhost:8000/',
   port: process.env.PORT || 8000,
   workers: process.env.WEB_CONCURRENCY || 1,
+
+  // Patreon
+  patreon_client_id: process.env.PATREON_CLIENT_ID,
+  patreon_client_secret: process.env.PATREON_CLIENT_SECRET,
 }
 
 module.exports = generalConfig

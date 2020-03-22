@@ -1,6 +1,7 @@
-const express = require('express'),
-  router = express.Router(),
-  // Middleware
+const fs = require('fs'),
+  express = require('express'),
+  // Middleware validation
+  { check } = require('express-validator'),
   {
     queryValidate,
   } = require('@server/middleware/query_validation/validate.js'),
@@ -9,10 +10,11 @@ const express = require('express'),
   {
     singlePostValidation,
   } = require('@server/middleware/query_validation/singlePost.js'),
-  // Import all routes
+  // Routes
   defaultRouter = require('./default'),
-  // debug = require('debug')(`Indexer`),
-  fs = require('fs')
+  // Init
+  router = express.Router()
+// debug = require('debug')(`Indexer`)
 
 // All routes are added here
 router
@@ -25,6 +27,13 @@ router
   .use('/*/posts', postsValidation(), queryValidate)
   .use('/*/single-post', singlePostValidation(), queryValidate)
   .use('/*/tags', tagsValidation(), queryValidate)
+  // Patreon
+  .use(
+    '/oauth/redirect',
+    [check('code').isString().notEmpty()],
+    queryValidate,
+    require('./auth/auth.js')
+  )
 
 // Dynamic routes
 fs.readdirSync(__dirname + '/boorus', { withFileTypes: true })
