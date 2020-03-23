@@ -1,9 +1,9 @@
 // Defines defaults for domain
 const domainConfig = {
   routeUrl: 'safebooru/',
-  baseUrl: 'http://safebooru.org/',
-  apiUrl: 'http://safebooru.org/index.php?page=dapi&s=',
-  tagApiUrl: 'http://safebooru.org/autocomplete.php?',
+  baseUrl: 'https://safebooru.org/',
+  apiUrl: 'https://safebooru.org/index.php?page=dapi&s=',
+  tagApiUrl: 'https://safebooru.org/autocomplete.php?',
 }
 
 // API help page --> https://safebooru.org/index.php?page=help&topic=dapi
