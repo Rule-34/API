@@ -8,4 +8,6 @@ const domainConfig = {
 
 // API help page --> It has no documentation at all
 
+// Also, this is the only booru that doesnt use httpS, since it doesnt redirect we save data by not making the connection secure
+
 module.exports = domainConfig
