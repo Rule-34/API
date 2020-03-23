@@ -5,6 +5,9 @@ const throng = require('throng'),
   // Requirements
   generalConfig = require('@server/config/generalConfig.js')
 
+// Analytics
+require('newrelic')
+
 // Use cluster (more node services executing this) if in production
 if (generalConfig.env === 'production') {
   throng(

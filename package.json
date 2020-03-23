@@ -27,6 +27,7 @@
     "helmet": "^3.21.3",
     "module-alias": "^2.2.2",
     "morgan": "~1.10.0",
+    "newrelic": "^6.5.0",
     "node-fetch": "^2.6.0",
     "throng": "^4.0.0"
   },
