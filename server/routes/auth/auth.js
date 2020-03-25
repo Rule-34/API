@@ -45,10 +45,13 @@ router.get('/', async function (req, res, next) {
       return
     })
 
-  // Exit if theres no data
-  if (!data.access_token) return next(new Error('No data fetched'))
-
   debug(data)
+
+  // Exit if theres no data
+  if (!data.access_token) {
+    next(new Error('No data fetched'))
+    return
+  }
 
   // Redirect user to the app with data in the query
   res.redirect(
