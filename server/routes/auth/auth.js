@@ -22,7 +22,7 @@ router.get('/', async function (req, res, next) {
   const codeToken = req.query.code,
     url = `https://www.patreon.com/api/oauth2/token?code=${codeToken}&grant_type=authorization_code&client_id=${generalConfig.patreon_client_id}&client_secret=${generalConfig.patreon_client_secret}&redirect_uri=${INITIAL_REDIRECT_URL}`
 
-  // debug(url)
+  debug(url)
 
   // Fetch token of the user
   const data = await fetch(url, {
@@ -48,7 +48,7 @@ router.get('/', async function (req, res, next) {
   // Exit if theres no data
   if (!data.access_token) return next(new Error('No data fetched'))
 
-  // debug(data)
+  debug(data)
 
   // Redirect user to the app with data in the query
   res.redirect(
