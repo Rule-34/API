@@ -32,7 +32,8 @@ router
     '/oauth/redirect',
     [check('code').isString().notEmpty()],
     queryValidate,
-    require('./auth/auth.js')
+    require('./auth/redirect.js')
+  )
   )
 
 // Dynamic routes

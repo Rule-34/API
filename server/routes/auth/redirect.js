@@ -4,7 +4,7 @@ const express = require('express'),
   generalConfig = require('@server/config/generalConfig.js'),
   // Init
   router = express.Router(),
-  debug = require('debug')(`Patreon auth`)
+  debug = require('debug')(`Patreon Redirect`)
 
 // Use the same redirect url that the client used (this is just a mirror)
 const INITIAL_REDIRECT_URL =
@@ -22,7 +22,7 @@ router.get('/', async function (req, res, next) {
   const codeToken = req.query.code,
     url = `https://www.patreon.com/api/oauth2/token?code=${codeToken}&grant_type=authorization_code&client_id=${generalConfig.patreon_client_id}&client_secret=${generalConfig.patreon_client_secret}&redirect_uri=${INITIAL_REDIRECT_URL}`
 
-  debug(url)
+  // debug(url)
 
   // Fetch token of the user
   const data = await fetch(url, {
@@ -45,7 +45,7 @@ router.get('/', async function (req, res, next) {
       return
     })
 
-  debug(data)
+  // debug(data)
 
   // Exit if theres no data
   if (!data.access_token) {
