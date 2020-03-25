@@ -34,6 +34,14 @@ router
     queryValidate,
     require('./auth/redirect.js')
   )
+  .use(
+    '/oauth/user',
+    [
+      check('access_token').isString().notEmpty(),
+      check('refresh_token').isString().optional(),
+    ],
+    queryValidate,
+    require('./auth/token.js')
   )
 
 // Dynamic routes
