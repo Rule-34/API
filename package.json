@@ -24,7 +24,7 @@
     "express-rate-limit": "^5.1.1",
     "express-validator": "^6.4.0",
     "he": "^1.2.0",
-    "helmet": "^3.21.3",
+    "helmet": "^3.22.0",
     "module-alias": "^2.2.2",
     "morgan": "~1.10.0",
     "newrelic": "^6.5.0",
