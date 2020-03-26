@@ -1,13 +1,12 @@
 {
-  "name": "express-typescript-starter",
+  "name": "rule-34-api-auth",
   "version": "0.1.0",
-  "description": "A starting point for Node.js express apps with TypeScript",
+  "description": "An Auth API",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/TypeScript-Node-Starter"
+    "url": "https://github.com/VoidlessSeven7/Rule-34-API-Auth"
   },
-  "author": "Bowden Kelly",
-  "license": "MIT",
+  "author": "Alejandro Akbal",
   "scripts": {
     "start": "npm run serve",
     "build": "npm run build-sass && npm run build-ts && npm run lint && npm run copy-static-assets",
