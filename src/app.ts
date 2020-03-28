@@ -10,6 +10,8 @@ import apicache from 'apicache'
 import rateLimit from 'express-rate-limit'
 // Errors
 import errorHandler from 'errorhandler'
+// Routes
+import baseRouter from './routes'
 
 // Create Express server
 const app = express()
@@ -86,7 +88,7 @@ switch (process.env.NODE_ENV) {
 /**
  * Routes
  */
-// app.use(baseRouter)
+app.use(baseRouter)
 
 //  Error handler
 app.use(errorHandler())
