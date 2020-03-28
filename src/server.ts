@@ -1,4 +1,9 @@
-import app from './app'
+import dotenv from 'dotenv'
+dotenv.config()
+
+import 'module-alias/register'
+
+import app from '@/app'
 
 /**
  * Error Handler. Provides full stack - remove for production
