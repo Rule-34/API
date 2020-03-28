@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { Request, Response } from 'express'
 // Utils
 import bodyParser from 'body-parser'
 import compression from 'compression'
@@ -70,11 +70,11 @@ switch (process.env.NODE_ENV) {
     // Cache
     app.use(cache('5 minutes'))
 
-    app.get('/cache/performance', (req, res) => {
+    app.get('/cache/performance', (req: Request, res: Response) => {
       res.json(apicache.getPerformance())
     })
 
-    app.get('/cache/index', (req, res) => {
+    app.get('/cache/index', (req: Request, res: Response) => {
       res.json(apicache.getIndex())
     })
 
