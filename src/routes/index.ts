@@ -6,11 +6,14 @@ import fs from 'fs'
 const router = Router()
 
 // Add static routes
-router.use('/', require('./default'))
+router.get('/', require('./default'))
 
 // Add dynamic routes
 fs.readdirSync(__dirname + '/booru', { withFileTypes: true })
   .filter((dir) => dir.isDirectory())
-  .map((dir) => router.use(`/${dir.name}`, require(`./booru/${dir.name}`)))
+  .map((dir) => {
+    // console.log('Direction ' + dir.name)
+    router.use(`/${dir.name}`, require(`./booru/${dir.name}`))
+  })
 
 export default router

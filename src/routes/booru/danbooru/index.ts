@@ -6,12 +6,17 @@ const router = Router()
 /*
  ** All routes are used here
  */
-router.use('/', require('./default'))
+router
+  .get('/', require('./default'))
 
-//   .use('/posts', require('./posts'))
-//   .use('/single-post', require('./singlePost'))
+  .get('/posts', require('./posts'))
+  .get('/single-post', require('./singlePost'))
 
-//   .use('/tags', require('./tags'))
+  .get('/tags', require('./tags'))
+
+// .get('/test', (req, res) => {
+//   res.send('lol')
+// })
 
 // Export default
 module.exports = router
