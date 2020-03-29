@@ -1,5 +1,7 @@
+import fetch from 'node-fetch'
+
 // Gets the content from the passed url and returns it
-export default async (url: string): Promise<string | object> => {
+export default async (url: string): Promise<string> => {
   const data = await fetch(url, {
     headers: {
       'User-Agent':
