@@ -1,15 +1,9 @@
-import { httpFetch } from './httpFetch'
-import { xmlToJson } from './xmlToJson'
-import { jsonCleaner } from './jsonCleaner'
+import httpFetch from './httpFetch'
+import xmlToJson from './xmlToJson'
+import jsonCleaner from './json-cleaner'
 
-interface XmlToJsonFromUrl {
-  url: string
-  template: string
-  domain: string
-  isJson: boolean
-  limit?: number
-  useCorsProxy?: boolean
-}
+// Definitions
+import { PassedData } from '@/types/passed-data'
 
 /**
  * Transform the passed url with the passed template
@@ -20,14 +14,14 @@ interface XmlToJsonFromUrl {
  * @param {Number} limit
  * @param {Boolean} useCorsProxy Should the request return the proxied url, defaults to true
  */
-export default async function xmlToJsonFromUrl({
+export default async ({
   url,
   template,
   domain,
   isJson,
   limit,
   useCorsProxy = false,
-}: XmlToJsonFromUrl): Promise<object> {
+}: PassedData): Promise<object> => {
   // Initialize variable
   let json: object
 
@@ -35,17 +29,17 @@ export default async function xmlToJsonFromUrl({
   const data: string | object = await httpFetch(url)
 
   // Dont transform if its already JSON
-  if (isJson) {
+  if (!isJson) {
     json = data
   } else {
-    json = await xmlToJson(data, domain)
+    json = await xmlToJson(data)
   }
 
   // Then clean the JSON with the passed template, and return it
   return await jsonCleaner({
     template,
     domain,
-    json,
+    data: json,
     limit,
     useCorsProxy,
   })
