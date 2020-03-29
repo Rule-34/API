@@ -5,8 +5,9 @@ export interface PassedData {
     isJson?: boolean
     limit?: number
     useCorsProxy?: boolean
+    corsProxyUrl?: string
 
     // Optional
-    data: string | object
+    data?: string | object
   }
   
