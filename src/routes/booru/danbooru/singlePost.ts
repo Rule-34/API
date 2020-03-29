@@ -1,5 +1,4 @@
-import { Router, Request, Response } from 'express'
-import debug from 'debug'
+import { Request, Response } from 'express'
 
 // Configuration
 import domainData from './domainData'
@@ -8,7 +7,7 @@ import domainData from './domainData'
 import fetchAndTransform from '@/util/fetchAndTransform'
 
 // Init
-const router = Router()
+import debug from 'debug'
 debug(`Server:route danbooru single-post`)
 
 /**
@@ -27,7 +26,7 @@ function applyUrlParameters(req: Request): string {
 /**
  * Route
  */
-router.get('/', async function (req: Request, res: Response) {
+module.exports = async (req: Request, res: Response): Promise<void> => {
   // Get the requested parameters and create a url to request data with it
   const requestUrl: string = applyUrlParameters(req)
   debug(requestUrl)
@@ -43,6 +42,4 @@ router.get('/', async function (req: Request, res: Response) {
 
   // Reply
   res.json(jsonResult)
-})
-
-module.exports = router
+}
