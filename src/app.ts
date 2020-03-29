@@ -27,7 +27,7 @@ const rateLimiter = rateLimit({
 
 // Express configuration
 app.set('trust proxy', 1)
-app.set('port', process.env.PORT || 3000)
+app.set('port', process.env.PORT || 8100)
 
 // Express middleware
 app.use(bodyParser.urlencoded({ extended: true }))
