@@ -21,25 +21,20 @@ export default async ({
   isJson,
   limit,
   useCorsProxy = false,
-}: PassedData): Promise<object> => {
-  // Initialize variable
-  let json: object
+}: PassedData): Promise<Array<object>> => {
+  // First fetch data
+  let data: string | object = await httpFetch(url)
 
-  // First get XML from url
-  const data: string | object = await httpFetch(url)
-
-  // Dont transform if its already JSON
+  // Transform if data is JSON
   if (!isJson) {
-    json = data
-  } else {
-    json = await xmlToJson(data)
+    data = await xmlToJson(data)
   }
 
   // Then clean the JSON with the passed template, and return it
   return await jsonCleaner({
     template,
     domain,
-    data: json,
+    data,
     limit,
     useCorsProxy,
   })
