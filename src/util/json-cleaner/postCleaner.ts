@@ -1,7 +1,7 @@
 // @ts-nocheck
 /* eslint-disable @typescript-eslint/camelcase */
 
-import { stringToArray, isVideo } from './helper'
+import { stringToArray, isVideo } from '@/util/shared'
 
 // Definitions
 import { PassedData } from '@/types/passed-data'
