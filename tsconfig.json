@@ -6,7 +6,7 @@
     "target": "es6",
     "noImplicitAny": true,
     "moduleResolution": "node",
-    "sourceMap": true,
+    // "sourceMap": true,
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
