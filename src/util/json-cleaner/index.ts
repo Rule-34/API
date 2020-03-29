@@ -1,6 +1,3 @@
-import debug from 'debug'
-debug(`Server:util Json Cleaner`)
-
 import postCleaner from './postCleaner'
 import tagCleaner from './tagCleaner'
 
@@ -21,7 +18,7 @@ export default ({
   data,
   limit,
   useCorsProxy,
-}: PassedData): Promise<Array<object>> => {
+}: PassedData): Array<object> => {
   // Define CORS Proxy URL
   let corsProxyUrl = ''
 
