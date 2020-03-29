@@ -9,11 +9,7 @@ import { PassedData } from '@/types/passed-data'
  * @param {String} domain Domain specific quirk treatment
  * @param {Number} limit Number to limit how many tags should be processed (Only used on some domains that do not have queries)
  */
-export default ({
-  data,
-  domain,
-  limit,
-}: PassedData): Promise<Array<object>> => {
+export default ({ data, domain, limit }: PassedData): Array<object> => {
   const finalJson = []
 
   let parsedJson = {},
