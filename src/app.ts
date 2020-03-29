@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express'
 // Utils
 import bodyParser from 'body-parser'
 import compression from 'compression'
-import logger from 'morgan'
+import morgan from 'morgan'
 // Security
 import cors from 'cors'
 import helmet from 'helmet'
@@ -47,7 +47,7 @@ switch (process.env.NODE_ENV) {
     )
 
     // Logging
-    app.use(logger('dev'))
+    app.use(morgan('dev'))
     break
 
   case 'production':
@@ -62,7 +62,7 @@ switch (process.env.NODE_ENV) {
 
     // Logging
     app.use(
-      logger('dev', {
+      morgan('dev', {
         skip: function (req, res) {
           return res.statusCode < 400
         },
