@@ -5,7 +5,7 @@ import debug from 'debug'
 import domainData from './domainData'
 
 // Util
-import { xmlToJsonFromUrl } from '@/util/xmlToJsonFromUrl'
+import fetchAndTransform from '@/util/fetchAndTransform'
 
 // Init
 const router = Router()
@@ -17,7 +17,7 @@ debug(`Server:route danbooru single-post`)
  */
 function applyUrlParameters(req: Request): string {
   // Default query parameters
-  const { postId } = req.query
+  const { postId }: { postId: number } = req.query
 
   const builtUrl: string = domainData.singlePostApi + postId + '.json'
 
@@ -33,7 +33,7 @@ router.get('/', async function (req: Request, res: Response) {
   debug(requestUrl)
 
   // Process through wich the xml request gets transformed to optimized json
-  const jsonResult: object = await xmlToJsonFromUrl({
+  const jsonResult: object = await fetchAndTransform({
     url: requestUrl,
     template: 'posts',
     domain: 'danbooru-single',

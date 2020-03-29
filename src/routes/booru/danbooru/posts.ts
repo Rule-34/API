@@ -5,7 +5,7 @@ import debug from 'debug'
 import domainData from './domainData'
 
 // Util
-import { xmlToJsonFromUrl } from '@/util/xmlToJsonFromUrl'
+import fetchAndTransform from '@/util/fetchAndTransform'
 
 // Init
 const router = Router()
@@ -55,7 +55,7 @@ router.get('/', async function (req: Request, res: Response) {
   debug(requestUrl)
 
   // Process through wich the xml request gets transformed to optimized json
-  const jsonResult: object = await xmlToJsonFromUrl({
+  const jsonResult: object = await fetchAndTransform({
     url: requestUrl,
     template: 'posts',
     domain: 'danbooru',
