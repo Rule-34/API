@@ -7,8 +7,8 @@ import domainData from './domainData'
 import fetchAndTransform from '@/util/fetchAndTransform'
 
 // Init
-import Debug from 'debug'
-const debug = Debug(`Server:route xxx tags`)
+// import Debug from 'debug'
+// const debug = Debug(`Server:route xxx tags`)
 
 /**
  * Helper function for building an URL
@@ -30,7 +30,7 @@ function applyUrlParameters(req: Request): string {
 module.exports = async (req: Request, res: Response): Promise<void> => {
   // Get the requested parameters and create a url to request data with it
   const requestUrl: string = applyUrlParameters(req)
-  debug(requestUrl)
+  // debug(requestUrl)
 
   const limit = req.query.limit || 25
 
