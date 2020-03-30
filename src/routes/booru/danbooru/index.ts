@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Router } from 'express'
+import asyncHandler from 'express-async-handler'
+
 import {
   postsValidation,
   singlePostValidation,
@@ -23,10 +25,10 @@ router
 router
   .get('/', require('./default'))
 
-  .get('/posts', require('./posts'))
-  .get('/single-post', require('./singlePost'))
+  .get('/posts', asyncHandler(require('./posts')))
+  .get('/single-post', asyncHandler(require('./singlePost')))
 
-  .get('/tags', require('./tags'))
+  .get('/tags', asyncHandler(require('./tags')))
 
 // .get('/test', (req, res) => {
 //   res.send('lol')
