@@ -47,7 +47,12 @@ export const queryValidate = (
     const extractedErrors: Array<object> = []
     errors.array().map((err) => extractedErrors.push({ [err.param]: err.msg }))
 
-    next(new Error(JSON.stringify(extractedErrors)))
+    // Send array of errors
+    res.status(422).json({
+      errors: extractedErrors,
+    })
+
+    // Exit as we dont need to continue execution nor go to errorHanlder middleware
     return
   }
 
