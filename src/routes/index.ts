@@ -8,6 +8,10 @@ const router = Router()
 // Add static routes
 router.get('/', require('./default'))
 
+if (process.env.NODE_ENV === 'development') {
+  router.get('/test', require('./test'))
+}
+
 // Add dynamic routes
 fs.readdirSync(__dirname + '/booru', { withFileTypes: true })
   .filter((dir) => dir.isDirectory())
