@@ -5,11 +5,27 @@ import { query, validationResult, ValidationChain } from 'express-validator'
 import Debug from 'debug'
 const debug = Debug(`Server:middleware query validation`)
 
+/**
+ * Helpers
+ */
+
+function encodeValue(value: string): string {
+  // debug(`\n\n${value} -> ${encodeURIComponent(value)}\n\n`)
+  return encodeURIComponent(value)
+}
+
+/**
+ * Validators
+ */
 export const postsValidation = (): ValidationChain[] => {
   return [
     query('limit').isInt().optional(),
     query('pid').isInt().optional(),
-    query('tags').isString().optional(),
+    query('tags')
+      .isString()
+      .optional()
+      // Encode tags
+      .customSanitizer(encodeValue),
     query('rating').isString().optional(),
     query('score').isInt().optional(),
     query('corsProxy').isBoolean().toBoolean().optional(),
@@ -25,7 +41,11 @@ export const singlePostValidation = (): ValidationChain[] => {
 
 export const tagsValidation = (): ValidationChain[] => {
   return [
-    query('tag').isString().notEmpty(),
+    query('tag')
+      .isString()
+      .notEmpty()
+      // Encode tags
+      .customSanitizer(encodeValue),
     query('limit').isInt().optional(),
     query('order').isString().optional(),
     query('pid').isInt().optional(),
