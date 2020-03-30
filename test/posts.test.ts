@@ -9,18 +9,7 @@ import app from '../src/app'
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
-// import domains from '../external/r34-shared/booru-list.json'
-
-const domains = [
-  {
-    name: 'danbooru.donmai.us',
-    short: 'danbooru',
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    max_count: 3806415,
-    pid: 1,
-    nsfw: true,
-  },
-]
+import domains from '../external/r34-shared/booru-list.json'
 
 /* ---------------- POSTS ---------------- */
 describe.each(domains)('Posts', (domain) => {
