@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express'
-import Debug from 'debug'
 
 import IErrorWithStatus from '@/types/error-with-status.interface'
 
 // Init
+import Debug from 'debug'
 const debug = Debug(`Server:middleware error handler`)
 
 export default (

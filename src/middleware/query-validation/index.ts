@@ -39,8 +39,6 @@ export const queryValidate = (
 ): void => {
   const errors = validationResult(req)
 
-  debug('\n\nlol\n\n')
-
   // Check if there is any error
   if (!errors.isEmpty()) {
     // Create array of errors
