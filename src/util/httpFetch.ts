@@ -8,7 +8,7 @@ const debug = Debug('Server:util Fetch')
 // Gets the content from the passed url and returns it
 export default async (url: string): Promise<string> => {
   // Encode url
-  // url = he.encode(url)
+  url = encodeURI(url)
 
   debug(url)
 
