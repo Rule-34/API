@@ -4,7 +4,7 @@
 import { stringToArray, isVideo } from '@/util/shared'
 
 // Definitions
-import { PassedData } from '@/types/passed-data'
+import { IPassedData } from 'passed-data.interface'
 
 import Debug from 'debug'
 const debug = Debug(`Server:util post Cleaner`)
@@ -14,7 +14,7 @@ const debug = Debug(`Server:util post Cleaner`)
  * @param {Object} json Json Object which contains post content
  * @param {String} domain Domain for specific quirk treatment
  */
-export default ({ data, domain, corsProxyUrl }: PassedData): Array<object> => {
+export default ({ data, domain, corsProxyUrl }: IPassedData): Array<object> => {
   const finalJson: Array<object> = []
 
   let iterableJson: Array<object> = []

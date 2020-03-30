@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 // Definitions
-import { PassedData } from '@/types/passed-data'
+import { IPassedData } from 'passed-data.interface'
 
 /**
  * Cleans a Json object that contains tags
@@ -9,7 +9,7 @@ import { PassedData } from '@/types/passed-data'
  * @param {String} domain Domain specific quirk treatment
  * @param {Number} limit Number to limit how many tags should be processed (Only used on some domains that do not have queries)
  */
-export default ({ data, domain, limit }: PassedData): Array<object> => {
+export default ({ data, domain, limit }: IPassedData): Array<object> => {
   const finalJson = []
 
   let parsedJson = {},

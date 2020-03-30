@@ -1,4 +1,4 @@
-export interface PassedData {
+export interface IPassedData {
     url?: string
     template?: string
     domain: string

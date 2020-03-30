@@ -2,7 +2,7 @@ import postCleaner from './postCleaner'
 import tagCleaner from './tagCleaner'
 
 // Definitions
-import { PassedData } from '@/types/passed-data'
+import { IPassedData } from 'passed-data.interface'
 
 /**
  * Cleans a JSON object according to its template and domain
@@ -18,7 +18,7 @@ export default ({
   data,
   limit,
   useCorsProxy,
-}: PassedData): Array<object> => {
+}: IPassedData): Array<object> => {
   // Define CORS Proxy URL
   let corsProxyUrl = ''
 

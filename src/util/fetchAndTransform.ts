@@ -3,7 +3,7 @@ import xmlToJson from './xmlToJson'
 import jsonCleaner from './json-cleaner'
 
 // Definitions
-import { PassedData } from '@/types/passed-data'
+import { IPassedData } from 'passed-data.interface'
 
 /**
  * Transform the passed url with the passed template
@@ -21,7 +21,7 @@ export default async ({
   isJson,
   limit,
   useCorsProxy = false,
-}: PassedData): Promise<Array<object>> => {
+}: IPassedData): Promise<Array<object>> => {
   // First fetch data
   let data: string | object = await httpFetch(url)
 
