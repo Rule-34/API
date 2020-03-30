@@ -9,7 +9,7 @@ import helmet from 'helmet'
 import apicache from 'apicache'
 import rateLimit from 'express-rate-limit'
 // Errors
-import errorHandler from 'errorhandler'
+import errorHandler from './middleware/error'
 // Routes
 import baseRouter from './routes'
 
@@ -85,12 +85,12 @@ switch (process.env.NODE_ENV) {
     break
 }
 
+//  Error handler
+app.use(errorHandler)
+
 /**
  * Routes
  */
 app.use(baseRouter)
-
-//  Error handler
-app.use(errorHandler())
 
 export default app
