@@ -3,7 +3,7 @@ export default {
   short: 'gelbooru/',
 
   postsApi: 'https://gelbooru.com/index.php?page=dapi&s=post&q=index',
-  singlePostApi: 'https://gelbooru.com/index.php?page=dapi&s=post&q=index',
+  singlePostApi: 'https://gelbooru.com/index.php?page=dapi&s=post&q=index&id=',
   tagsApi: 'https://gelbooru.com/index.php?page=dapi&s=tag&q=index',
 }
 
