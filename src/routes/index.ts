@@ -2,17 +2,35 @@
 import { Router } from 'express'
 import fs from 'fs'
 
-// Create router
 const router = Router()
 
-// Add static routes
+/**
+ * Middleware
+ */
+import {
+  postsValidation,
+  singlePostValidation,
+  tagsValidation,
+  queryValidate,
+} from '@/middleware/query-validation'
+
+router
+  .use('*/posts', postsValidation(), queryValidate)
+  .use('*/single-post', singlePostValidation(), queryValidate)
+  .use('*/tags', tagsValidation(), queryValidate)
+
+/**
+ * Static routes
+ */
 router.get('/', require('./default'))
 
 if (process.env.NODE_ENV === 'development') {
   router.get('/test', require('./test'))
 }
 
-// Add dynamic routes
+/**
+ * Dynamic routes
+ */
 fs.readdirSync(__dirname + '/booru', { withFileTypes: true })
   .filter((dir) => dir.isDirectory())
   .map((dir) => {
