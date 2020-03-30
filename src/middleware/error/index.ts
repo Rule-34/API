@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from 'express'
 import Debug from 'debug'
 
-import ErrorObj from '@/types/error-obj.interface'
+import IErrorWithStatus from '@/types/error-with-status.interface'
 
 // Init
 const debug = Debug(`Server:middleware error handler`)
 
 export default (
-  err: ErrorObj,
+  err: IErrorWithStatus,
   req: Request,
   res: Response,
   next: NextFunction
