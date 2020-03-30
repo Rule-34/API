@@ -3,7 +3,7 @@ export default {
   short: 'danbooru/',
 
   postsApi: 'https://danbooru.donmai.us/posts.json',
-  singlePostApi: 'https://danbooru.donmai.us/posts',
+  singlePostApi: 'https://danbooru.donmai.us/posts/',
   tagsApi: 'https://danbooru.donmai.us/tags.json',
 }
 

@@ -16,7 +16,7 @@ const debug = Debug(`Server:route danbooru single-post`)
  */
 function applyUrlParameters(req: Request): string {
   // Default query parameters
-  const { postId }: { postId: number } = req.query
+  const postId: number = req.query.id
 
   const builtUrl: string = domainData.singlePostApi + postId + '.json'
 
