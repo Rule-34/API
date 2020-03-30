@@ -7,8 +7,8 @@ import domainData from './domainData'
 import fetchAndTransform from '@/util/fetchAndTransform'
 
 // Init
-import debug from 'debug'
-debug(`Server:route danbooru tags`)
+import Debug from 'debug'
+const debug = Debug(`Server:route danbooru tags`)
 
 /**
  * Helper function for building an URL

@@ -6,8 +6,8 @@ import { stringToArray, isVideo } from '@/util/shared'
 // Definitions
 import { PassedData } from '@/types/passed-data'
 
-import debug from 'debug'
-debug(`Server:util post Cleaner`)
+import Debug from 'debug'
+const debug = Debug(`Server:util post Cleaner`)
 
 /**
  *
