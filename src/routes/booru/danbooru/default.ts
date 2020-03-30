@@ -9,7 +9,9 @@ module.exports = (req: Request, res: Response): void => {
     message: `This endpoint is for ${domainData.url}`,
 
     posts: `${DOMAIN}/${domainData.short}posts`,
+
     'single-post': `${DOMAIN}/${domainData.short}single-post`,
+
     tags: `${DOMAIN}/${domainData.short}tags`,
   })
 }
