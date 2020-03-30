@@ -16,7 +16,15 @@ export default (
 
   res.status(err.status || 500)
 
-  const message: string = err.message
+  let message: string | object = err.message
+
+  try {
+    message = JSON.parse(err.message)
+
+    debug('Parsed error message')
+  } catch (error) {
+    debug('Couldnt parse error message, must be a normal error')
+  }
 
   res.json({
     errors: {
