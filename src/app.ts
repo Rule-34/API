@@ -85,12 +85,12 @@ switch (process.env.NODE_ENV) {
     break
 }
 
-//  Error handler
-app.use(errorHandler)
-
 /**
  * Routes
  */
 app.use(baseRouter)
+
+//  Error handler
+app.use(errorHandler)
 
 export default app
