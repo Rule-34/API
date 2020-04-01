@@ -12,9 +12,10 @@ export default (
   res: Response,
   next: NextFunction
 ): void => {
-  debug(err.stack)
+  // Extract values from err
+  const { status = 500, stack } = err
 
-  res.status(err.status)
+  debug(stack)
 
   let message: string | object = err.message
 
@@ -25,7 +26,7 @@ export default (
     debug('Couldnt parse error message, must be a normal error')
   }
 
-  res.json({
+  res.status(status).json({
     error: {
       code: err.status,
       message,
