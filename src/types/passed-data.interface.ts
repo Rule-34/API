@@ -8,6 +8,6 @@ export interface IPassedData {
     corsProxyUrl?: string
 
     // Optional
-    data?: string | object
+    data?: string
   }
   
