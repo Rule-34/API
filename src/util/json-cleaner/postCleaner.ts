@@ -61,7 +61,15 @@ export default ({
 
     // Exit with error as a domain is needed
     default:
-      throw 'No domain supplied, a domain is needed'
+      throw new Error('No domain supplied, a domain is needed')
+  }
+
+  // Error handling
+  if (!iterableJson.length) {
+    throw new CustomError(
+      'No data to return, maybe you have too many tags?',
+      422
+    )
   }
 
   // Loop each post to extract only the things that we are gonna use
