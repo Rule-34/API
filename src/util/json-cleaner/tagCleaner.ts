@@ -11,15 +11,10 @@ import { CustomError } from '@/util/classes'
  * @param {Number} limit Number to limit how many tags should be processed (Only used on some domains that do not have queries)
  */
 export default ({ data, domain, limit }: IPassedData): Array<object> => {
-  const finalJson = []
+  const finalJson: Array<object> = []
 
-  let parsedJson = {},
+  let iterableJson: Array<object> = [],
     counter = 0
-
-  // Error handling
-  if (!data) {
-    throw new Error('No data to return, maybe you have too many tags?')
-  }
 
   // Parse every tag result
   switch (domain) {

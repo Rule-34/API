@@ -21,8 +21,11 @@ export default ({ data, domain, corsProxyUrl }: IPassedData): Array<object> => {
   let iterableJson: Array<object> = []
 
   // Error handling
-  if (!data) {
-    throw new Error('No data to parse')
+  if (!iterableJson.length) {
+    throw new CustomError(
+      'No data to return, maybe you have too many tags?',
+      422
+    )
   }
 
   // Parse JSON
