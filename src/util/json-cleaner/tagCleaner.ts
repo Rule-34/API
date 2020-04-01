@@ -17,16 +17,14 @@ export default ({ data, domain, limit }: IPassedData): Array<object> => {
     counter = 0
 
   // Parse every tag result
-  switch (domain) {
-    case 'xxx':
-    case 'safebooru':
-    case 'paheal':
-    case 'danbooru':
-    case 'gelbooru':
-    case 'loli':
-    case 'e621':
-      parsedJson = JSON.parse(data)
-      break
+  iterableJson = JSON.parse(data)
+
+  // Error handling
+  if (!iterableJson.length) {
+    throw new CustomError(
+      'No data to return, maybe you searched for an unknown tag?',
+      422
+    )
   }
 
   // Parse every tag result
@@ -34,11 +32,11 @@ export default ({ data, domain, limit }: IPassedData): Array<object> => {
     case 'xxx':
     case 'safebooru':
       // XXX Api's returns html code so we need to decode it first
-      for (const prop in parsedJson) {
+      for (const prop in iterableJson) {
         // Add object to array while extracting only digits
         finalJson.push({
-          name: parsedJson[prop].value,
-          count: Number(parsedJson[prop].label.match(/\d+/g)),
+          name: iterableJson[prop].value,
+          count: Number(iterableJson[prop].label.match(/\d+/g)),
         })
 
         counter++
@@ -52,8 +50,8 @@ export default ({ data, domain, limit }: IPassedData): Array<object> => {
       break
 
     case 'paheal':
-      for (const prop in parsedJson) {
-        finalJson.push({ name: prop, count: parsedJson[prop] })
+      for (const prop in iterableJson) {
+        finalJson.push({ name: prop, count: iterableJson[prop] })
 
         counter++
 
@@ -66,7 +64,7 @@ export default ({ data, domain, limit }: IPassedData): Array<object> => {
       break
 
     case 'gelbooru':
-      parsedJson.forEach((tag) => {
+      iterableJson.forEach((tag) => {
         finalJson.push({ name: tag.tag, count: Number(tag.count) })
       })
       break
@@ -74,7 +72,7 @@ export default ({ data, domain, limit }: IPassedData): Array<object> => {
     case 'danbooru':
     case 'e621':
     case 'loli':
-      parsedJson.forEach((tag) => {
+      iterableJson.forEach((tag) => {
         finalJson.push({ name: tag.name, count: Number(tag.post_count) })
       })
       break
