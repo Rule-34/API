@@ -1,7 +1,12 @@
+/* eslint-disable @typescript-eslint/camelcase */
+
+// TEMPORARY
+
 import { stringToArray, isVideo } from '@/util/shared'
 
 // Definitions
 import { IPassedData } from 'passed-data.interface'
+import { FetchedPostsRequest, ReturnedPostsRequest } from 'requests.interface'
 
 // Classes
 import { CustomError } from '@/util/classes'
@@ -15,18 +20,14 @@ const debug = Debug(`Server:util post Cleaner`)
  * @param {Object} json Json Object which contains post content
  * @param {String} domain Domain for specific quirk treatment
  */
-export default ({ data, domain, corsProxyUrl }: IPassedData): Array<object> => {
-  const finalJson: Array<object> = []
+export default ({
+  data,
+  domain,
+  corsProxyUrl,
+}: IPassedData): Array<ReturnedPostsRequest> => {
+  const finalJson: Array<ReturnedPostsRequest> = []
 
-  let iterableJson: Array<object> = []
-
-  // Error handling
-  if (!iterableJson.length) {
-    throw new CustomError(
-      'No data to return, maybe you have too many tags?',
-      422
-    )
-  }
+  let iterableJson: Array<FetchedPostsRequest> = []
 
   // Parse JSON
   switch (domain) {
@@ -35,7 +36,7 @@ export default ({ data, domain, corsProxyUrl }: IPassedData): Array<object> => {
     case 'paheal':
     case 'gelbooru':
     case 'safebooru':
-      iterableJson = data[0]
+      iterableJson = JSON.parse(data)[0]
       break
 
     // Simple parse
@@ -65,7 +66,16 @@ export default ({ data, domain, corsProxyUrl }: IPassedData): Array<object> => {
 
   // Loop each post to extract only the things that we are gonna use
   iterableJson.forEach((post) => {
-    const tempJson = {}
+    const tempJson: ReturnedPostsRequest = {
+      id: undefined,
+      high_res_file: undefined,
+      low_res_file: undefined,
+      preview_file: undefined,
+      tags: [],
+      source: undefined,
+      rating: undefined,
+      type: undefined,
+    }
 
     // Add ID
     tempJson.id = post.id
