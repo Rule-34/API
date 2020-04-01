@@ -71,12 +71,17 @@ export interface ReturnedTagsRequest {
   }
   
   export interface FetchedTagsRequest {
-    // Name
+    /**
+     * Name of the tag
+     */
     value?: string
     name?: string
     label?: string
     tag?: string
-    // Count
+    
+    /**
+     * Count of posts with that tag
+     */
     count?: string | number
     post_count?: string | number
   }
