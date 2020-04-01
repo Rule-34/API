@@ -1,11 +1,12 @@
-// @ts-nocheck
-/* eslint-disable @typescript-eslint/camelcase */
-
 import { stringToArray, isVideo } from '@/util/shared'
 
 // Definitions
 import { IPassedData } from 'passed-data.interface'
 
+// Classes
+import { CustomError } from '@/util/classes'
+
+// Init
 import Debug from 'debug'
 const debug = Debug(`Server:util post Cleaner`)
 

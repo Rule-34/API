@@ -1,7 +1,8 @@
-// @ts-nocheck
-
 // Definitions
 import { IPassedData } from 'passed-data.interface'
+
+// Classes
+import { CustomError } from '@/util/classes'
 
 /**
  * Cleans a Json object that contains tags
