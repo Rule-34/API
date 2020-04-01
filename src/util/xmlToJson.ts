@@ -21,6 +21,6 @@ const template = {
  * Transforms XML to Json using a template
  * @xml XML data
  */
-export default async (xml: string): Promise<object> => {
-  return await transform(xml, template)
+export default async (xml: string): Promise<string> => {
+  return JSON.stringify(await transform(xml, template))
 }

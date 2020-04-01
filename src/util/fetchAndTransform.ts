@@ -23,7 +23,7 @@ export default async ({
   useCorsProxy = false,
 }: IPassedData): Promise<Array<object>> => {
   // First fetch data
-  let data: string | object = await httpFetch(url)
+  let data = await httpFetch(url)
 
   // Transform if data is JSON
   if (!isJson) {
