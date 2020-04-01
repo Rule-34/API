@@ -1,5 +1,9 @@
+// @ts-nocheck
+// TEMPORARY
+
 // Definitions
 import { IPassedData } from 'passed-data.interface'
+import { FetchedTagsRequest, ReturnedTagsRequest } from 'requests.interface'
 
 // Classes
 import { CustomError } from '@/util/classes'
@@ -10,17 +14,30 @@ import { CustomError } from '@/util/classes'
  * @param {String} domain Domain specific quirk treatment
  * @param {Number} limit Number to limit how many tags should be processed (Only used on some domains that do not have queries)
  */
-export default ({ data, domain, limit }: IPassedData): Array<object> => {
-  const finalJson: Array<object> = []
+export default ({
+  data,
+  domain,
+  limit,
+}: IPassedData): Array<ReturnedTagsRequest> => {
+  const finalJson: Array<ReturnedTagsRequest> = []
 
-  let iterableJson: Array<object> = [],
-    counter = 0
+  let counter = 0
 
   // Parse every tag result
-  iterableJson = JSON.parse(data)
+  let iterableArray: Array<FetchedTagsRequest>
+
+  switch (domain) {
+    case 'paheal':
+      // Paheal returns an pair key value JSON, so we have to encapsulate it
+      iterableArray = Object.entries(JSON.parse(data))
+      break
+    default:
+      iterableArray = JSON.parse(data)
+      break
+  }
 
   // Error handling
-  if (!iterableJson.length) {
+  if (!iterableArray.length) {
     throw new CustomError(
       'No data to return, maybe you searched for an unknown tag?',
       422
@@ -32,11 +49,11 @@ export default ({ data, domain, limit }: IPassedData): Array<object> => {
     case 'xxx':
     case 'safebooru':
       // XXX Api's returns html code so we need to decode it first
-      for (const prop in iterableJson) {
+      for (const prop of iterableArray) {
         // Add object to array while extracting only digits
         finalJson.push({
-          name: iterableJson[prop].value,
-          count: Number(iterableJson[prop].label.match(/\d+/g)),
+          name: prop.value,
+          count: Number(prop.label.match(/\d+/g)),
         })
 
         counter++
@@ -50,8 +67,10 @@ export default ({ data, domain, limit }: IPassedData): Array<object> => {
       break
 
     case 'paheal':
-      for (const prop in iterableJson) {
-        finalJson.push({ name: prop, count: iterableJson[prop] })
+      for (const prop of iterableArray) {
+        // console.log(prop)
+
+        finalJson.push({ name: prop[0], count: prop[1] })
 
         counter++
 
@@ -64,7 +83,7 @@ export default ({ data, domain, limit }: IPassedData): Array<object> => {
       break
 
     case 'gelbooru':
-      iterableJson.forEach((tag) => {
+      iterableArray.forEach((tag) => {
         finalJson.push({ name: tag.tag, count: Number(tag.count) })
       })
       break
@@ -72,7 +91,7 @@ export default ({ data, domain, limit }: IPassedData): Array<object> => {
     case 'danbooru':
     case 'e621':
     case 'loli':
-      iterableJson.forEach((tag) => {
+      iterableArray.forEach((tag) => {
         finalJson.push({ name: tag.name, count: Number(tag.post_count) })
       })
       break
