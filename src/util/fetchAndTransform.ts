@@ -1,3 +1,5 @@
+import he from 'he'
+
 import httpFetch from './httpFetch'
 import xmlToJson from './xmlToJson'
 import jsonCleaner from './json-cleaner'
@@ -29,6 +31,9 @@ export default async ({
   if (!isJson) {
     data = await xmlToJson(data)
   }
+
+  // Decode HTML chars
+  data = he.decode(data)
 
   // Then clean the JSON with the passed template, and return it
   return await jsonCleaner({
