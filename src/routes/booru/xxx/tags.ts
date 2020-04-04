@@ -4,7 +4,7 @@ import { Request, Response } from 'express'
 import domainData from './domainData'
 
 // Util
-import fetchAndTransform from '@/util/fetchAndTransform'
+import fetchAndTransform from '@/util/booru/fetchAndTransform'
 
 // Init
 // import Debug from 'debug'
