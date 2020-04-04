@@ -1,4 +1,3 @@
-// @ts-nocheck
 // TEMPORARY
 
 // Definitions
@@ -29,6 +28,9 @@ export default ({
   switch (domain) {
     case 'paheal':
       // Paheal returns an pair key value JSON, so we have to encapsulate it
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore
       iterableArray = Object.entries(JSON.parse(data))
       break
     default:
@@ -70,6 +72,8 @@ export default ({
       for (const prop of iterableArray) {
         // console.log(prop)
 
+        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+        // @ts-ignore
         finalJson.push({ name: prop[0], count: prop[1] })
 
         counter++
