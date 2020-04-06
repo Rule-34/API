@@ -13,6 +13,13 @@ import errorHandler from './middleware/error'
 // Routes
 import baseRouter from './routes'
 
+import ConnectDatadog from 'connect-datadog'
+
+const datadog = new ConnectDatadog({
+  response_code: true,
+  tags: ['app:Rule 34 API'],
+})
+
 // Create Express server
 const app = express()
 
@@ -82,6 +89,9 @@ switch (process.env.NODE_ENV) {
 
     // Rate limit
     app.use(rateLimiter)
+
+    // Analytics
+    app.use(datadog)
     break
 }
 
