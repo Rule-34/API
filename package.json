@@ -78,7 +78,7 @@
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.1",
     "eslint-plugin-prettier": "^3.1.2",
-    "jest": "^25.2.4",
+    "jest": "^25.2.7",
     "nodemon": "^2.0.2",
     "prettier": "^2.0.2",
     "supertest": "^4.0.2",
