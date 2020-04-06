@@ -15,7 +15,7 @@ import baseRouter from './routes'
 
 import ConnectDatadog from 'connect-datadog'
 
-const datadog = new ConnectDatadog({
+const datadog = ConnectDatadog({
   response_code: true,
   tags: ['app:Rule 34 API'],
 })
