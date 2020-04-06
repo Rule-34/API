@@ -65,9 +65,9 @@
     "@types/express-rate-limit": "^5.0.0",
     "@types/he": "^1.1.1",
     "@types/helmet": "0.0.45",
-    "@types/jest": "^25.1.4",
+    "@types/jest": "^25.2.1",
     "@types/morgan": "^1.9.0",
-    "@types/node": "^13.9.8",
+    "@types/node": "^13.11.0",
     "@types/node-fetch": "^2.5.5",
     "@types/supertest": "^2.0.8",
     "@types/winston": "^2.4.4",
@@ -78,12 +78,12 @@
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.1",
     "eslint-plugin-prettier": "^3.1.2",
-    "jest": "^25.2.4",
+    "jest": "^25.2.7",
     "nodemon": "^2.0.2",
-    "prettier": "^2.0.2",
+    "prettier": "^2.0.3",
     "supertest": "^4.0.2",
-    "ts-jest": "^25.3.0",
-    "ts-node": "^8.8.1",
+    "ts-jest": "^25.3.1",
+    "ts-node": "^8.8.2",
     "typescript": "^3.8.3"
   }
 }
