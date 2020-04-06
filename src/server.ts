@@ -5,9 +5,12 @@ import 'module-alias/register'
 
 import app from './app'
 
-/**
- * Error Handler. Provides full stack - remove for production
- */
+// Analytics
+import tracer from 'dd-trace'
+
+tracer.init({
+  analytics: true,
+})
 
 /**
  * Start Express server.
