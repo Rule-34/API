@@ -48,7 +48,6 @@
     "helmet": "^3.22.0",
     "module-alias": "^2.2.2",
     "morgan": "^1.10.0",
-    "newrelic": "^6.5.0",
     "node-fetch": "^2.6.0",
     "winston": "^3.2.1"
   },
@@ -58,6 +57,7 @@
     "@types/chai": "^4.2.11",
     "@types/compression": "^1.7.0",
     "@types/concurrently": "^5.1.0",
+    "@types/connect-datadog": "0.0.4",
     "@types/cors": "^2.8.6",
     "@types/debug": "^4.1.5",
     "@types/errorhandler": "^1.5.0",
