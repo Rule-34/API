@@ -37,7 +37,6 @@
     "compression": "^1.7.4",
     "connect-datadog": "0.0.9",
     "cors": "^2.8.5",
-    "dd-trace": "^0.19.0",
     "debug": "^4.1.1",
     "dotenv": "^8.2.0",
     "errorhandler": "^1.5.1",
