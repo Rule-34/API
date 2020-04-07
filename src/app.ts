@@ -83,8 +83,6 @@ switch (process.env.NODE_ENV) {
     // Rate limit
     app.use(rateLimiter)
 
-    // Analytics
-    app.use(datadog)
     break
 }
 
