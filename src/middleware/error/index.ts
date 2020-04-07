@@ -19,18 +19,17 @@ export default (
 
   let message: string | object = err.message
 
-  try {
-    message = JSON.parse(err.message)
-    debug('Parsed error message')
-  } catch (error) {
-    debug('Couldnt parse error message, must be a normal error')
+  // If message is an Array of messages
+  if (err.messageArray) {
+    message = err.messageArray
   }
 
   res.status(status).json({
     error: {
       code: err.status,
       message,
-      error: process.env.NODE_ENV === 'development' ? err : {},
+      // Only send stack if we are in development
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
     },
   })
 }

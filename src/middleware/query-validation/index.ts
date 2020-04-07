@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
 import { query, validationResult, ValidationChain } from 'express-validator'
 
+import { CustomError } from '@/util/classes'
+
 // Init
 import Debug from 'debug'
 const debug = Debug(`Server:middleware query validation`)
@@ -61,7 +63,9 @@ export const queryValidate = (
     const extractedErrors: Array<object> = []
     errors.array().map((err) => extractedErrors.push({ [err.param]: err.msg }))
 
-    next(new Error(JSON.stringify(extractedErrors)))
+    next(
+      new CustomError('Check the following query errors', 422, extractedErrors)
+    )
     return
   }
 
