@@ -13,13 +13,6 @@ import errorHandler from './middleware/error'
 // Routes
 import baseRouter from './routes'
 
-import ConnectDatadog from 'connect-datadog'
-
-const datadog = ConnectDatadog({
-  response_code: true,
-  tags: ['app:Rule 34 API'],
-})
-
 // Create Express server
 const app = express()
 
