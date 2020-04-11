@@ -211,10 +211,20 @@ export default ({
     switch (domain) {
       case 'e621':
       case 'e621-single':
+        if (post.sources[0] === '') {
+          debug(`Empty tag of post ${tempJson.id}`)
+          break
+        }
+
         tempJson.source = post.sources[0]
         break
 
       default:
+        if (post.source === '') {
+          debug(`Empty tag of post ${tempJson.id}`)
+          break
+        }
+
         tempJson.source = post.source
         break
     }
