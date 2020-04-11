@@ -4,7 +4,7 @@ import { CustomError } from '@/util/classes'
 
 // Init
 import Debug from 'debug'
-const debug = Debug(`Server:middleware error handler`)
+const debug = Debug(`Server:middleware Error Handler`)
 
 export default (
   err: CustomError,

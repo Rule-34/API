@@ -5,7 +5,7 @@ import { CustomError } from '@/util/classes'
 
 // Init
 import Debug from 'debug'
-const debug = Debug(`Server:middleware query validation`)
+const debug = Debug(`Server:middleware Query Validation`)
 
 /**
  * Helpers

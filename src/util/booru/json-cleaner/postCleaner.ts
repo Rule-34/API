@@ -13,7 +13,7 @@ import { CustomError } from '@/util/classes'
 
 // Init
 import Debug from 'debug'
-const debug = Debug(`Server:util post Cleaner`)
+const debug = Debug(`Server:util Post Cleaner`)
 
 /**
  *
