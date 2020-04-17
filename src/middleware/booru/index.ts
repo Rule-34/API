@@ -29,3 +29,17 @@ export function randomMiddlewareWithoutAPI(domainData: DomainData) {
     next()
   }
 }
+
+export const randomMiddlewareWithAPI = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  // Modify order to be random
+  req.query.order = 'random'
+
+  // Default to 1 as the limit
+  req.query.limit = req.query.limit ?? ((1 as unknown) as string)
+
+  next()
+}
