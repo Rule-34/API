@@ -19,8 +19,9 @@ function applyUrlParameters(req: Request): string {
   const limit = req.query.limit || 20,
     pageId = req.query.pid,
     tags = req.query.tags || '',
-    rating = (req.query.rating as string) as string,
-    score = req.query.score
+    rating = req.query.rating as string,
+    score = req.query.score,
+    order = req.query.order
 
   let builtUrl: string = domainData.postsApi + '&limit=' + limit
 
@@ -40,6 +41,10 @@ function applyUrlParameters(req: Request): string {
 
   if (score) {
     builtUrl += '+score:>=' + score
+  }
+
+  if (order) {
+    builtUrl += 'sort:' + order
   }
 
   return builtUrl
