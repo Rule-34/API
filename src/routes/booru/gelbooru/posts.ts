@@ -44,7 +44,7 @@ function applyUrlParameters(req: Request): string {
   }
 
   if (order) {
-    builtUrl += 'sort:' + order
+    builtUrl += '+sort:' + order
   }
 
   return builtUrl
