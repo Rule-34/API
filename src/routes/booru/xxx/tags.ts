@@ -16,10 +16,10 @@ import fetchAndTransform from '@/util/booru/fetchAndTransform'
  */
 function applyUrlParameters(req: Request): string {
   // Default query parameters
-  const tag: string = req.query.tag
-  // limit: number = req.query.limit || 25,
-  // pageId: number = req.query.pid || 1,
-  // order: string = req.query.order || 'count'
+  const tag = req.query.tag
+  // limit = req.query.limit || 25,
+  // pageId = req.query.pid || 1,
+  // order = req.query.order || 'count'
 
   return domainData.tagsApi + 'q=' + tag
 }
@@ -40,6 +40,9 @@ module.exports = async (req: Request, res: Response): Promise<void> => {
     template: 'autocomplete',
     domain: 'xxx',
     isJson: true,
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore // Disabled because its already a number by the express-validator middleware
     limit,
   })
 

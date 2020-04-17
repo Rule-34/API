@@ -16,7 +16,7 @@ import fetchAndTransform from '@/util/booru/fetchAndTransform'
  */
 function applyUrlParameters(req: Request): string {
   // Default query parameters
-  const postId: number = req.query.id
+  const postId = req.query.id
 
   const builtUrl: string = domainData.singlePostApi + postId + '.json'
 
@@ -37,6 +37,9 @@ module.exports = async (req: Request, res: Response): Promise<void> => {
     template: 'posts',
     domain: 'danbooru-single',
     isJson: true,
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore // Disabled because its already a boolean by the express-validator middleware
     useCorsProxy: req.query.corsProxy,
   })
 

@@ -16,10 +16,10 @@ import fetchAndTransform from '@/util/booru/fetchAndTransform'
  */
 function applyUrlParameters(req: Request): string {
   // Default query parameters
-  const tag: string = req.query.tag,
-    limit: number = req.query.limit || 25,
-    pageId: number = req.query.pid || 1,
-    order: string = req.query.order || 'count'
+  const tag = req.query.tag,
+    limit = req.query.limit || 25,
+    pageId = req.query.pid || 1,
+    order = req.query.order || 'count'
 
   return (
     domainData.tagsApi +

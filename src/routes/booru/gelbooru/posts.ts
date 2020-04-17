@@ -16,11 +16,11 @@ import fetchAndTransform from '@/util/booru/fetchAndTransform'
  */
 function applyUrlParameters(req: Request): string {
   // Default query parameters
-  const limit: number = req.query.limit || 20,
-    pageId: number = req.query.pid,
-    tags: string = req.query.tags || '',
-    rating: string = req.query.rating,
-    score: number = req.query.score
+  const limit = req.query.limit || 20,
+    pageId = req.query.pid,
+    tags = req.query.tags || '',
+    rating = (req.query.rating as string) as string,
+    score = req.query.score
 
   let builtUrl: string = domainData.postsApi + '&limit=' + limit
 
@@ -58,6 +58,9 @@ module.exports = async (req: Request, res: Response): Promise<void> => {
     url: requestUrl,
     template: 'posts',
     domain: 'gelbooru',
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore // Disabled because its already a boolean by the express-validator middleware
     useCorsProxy: req.query.corsProxy,
   })
 
