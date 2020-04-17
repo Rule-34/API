@@ -26,6 +26,7 @@ function applyUrlParameters(req: Request): string {
     '&json=1' +
     '&name_pattern=' +
     tag +
+    '%' + // Multi character wildcard, like "*"
     '&limit=' +
     limit +
     '&orderby=' +
