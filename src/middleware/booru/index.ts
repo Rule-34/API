@@ -4,6 +4,9 @@ import { DomainData } from 'booru.interface'
 
 import booruList from 'ext/r34-shared/booru-list.json'
 
+import constants from '@/configuration/constants'
+const DOMAIN = constants.DOMAIN
+
 // Init
 // import Debug from 'debug'
 // const debug = Debug(`Server:route randomPost`)
@@ -42,4 +45,24 @@ export const randomMiddlewareWithAPI = (
   req.query.limit = req.query.limit ?? ((1 as unknown) as string)
 
   next()
+}
+
+/**
+ * Generate a response for every default booru route
+ * @param domainData DomainData
+ */
+export function defaultResponse(domainData: DomainData) {
+  return (req: Request, res: Response): void => {
+    res.json({
+      message: `This endpoint is for ${domainData.url}`,
+
+      posts: `${DOMAIN}/${domainData.short}posts`,
+
+      'single-post': `${DOMAIN}/${domainData.short}single-post`,
+
+      'random-post': `${DOMAIN}/${domainData.short}random-post`,
+
+      tags: `${DOMAIN}/${domainData.short}tags`,
+    })
+  }
 }
