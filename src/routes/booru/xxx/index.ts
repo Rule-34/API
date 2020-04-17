@@ -2,6 +2,10 @@
 import { Router } from 'express'
 import asyncHandler from 'express-async-handler'
 
+import domainData from './domainData'
+
+import { randomMiddlewareWithoutAPI } from '@/middleware/booru'
+
 const router = Router()
 
 /*
@@ -15,7 +19,7 @@ router
 
   .get(
     '/random-post',
-    require('./randomPost'),
+    randomMiddlewareWithoutAPI(domainData),
     asyncHandler(require('./singlePost'))
   )
 
