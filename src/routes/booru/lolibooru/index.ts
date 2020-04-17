@@ -2,6 +2,8 @@
 import { Router } from 'express'
 import asyncHandler from 'express-async-handler'
 
+import { randomMiddlewareWithAPI } from '@/middleware/booru'
+
 const router = Router()
 
 /*
@@ -14,7 +16,7 @@ router
 
   .get(
     '/random-post',
-    require('./randomPost'),
+    randomMiddlewareWithAPI,
     asyncHandler(require('./posts'))
   )
 
