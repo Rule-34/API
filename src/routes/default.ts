@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { Request, Response } from 'express'
 
-import constants from '@/configuration/constants'
-const DOMAIN = constants.DOMAIN
+import constants from '@/configuration'
+const host = constants.host
 
 /**
  * GET /
@@ -14,32 +14,32 @@ module.exports = (req: Request, res: Response): void => {
       'This is an API wrapper made for https://r34.app, it gathers content from the next sites',
     rule34_xxx: {
       domain: 'https://rule34.xxx/',
-      api: `${DOMAIN}/xxx/`,
+      api: `${host}/xxx/`,
     },
 
     rule34_paheal: {
       domain: 'https://rule34.paheal.net/',
-      api: `${DOMAIN}/paheal/`,
+      api: `${host}/paheal/`,
     },
 
     danbooru: {
       domain: 'https://danbooru.donmai.us/',
-      api: `${DOMAIN}/danbooru/`,
+      api: `${host}/danbooru/`,
     },
 
     gelbooru: {
       domain: 'https://gelbooru.com/',
-      api: `${DOMAIN}/gelbooru/`,
+      api: `${host}/gelbooru/`,
     },
 
     e621: {
       domain: 'https://e621.net/',
-      api: `${DOMAIN}/e621/`,
+      api: `${host}/e621/`,
     },
 
     lolibooru: {
       domain: 'https://lolibooru.moe/',
-      api: `${DOMAIN}/loli/`,
+      api: `${host}/loli/`,
     },
   })
 }

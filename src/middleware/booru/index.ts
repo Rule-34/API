@@ -4,8 +4,8 @@ import { DomainData } from 'booru.interface'
 
 import booruList from 'ext/r34-shared/booru-list.json'
 
-import constants from '@/configuration/constants'
-const DOMAIN = constants.DOMAIN
+import constants from '@/configuration'
+const host = constants.host
 
 // Init
 // import Debug from 'debug'
@@ -56,13 +56,13 @@ export function defaultResponse(domainData: DomainData) {
     res.json({
       message: `This endpoint is for ${domainData.url}`,
 
-      posts: `${DOMAIN}/${domainData.short}posts`,
+      posts: `${host}/${domainData.short}posts`,
 
-      'single-post': `${DOMAIN}/${domainData.short}single-post`,
+      'single-post': `${host}/${domainData.short}single-post`,
 
-      'random-post': `${DOMAIN}/${domainData.short}random-post`,
+      'random-post': `${host}/${domainData.short}random-post`,
 
-      tags: `${DOMAIN}/${domainData.short}tags`,
+      tags: `${host}/${domainData.short}tags`,
     })
   }
 }
