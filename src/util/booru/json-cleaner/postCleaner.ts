@@ -212,7 +212,7 @@ export default ({
       case 'e621':
       case 'e621-single':
         if (post.sources[0] === '') {
-          debug(`Empty tag of post ${tempJson.id}`)
+          // debug(`Empty tag of post ${tempJson.id}`)
           break
         }
 
@@ -221,7 +221,7 @@ export default ({
 
       default:
         if (post.source === '') {
-          debug(`Empty tag of post ${tempJson.id}`)
+          // debug(`Empty tag of post ${tempJson.id}`)
           break
         }
 
