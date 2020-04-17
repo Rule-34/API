@@ -2,7 +2,9 @@
 import { Router } from 'express'
 import asyncHandler from 'express-async-handler'
 
-import { randomMiddlewareWithAPI } from '@/middleware/booru'
+import domainData from './domainData'
+
+import { randomMiddlewareWithAPI, defaultResponse } from '@/middleware/booru'
 
 const router = Router()
 
@@ -10,7 +12,7 @@ const router = Router()
  ** Routes
  */
 router
-  .get('/', require('./default'))
+  .get('/', defaultResponse(domainData))
 
   .get('/posts', asyncHandler(require('./posts')))
   .get('/single-post', asyncHandler(require('./singlePost')))
