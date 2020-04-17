@@ -13,6 +13,12 @@ router
   .get('/posts', asyncHandler(require('./posts')))
   .get('/single-post', asyncHandler(require('./singlePost')))
 
+  .get(
+    '/random-post',
+    require('./randomPost'),
+    asyncHandler(require('./singlePost'))
+  )
+
   .get('/tags', asyncHandler(require('./tags')))
 
 // Export default
