@@ -3,7 +3,9 @@
     "moduleResolution": "node",
     "module": "CommonJS",
 
-    "target": "ESNext",
+    "lib": ["ESNext"],
+
+    "target": "ES2019",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
