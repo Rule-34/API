@@ -7,8 +7,6 @@ import 'module-alias/register'
 import request from 'supertest'
 import app from '../src/app'
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-// @ts-ignore
 import domains from '../external/r34-shared/booru-list.json'
 
 /* ---------------- POSTS WITH QUERIES ---------------- */
