@@ -76,6 +76,7 @@ export default ({
   iterableJson.forEach((post) => {
     const tempJson: ReturnedPostsRequest = {
       id: undefined,
+      score: undefined,
       high_res_file: undefined,
       low_res_file: undefined,
       preview_file: undefined,
@@ -87,6 +88,25 @@ export default ({
 
     // Add ID
     tempJson.id = post.id
+
+    // Score
+
+    switch (domain) {
+      case 'e621':
+      case 'e621-single':
+        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+        // @ts-ignore // Disabled because I dont know how I could do this
+        tempJson.score = post.score.total
+        break
+
+      case 'loli':
+        tempJson.score = Number(post.score)
+        break
+
+      default:
+        tempJson.score = post.score as number
+        break
+    }
 
     // Proxy media files and skip to next if they have any media assigned
     switch (domain) {

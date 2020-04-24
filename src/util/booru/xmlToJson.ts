@@ -6,6 +6,7 @@ const template = {
     '/posts/post',
     {
       id: 'number(@id)',
+      score: 'number(@score)',
       high_res_file: '@file_url',
       low_res_file: '@sample_url',
       preview_file: '@preview_url',
