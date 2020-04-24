@@ -21,8 +21,8 @@ const cache = apicache.middleware
 
 // Create Rate limiter middleware
 const rateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 225, // 15 requests per minute
+  windowMs: 1 * 60 * 1000, // 15 minutes
+  max: 15, // 15 requests per minute
 })
 
 // Express configuration
