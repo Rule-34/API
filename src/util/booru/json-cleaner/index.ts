@@ -1,3 +1,5 @@
+import constants from '@/configuration'
+
 import postCleaner from './postCleaner'
 import tagCleaner from './tagCleaner'
 
@@ -20,10 +22,10 @@ export default ({
   useCorsProxy,
 }: IPassedData): Array<object> => {
   // Define CORS Proxy URL
-  let corsProxyUrl = ''
+  let { corsProxyUrl } = constants
 
-  if (useCorsProxy) {
-    corsProxyUrl = 'https://cors-proxy.rule34app.workers.dev/?q='
+  if (!useCorsProxy) {
+    corsProxyUrl = ''
   }
 
   // Clean json of unnecessary data
