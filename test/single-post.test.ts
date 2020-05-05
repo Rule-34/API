@@ -11,22 +11,24 @@ import domains from '../external/r34-shared/booru-list.json'
 
 /* ---------------- SINGLE POST ---------------- */
 describe.each(domains)('Single Post', (domain) => {
-  // Valid response
-  it(`Route ${domain.short} responds with same ID`, function (done) {
+  // Sleep some seconds between route fetches
+  beforeEach(async () => {
+    console.log('Waiting!')
+    await new Promise((r) => setTimeout(r, 300))
+  })
+
+  test(`Route ${domain.short} response's ID is the requested ID`, (done) => {
     request(app)
       .get(`/${domain.short}/single-post/?id=100`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      // Custom
-      .expect(function (res) {
-        //   Array check
+      .expect((res) => {
         if (res.body[0].id !== 100) {
-          throw new Error('Response ID isnt 100')
+          throw new Error('Response ID isnt 100: ' + res.body[0].id)
         }
       })
-      // End
-      .end(function (err) {
+      .end((err) => {
         if (err) return done(err)
         done()
       })

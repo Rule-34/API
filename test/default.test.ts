@@ -15,25 +15,21 @@ const DefaultKeys = ['message', 'posts', 'single-post', 'random-post', 'tags']
 describe.each(domains)('Posts', (domain) => {
   const url = `/${domain.short}`
 
-  it(`Route ${domain.short} responds with valid default response`, function (done) {
+  test(`Route ${domain.short} responds with valid default response`, (done) => {
     request(app)
       .get(url)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      // Custom
-      .expect(function (res) {
+      .expect((res) => {
         // console.log(url)
-
-        // Check if key exists
         DefaultKeys.forEach((key) => {
           if (!res.body.hasOwnProperty(key)) {
             throw new Error('Response doesnt have key: ' + key)
           }
         })
       })
-      // End
-      .end(function (err) {
+      .end((err) => {
         if (err) return done(err)
         done()
       })

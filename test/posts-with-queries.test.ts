@@ -13,46 +13,50 @@ import domains from '../external/r34-shared/booru-list.json'
 describe.each(domains)('Posts', (domain) => {
   const url = `/${domain.short}/posts?limit=5`
 
-  it(`Route ${domain.short} responds with valid post length`, function (done) {
+  // Sleep some seconds between route fetches
+  beforeEach(async () => {
+    console.log('Waiting!')
+    await new Promise((r) => setTimeout(r, 300))
+  })
+
+  test(`Route ${domain.short} responds with valid post length`, (done) => {
     request(app)
       .get(url)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      // Custom
-      .expect(function (res) {
-        // Check
+      .expect((res) => {
         if (res.body.length !== 5) {
           throw new Error(
             'Response is longer than it should: ' + res.body.length
           )
         }
       })
-      // End
-      .end(function (err) {
+      .end((err) => {
         if (err) return done(err)
         done()
       })
   })
 
-  //  Rating check
-  it(`Route ${domain.short} responds with valid rating`, function (done) {
+  test(`Route ${domain.short} response's rating is safe`, (done) => {
     request(app)
-      .get(`${url}&rating=+safe`)
+      .get(`${url}&rating=safe`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      // Custom
-      .expect(function (res) {
-        // Check
+      .expect((res) => {
         res.body.forEach((element: { rating: string }) => {
           if (element.rating !== 'safe') {
             throw new Error('Rating isnt as expected: ' + element.rating)
           }
         })
       })
-      // End
-      .end(function (err) {
+      .end((err) => {
+        if (err) return done(err)
+        done()
+      })
+  })
+
         if (err) return done(err)
         done()
       })
