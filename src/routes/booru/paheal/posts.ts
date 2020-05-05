@@ -16,11 +16,12 @@ import fetchAndTransform from '@/util/booru/fetchAndTransform'
  */
 function applyUrlParameters(req: Request): string {
   // Default query parameters
-  const limit = req.query.limit || 20,
-    pageId = req.query.pid,
-    tags = req.query.tags || '',
-    // rating = req.query.rating as string,
-    score = req.query.score
+  const limit = req.query.limit || 20
+  const pageId = req.query.pid
+  const tags = req.query.tags || ''
+  // let rating = req.query.rating as string
+  const score = req.query.score
+  // const order = req.query.order
 
   let builtUrl: string = domainData.postsApi + '?limit=' + limit
 
@@ -39,8 +40,12 @@ function applyUrlParameters(req: Request): string {
   // }
 
   if (score) {
-    builtUrl += '+score:>=' + score
+    builtUrl += '+score:' + score
   }
+
+  // if (order) {
+  //   builtUrl += '+order:' + order
+  // }
 
   return builtUrl
 }
