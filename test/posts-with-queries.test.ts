@@ -57,6 +57,20 @@ describe.each(domains)('Posts', (domain) => {
       })
   })
 
+  test(`Route ${domain.short} response's rating is everything but safe`, (done) => {
+    request(app)
+      .get(`${url}&rating=-safe`)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .expect((res) => {
+        res.body.forEach((element: { rating: string }) => {
+          if (element.rating === 'safe') {
+            throw new Error('Rating isnt as expected: ' + element.rating)
+          }
+        })
+      })
+      .end((err) => {
         if (err) return done(err)
         done()
       })
