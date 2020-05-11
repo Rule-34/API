@@ -153,11 +153,17 @@ export function createPostFromData(fetchedPostData: PostRequest): PostResponse {
   /*
    * Source
    */
-  tmpJSON.source =
-    // Usual
-    [fetchedPostData.source] ?? [fetchedPostData.source_url] ?? // E621
-    //  Unknown
-    fetchedPostData.sources
+  if (fetchedPostData.source) {
+    tmpJSON.source = [fetchedPostData.source]
+
+    // danbooru.donmai.us
+  } else if (fetchedPostData.source_url) {
+    tmpJSON.source = [fetchedPostData.source]
+
+    // E621
+  } else if (fetchedPostData.sources) {
+    tmpJSON.source = fetchedPostData.sources
+  }
 
   /*
    * Rating
