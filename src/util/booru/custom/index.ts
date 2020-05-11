@@ -1,6 +1,5 @@
 // Classes
-import { Danbooru } from './structures/Booru/Danbooru'
-import { Shimmie2 } from './structures/Booru/Shimmie2'
+import { Danbooru, Gelbooru, Shimmie2 } from './structures/booru'
 import { CustomError } from '@/util/classes'
 
 // Types
