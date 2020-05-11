@@ -198,6 +198,10 @@ export function createPostFromData(fetchedPostData: PostRequest): PostResponse {
 export function ProcessPosts(PostArray: PostRequest[]): PostResponse[] {
   const ProcessedPosts: PostResponse[] = []
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+  PostArray = PostArray.length ? PostArray : PostArray.posts
+
   // Error handling
   if (!PostArray.length) {
     throw new CustomError(
