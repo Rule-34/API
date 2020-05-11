@@ -7,18 +7,22 @@ const template = {
       id: 'number(@id)',
       score: 'number(@score)',
 
-      high_res_file: { url: '@file_url', height: '@height', width: '@width' },
+      high_res_file: {
+        url: '@file_url',
+        height: 'number(@height)',
+        width: 'number(@width)',
+      },
 
       low_res_file: {
         url: '@sample_url',
-        height: '@sample_height',
-        width: '@sample_width',
+        height: 'number(@sample_height)',
+        width: 'number(@sample_width)',
       },
 
       preview_file: {
         url: '@preview_url',
-        height: '@preview_height',
-        width: '@preview_width',
+        height: 'number(@preview_height)',
+        width: 'number(@preview_width)',
       },
 
       tags: '@tags',
