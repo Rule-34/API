@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 
 // Util
-import customFetchAndTransform from '@/util/booru/custom'
+import { BooruHandler } from '@/util/booru/custom'
 
 // Init
 // import Debug from 'debug'
@@ -15,10 +15,7 @@ module.exports = async (req: Request, res: Response): Promise<void> => {
   // debug(requestUrl)
 
   // Process through wich the xml request gets transformed to optimized json
-  const jsonResult: object = await customFetchAndTransform({
-    queryObj,
-    desiredEndpoint: 'posts',
-  })
+  const jsonResult: object = await BooruHandler('posts', queryObj)
 
   // Reply
   res.json(jsonResult)
