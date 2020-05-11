@@ -1,8 +1,5 @@
 import { Request, Response } from 'express'
 
-// Configuration
-import domainData from './domainData'
-
 // Util
 import customFetchAndTransform from '@/util/booru/custom'
 

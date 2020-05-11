@@ -2,10 +2,6 @@
 import { Router } from 'express'
 import asyncHandler from 'express-async-handler'
 
-import domainData from './domainData'
-
-import { randomMiddlewareWithoutAPI, defaultResponse } from '@/middleware/booru'
-
 const router = Router()
 
 /*
