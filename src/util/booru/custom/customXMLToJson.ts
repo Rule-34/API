@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/camelcase */
-import { transform } from 'camaro'
+import { ready, transform } from 'camaro'
 
 const template = {
-  0: [
+  xml: [
     '/posts/post',
     {
       id: 'number(@id)',
@@ -33,6 +32,9 @@ const template = {
  * Transforms XML to Json using a template
  * @xml XML data
  */
-export default async (xml: string): Promise<object> => {
+export default async (xml: string): Promise<string> => {
+  // Ready camaro
+  await ready()
+
   return await transform(xml, template)
 }

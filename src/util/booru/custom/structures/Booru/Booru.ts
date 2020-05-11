@@ -2,14 +2,19 @@ import { PostResponse, ProcessedQueries } from '../types'
 
 import httpFetch from '@/util/booru/httpFetch'
 import { ProcessPosts } from '../Post'
+import customXMLToJson from '@/util/booru/custom/customXMLToJson'
+
+// Init
+import Debug from 'debug'
+const debug = Debug(`Server:util Booru`)
 
 interface QueryIdentifier {
   limit: string
   pageID: string
   tags: string
-  rating: string
-  score: string
-  order: string
+  rating?: string
+  score?: string
+  order?: string
 }
 
 interface BooruEndpoints {
@@ -93,8 +98,15 @@ export class Booru {
       URLToFetch += '+' + this.queryIdentifier.order + ':' + order
     }
 
-    // TODO: Test if response is XML and process it
-    const response = JSON.parse(await httpFetch(URLToFetch))
+    let response = await httpFetch(URLToFetch)
+
+    try {
+      response = JSON.parse(response)
+    } catch (error) {
+      debug('Response was not JSON')
+      response = await customXMLToJson(response)
+      // debug(response)
+    }
 
     return ProcessPosts(response)
   }
