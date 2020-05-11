@@ -40,6 +40,10 @@ export async function BooruHandler(
       API = new Shimmie2(domain as string)
       break
 
+    case 'gelbooru':
+      API = new Gelbooru(domain as string)
+      break
+
     default:
       throw new CustomError('No known booru type', 400)
   }
