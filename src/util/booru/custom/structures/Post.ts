@@ -135,19 +135,34 @@ export function createPostFromData(fetchedPostData: PostRequest): PostResponse {
   /*
    * Tags
    */
-  tmpJSON.tags =
-    // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-    (fetchedPostData.tags as string)?.trim().split(' ') ??
-    // danbooru.donmai.us
-    fetchedPostData.tag_string?.trim().split(' ')
+  fetchedPostData.tags = fetchedPostData.tags ?? fetchedPostData.tag_string
 
-  if (!tmpJSON.tags.length) {
-    const tempTags: string[] = []
+  switch (typeof fetchedPostData.tags) {
+    case 'string':
+      tmpJSON.tags =
+        // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
+        (fetchedPostData.tags as string)?.trim().split(' ') ??
+        // danbooru.donmai.us
+        fetchedPostData.tag_string?.trim().split(' ')
+      break
 
-    // E621 - TODO: will probably break something
-    ;(fetchedPostData.tags as [string[]]).forEach((tagContainer) => {
-      tempTags.concat(tagContainer)
-    })
+    case 'object':
+      // If it is already an array
+      if (Array.isArray(fetchedPostData.tags)) {
+        tmpJSON.tags = fetchedPostData.tags
+        break
+      }
+
+      // E621 - TODO: will probably break something
+      tmpJSON.tags = []
+
+      Object.keys(fetchedPostData.tags).forEach((tagContainer) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+        // @ts-ignore
+        tmpJSON.tags = tmpJSON.tags.concat(fetchedPostData.tags[tagContainer])
+      })
+      break
+
   }
 
   /*
