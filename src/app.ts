@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express'
+import express from 'express'
 // Utils
 import bodyParser from 'body-parser'
 import compression from 'compression'
@@ -6,8 +6,6 @@ import morgan from 'morgan'
 // Security
 import cors from 'cors'
 import helmet from 'helmet'
-import apicache from 'apicache'
-import rateLimit from 'express-rate-limit'
 // Errors
 import errorHandler from './middleware/error'
 // Routes
@@ -15,15 +13,6 @@ import baseRouter from './routes'
 
 // Create Express server
 const app = express()
-
-// Create cache middleware
-const cache = apicache.middleware
-
-// Create Rate limiter middleware
-const rateLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 15 minutes
-  max: 15, // 15 requests per minute
-})
 
 // Express configuration
 app.set('trust proxy', 1)
@@ -68,20 +57,6 @@ switch (process.env.NODE_ENV) {
         },
       })
     )
-
-    // Cache
-    app.use(cache('5 minutes'))
-
-    app.get('/cache/performance', (req: Request, res: Response) => {
-      res.json(apicache.getPerformance())
-    })
-
-    app.get('/cache/index', (req: Request, res: Response) => {
-      res.json(apicache.getIndex())
-    })
-
-    // Rate limit
-    app.use(rateLimiter)
 
     break
 }

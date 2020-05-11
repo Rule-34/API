@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import { transform } from 'camaro'
+import { ready, transform } from 'camaro'
 
 const template = {
   0: [
@@ -23,5 +23,8 @@ const template = {
  * @xml XML data
  */
 export default async (xml: string): Promise<string> => {
+  // Ready camaro
+  await ready()
+
   return JSON.stringify(await transform(xml, template))
 }

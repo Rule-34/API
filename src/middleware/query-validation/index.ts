@@ -27,7 +27,7 @@ export const postsValidation = (): ValidationChain[] => {
     // // Encode tags
     // .customSanitizer(encodeValue),
     query('rating').isString().optional(),
-    query('score').isInt().optional(),
+    query('score').isString().optional(),
     query('order').isString().optional(),
     query('corsProxy').isBoolean().toBoolean().optional(),
   ]

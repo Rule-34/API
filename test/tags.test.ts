@@ -11,47 +11,47 @@ import domains from '../external/r34-shared/booru-list.json'
 
 /* ---------------- TAGS ---------------- */
 describe.each(domains)('Tags', (domain) => {
-  // Valid integer count
-  it(`Route ${domain.short} responds with valid count`, function (done) {
+  const url = `/${domain.short}/tags`
+
+  // Sleep some seconds between route fetches
+  beforeEach(async () => {
+    console.log('Waiting!')
+    await new Promise((r) => setTimeout(r, 300))
+  })
+
+  test(`Route ${domain.short} response's is an integer`, (done) => {
     request(app)
-      .get(`/${domain.short}/tags?tag=pok`)
+      .get(`${url}?tag=pok`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      // Custom
-      .expect(function (res) {
-        // Check
+      .expect((res) => {
         res.body.forEach((element: { count: number }) => {
           if (!Number.isInteger(element.count)) {
             throw new Error('Count is not an int')
           }
         })
       })
-      // End
-      .end(function (err) {
+      .end((err) => {
         if (err) return done(err)
         done()
       })
   })
 
-  //  Array length
-  it(`Route ${domain.short} responds with valid tag length`, function (done) {
+  test(`Route ${domain.short} response's length is valid`, (done) => {
     request(app)
-      .get(`/${domain.short}/tags?tag=pok&limit=5`)
+      .get(`${url}?tag=pok&limit=5`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      // Custom
-      .expect(function (res) {
-        //   Array length check
+      .expect((res) => {
         if (res.body.length !== 5) {
           throw new Error(
             'Response is longer than it should: ' + res.body.length
           )
         }
       })
-      // End
-      .end(function (err) {
+      .end((err) => {
         if (err) return done(err)
         done()
       })
