@@ -5,13 +5,10 @@ import { PostResponse, PostRequest } from './types'
 import { CustomError } from '@/util/classes'
 
 // Init
-import Debug from 'debug'
-const debug = Debug(`Server:util Post Cleaner`)
+// import Debug from 'debug'
+// const debug = Debug(`Server:util Post Cleaner`)
 
-export function createPostFromData(
-  booru: string,
-  fetchedPostData: PostRequest
-): PostResponse {
+export function createPostFromData(fetchedPostData: PostRequest): PostResponse {
   const tmpJSON: PostResponse = {
     id: undefined,
     score: undefined,
@@ -44,6 +41,8 @@ export function createPostFromData(
   /*
    * Score
    */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore // Disabled because I dont know how I could do this
   tmpJSON.score = Number(fetchedPostData.score ?? fetchedPostData.score.total)
 
   /*
@@ -52,29 +51,29 @@ export function createPostFromData(
   tmpJSON.high_res_file = {
     url:
       // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.high_res_file.url ??
+      fetchedPostData.high_res_file?.url ??
       // lolibooru | danbooru
       fetchedPostData.file_url ??
       // E621 - Modern boorus
-      fetchedPostData.file.url,
+      fetchedPostData.file?.url,
 
     height:
       // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.high_res_file.height ??
+      fetchedPostData.high_res_file?.height ??
       // lolibooru
       fetchedPostData.height ??
       // E621 - Modern boorus
-      fetchedPostData.file.height ??
+      fetchedPostData.file?.height ??
       // danbooru.donmai.us
       fetchedPostData.image_height,
 
     width:
       // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.high_res_file.width ??
+      fetchedPostData.high_res_file?.width ??
       // lolibooru
       fetchedPostData.width ??
       // E621 - Modern boorus
-      fetchedPostData.file.width ??
+      fetchedPostData.file?.width ??
       // danbooru.donmai.us
       fetchedPostData.image_width,
   }
@@ -82,61 +81,60 @@ export function createPostFromData(
   tmpJSON.low_res_file = {
     url:
       // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.low_res_file.url ??
+      fetchedPostData.low_res_file?.url ??
       // lolibooru
       fetchedPostData.sample_url ??
       // E621 - Modern boorus
-      fetchedPostData.sample.url ??
+      fetchedPostData.sample?.url ??
       // danbooru.donmai.us
       fetchedPostData.large_file_url,
 
     height:
       // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.low_res_file.height ??
+      fetchedPostData.low_res_file?.height ??
       // lolibooru
       fetchedPostData.sample_height ??
       // E621 - Modern boorus
-      fetchedPostData.sample.height,
+      fetchedPostData.sample?.height,
 
     width:
       // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.low_res_file.width ??
+      fetchedPostData.low_res_file?.width ??
       // lolibooru
       fetchedPostData.sample_width ??
       // E621 - Modern boorus
-      fetchedPostData.sample.width,
+      fetchedPostData.sample?.width,
   }
 
   tmpJSON.preview_file = {
     url:
       // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.preview_file.url ??
+      fetchedPostData.preview_file?.url ??
       // E621
-      fetchedPostData.preview.url ??
+      fetchedPostData.preview?.url ??
       // danbooru.donmai.us
       fetchedPostData.preview_file_url,
 
     height:
       // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.preview_file.height ??
+      fetchedPostData.preview_file?.height ??
       // lolibooru
       fetchedPostData.preview_height ??
       // E621
-      fetchedPostData.preview.height,
+      fetchedPostData.preview?.height,
 
     width:
       // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.preview_file.width ??
+      fetchedPostData.preview_file?.width ??
       // lolibooru
       fetchedPostData.preview_width ??
       // E621
-      fetchedPostData.preview.width,
+      fetchedPostData.preview?.width,
   }
 
   /*
    * Tags
    */
-
   tmpJSON.tags =
     // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
     (fetchedPostData.tags as string)?.trim().split(' ') ??
@@ -209,7 +207,7 @@ export function ProcessPosts(PostArray: PostRequest[]): PostResponse[] {
   }
 
   PostArray.forEach((post) => {
-    ProcessedPosts.push(createPostFromData(undefined, post))
+    ProcessedPosts.push(createPostFromData(post))
   })
 
   return ProcessedPosts
