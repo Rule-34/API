@@ -163,6 +163,11 @@ export function createPostFromData(fetchedPostData: PostRequest): PostResponse {
       })
       break
 
+    default:
+      throw new CustomError(
+        'Unknown tag type' + typeof fetchedPostData.tags,
+        500
+      )
   }
 
   /*
