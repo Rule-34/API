@@ -197,4 +197,20 @@ export function createPostFromData(
   return tmpJSON
 }
 
+export function ProcessPosts(PostArray: PostRequest[]): PostResponse[] {
+  const ProcessedPosts: PostResponse[] = []
+
+  // Error handling
+  if (!PostArray.length) {
+    throw new CustomError(
+      'No data to return, maybe you have too many tags?',
+      422
+    )
+  }
+
+  PostArray.forEach((post) => {
+    ProcessedPosts.push(createPostFromData(undefined, post))
+  })
+
+  return ProcessedPosts
 }
