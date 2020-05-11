@@ -1,5 +1,6 @@
 // Classes
 import { Danbooru } from './structures/Booru/Danbooru'
+import { Shimmie2 } from './structures/Booru/Shimmie2'
 import { CustomError } from '@/util/classes'
 
 // Types
@@ -32,6 +33,11 @@ export async function BooruHandler(
   switch (booruType) {
     case 'danbooru':
       API = new Danbooru(domain as string)
+      break
+
+    case 'shimmie':
+    case 'shimmie2':
+      API = new Shimmie2(domain as string)
       break
 
     default:
