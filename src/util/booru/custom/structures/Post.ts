@@ -43,7 +43,7 @@ export function createPostFromData(fetchedPostData: PostRequest): PostResponse {
    */
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore // Disabled because I dont know how I could do this
-  tmpJSON.score = Number(fetchedPostData.score ?? fetchedPostData.score.total)
+  tmpJSON.score = fetchedPostData.score?.total ?? fetchedPostData.score
 
   /*
    * File URLs
