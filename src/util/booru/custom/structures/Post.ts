@@ -221,12 +221,11 @@ export function createPostFromData(fetchedPostData: PostRequest): PostResponse {
   return tmpJSON
 }
 
-export function ProcessPosts(PostArray: PostRequest[]): PostResponse[] {
+export function ProcessPosts(PostArray: any): PostResponse[] {
   const ProcessedPosts: PostResponse[] = []
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  PostArray = PostArray.length ? PostArray : PostArray.posts
+  if (PostArray.posts) PostArray = PostArray.posts
+  else if (PostArray.xml) PostArray = PostArray.xml
 
   // Error handling
   if (!PostArray.length) {
@@ -236,7 +235,7 @@ export function ProcessPosts(PostArray: PostRequest[]): PostResponse[] {
     )
   }
 
-  PostArray.forEach((post) => {
+  PostArray.forEach((post: any) => {
     ProcessedPosts.push(createPostFromData(post))
   })
 
