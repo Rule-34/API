@@ -83,3 +83,18 @@ export interface PostRequest {
    */
   rating: string
 }
+
+export interface ProcessedQueries {
+  limit: number
+  pageID: number
+  tags: string
+  rating: string
+  score: number
+  order: string
+
+  // SINGLE POST
+  postID: number
+
+  // TAGS
+  tag: string
+}
