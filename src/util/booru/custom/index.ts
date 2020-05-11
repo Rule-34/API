@@ -1,127 +1,50 @@
-import he from 'he'
+// Classes
+import { Danbooru } from './structures/Booru/Booru'
+import { CustomError } from '@/util/classes'
 
-import httpFetch from '../httpFetch'
-import xmlToJson from './customXMLToJson'
-import jsonCleaner from '../json-cleaner'
+// Types
+import { Request } from 'express'
+import { PostResponse, ProcessedQueries } from './structures/types'
 
-/**
- * Transform the passed url with the passed template
- * @param {String} url
- * @param {String} template
- * @param {String} domain
- * @param {Boolean} isJson
- * @param {Number} limit
- * @param {Boolean} useCorsProxy Should the request return the proxied url, defaults to true
- */
-export default async ({
-  queryObj,
-  desiredEndpoint: requestedEndpoint,
-}): Promise<Array<object>> => {
+export async function BooruHandler(
+  endpoint: string,
+  queryObj: Request['query']
+): Promise<PostResponse[]> {
   // General
-  const { HTTPScheme, host, booruType } = queryObj
+  const { domain, booruType } = queryObj
 
-  let URLToFetch, responseIsJSON
-
-  // Deestructure queries
   // POSTS
-  const limit = queryObj.limit ?? 20,
-    pageID = queryObj.pid,
-    tags = queryObj.tags,
-    rating = queryObj.rating,
-    score = queryObj.score,
-    order = queryObj.order,
+  const processedQueries: ProcessedQueries = {
+    limit: Number(queryObj.limit ?? 20),
+    pageID: Number(queryObj.pid),
+    tags: (queryObj.tags as string) ?? '',
+    rating: queryObj.rating as string,
+    score: Number(queryObj.score),
+    order: queryObj.order as string,
     // SINGLE POST
-    postID = queryObj.postID,
+    postID: Number(queryObj.postID),
     // TAGS
-    tag = queryObj.tag
+    tag: queryObj.tag as string,
+  }
 
+  // BOORU
+  let API
   switch (booruType) {
-    // BOORU
-    case 'shimmie':
-      // ENDPOINT
-      switch (requestedEndpoint) {
-        // POSTS
-        case 'posts':
-          // Init values
-          responseIsJSON = false
-
-          URLToFetch = HTTPScheme + host + '/api/danbooru/post/index.xml'
-
-          // QUERIES
-          URLToFetch += '?' + 'limit=' + limit
-
-          if (pageID) {
-            URLToFetch += '&' + 'pid=' + pageID
-          }
-
-          if (tags) {
-            URLToFetch += '&' + 'tags=' + tags
-          }
-
-          if (score) {
-            if (!tags) URLToFetch += '&' + 'tags='
-
-            URLToFetch += '+score:' + score
-          }
-          break
-
-        // SINGLE POST
-        case 'single-post':
-          // Init values
-          responseIsJSON = false
-
-          URLToFetch = HTTPScheme + host + '/api/danbooru/post/index.xml'
-
-          // QUERIES
-          URLToFetch += '?' + 'id=' + postID
-          break
-
-        // TAGS
-        case 'tags':
-          // Init values
-          responseIsJSON = true
-
-          URLToFetch = HTTPScheme + host + '/api/internal/autocomplete'
-
-          // QUERIES
-          URLToFetch += '?' + 's=' + tag
-          break
-
-        // RANDOM POST
-        case 'random-post':
-          // Init values
-          responseIsJSON = false
-
-          URLToFetch = undefined
-          break
-
-        default:
-          throw new Error('No endpoint specified')
-      }
-
+    case 'danbooru':
+      API = new Danbooru(domain as string)
       break
 
     default:
-      throw new Error('No known booru type')
+      throw new CustomError('No known booru type', 400)
   }
 
-  // First fetch data
-  let fetchData = await httpFetch(URLToFetch)
+  // ENDPOINT
+  switch (endpoint) {
+    // POSTS
+    case 'posts':
+      return await API.getPosts(processedQueries)
 
-  // Transform if data is JSON
-  if (!responseIsJSON) {
-    fetchData = await xmlToJson(fetchData, 'shimmie')
+    default:
+      throw new CustomError('No endpoint specified', 400)
   }
-
-  // Decode HTML chars
-  fetchData = he.decode(fetchData)
-
-  // Then clean the JSON with the passed template, and return it
-  return await jsonCleaner({
-    template,
-    domain,
-    data: fetchData,
-    limit,
-    useCorsProxy,
-  })
 }
