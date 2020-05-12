@@ -1,6 +1,6 @@
 import { ready, transform } from 'camaro'
 
-const template = {
+const postsTemplate = {
   xml: [
     '/posts/post',
     {
@@ -32,13 +32,32 @@ const template = {
   ],
 }
 
+const tagsTemplate = {
+  xml: [
+    '/tags/tag',
+    {
+      name: '@name',
+      count: 'number(@count)',
+    },
+  ],
+}
+
 /**
  * Transforms XML to Json using a template
  * @xml XML data
  */
-export default async (xml: string): Promise<string> => {
+export default async (xml: string, mode: string): Promise<string> => {
   // Ready camaro
   await ready()
 
-  return await transform(xml, template)
+  switch (mode) {
+    case 'posts':
+      return await transform(xml, postsTemplate)
+
+    case 'tags':
+      return await transform(xml, tagsTemplate)
+
+    default:
+      throw new Error('No mode specified')
+  }
 }
