@@ -9,20 +9,20 @@ const template = {
 
       high_res_file: {
         url: '@file_url',
-        height: 'number(@height)',
         width: 'number(@width)',
+        height: 'number(@height)',
       },
 
       low_res_file: {
         url: '@sample_url',
-        height: 'number(@sample_height)',
         width: 'number(@sample_width)',
+        height: 'number(@sample_height)',
       },
 
       preview_file: {
         url: '@preview_url',
-        height: 'number(@preview_height)',
         width: 'number(@preview_width)',
+        height: 'number(@preview_height)',
       },
 
       tags: '@tags',

@@ -57,16 +57,6 @@ export function createPostFromData(fetchedPostData: PostRequest): PostResponse {
       // E621 - Modern boorus
       fetchedPostData.file?.url,
 
-    height:
-      // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.high_res_file?.height ??
-      // lolibooru
-      fetchedPostData.height ??
-      // E621 - Modern boorus
-      fetchedPostData.file?.height ??
-      // danbooru.donmai.us
-      fetchedPostData.image_height,
-
     width:
       // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
       fetchedPostData.high_res_file?.width ??
@@ -76,6 +66,16 @@ export function createPostFromData(fetchedPostData: PostRequest): PostResponse {
       fetchedPostData.file?.width ??
       // danbooru.donmai.us
       fetchedPostData.image_width,
+
+    height:
+      // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
+      fetchedPostData.high_res_file?.height ??
+      // lolibooru
+      fetchedPostData.height ??
+      // E621 - Modern boorus
+      fetchedPostData.file?.height ??
+      // danbooru.donmai.us
+      fetchedPostData.image_height,
   }
 
   tmpJSON.low_res_file = {
@@ -89,14 +89,6 @@ export function createPostFromData(fetchedPostData: PostRequest): PostResponse {
       // danbooru.donmai.us
       fetchedPostData.large_file_url,
 
-    height:
-      // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.low_res_file?.height ??
-      // lolibooru
-      fetchedPostData.sample_height ??
-      // E621 - Modern boorus
-      fetchedPostData.sample?.height,
-
     width:
       // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
       fetchedPostData.low_res_file?.width ??
@@ -104,6 +96,14 @@ export function createPostFromData(fetchedPostData: PostRequest): PostResponse {
       fetchedPostData.sample_width ??
       // E621 - Modern boorus
       fetchedPostData.sample?.width,
+
+    height:
+      // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
+      fetchedPostData.low_res_file?.height ??
+      // lolibooru
+      fetchedPostData.sample_height ??
+      // E621 - Modern boorus
+      fetchedPostData.sample?.height,
   }
 
   tmpJSON.preview_file = {
@@ -115,14 +115,6 @@ export function createPostFromData(fetchedPostData: PostRequest): PostResponse {
       // danbooru.donmai.us
       fetchedPostData.preview_file_url,
 
-    height:
-      // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.preview_file?.height ??
-      // lolibooru
-      fetchedPostData.preview_height ??
-      // E621
-      fetchedPostData.preview?.height,
-
     width:
       // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
       fetchedPostData.preview_file?.width ??
@@ -130,6 +122,14 @@ export function createPostFromData(fetchedPostData: PostRequest): PostResponse {
       fetchedPostData.preview_width ??
       // E621
       fetchedPostData.preview?.width,
+
+    height:
+      // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
+      fetchedPostData.preview_file?.height ??
+      // lolibooru
+      fetchedPostData.preview_height ??
+      // E621
+      fetchedPostData.preview?.height,
   }
 
   /*
