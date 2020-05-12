@@ -1,6 +1,6 @@
 export * from './Booru'
+export * from './Danbooru2'
 export * from './Danbooru'
-export * from './DanbooruOld'
 export * from './Gelbooru'
 export * from './Shimmie2'
 export * from './Moebooru'
