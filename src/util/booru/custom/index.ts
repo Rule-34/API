@@ -15,7 +15,7 @@ import { BooruResponses } from './structures/types'
 export async function BooruHandler(
   endpoint: string,
   queryObj: Request['query']
-): Promise<PostResponse[]> {
+): Promise<BooruResponses.PostResponse[] | BooruResponses.TagResponse[]> {
   // General
   const { domain, booruType } = queryObj
 
@@ -63,6 +63,15 @@ export async function BooruHandler(
 
       return await API.getPosts(processedPostQueries)
 
+    case 'tags':
+      const processedTagQueries = {
+        tag: queryObj.tag as string,
+        limit: Number(queryObj.limit ?? 20),
+        pageID: Number(queryObj.pid),
+        order: (queryObj.order as string) ?? 'count',
+      }
+
+      return await API.getTags(processedTagQueries)
 
     // case 'single-post':
     // const processedSinglePostQueries = {

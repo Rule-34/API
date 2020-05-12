@@ -11,15 +11,15 @@ router
   // .get('/', defaultResponse(domainData))
 
   .get('/posts', asyncHandler(require('./posts')))
-// .get('/single-post', asyncHandler(require('./singlePost')))
+  // .get('/single-post', asyncHandler(require('./singlePost')))
 
-// .get(
-//   '/random-post',
-//   randomMiddlewareWithoutAPI(domainData),
-//   asyncHandler(require('./singlePost'))
-// )
+  // .get(
+  //   '/random-post',
+  //   randomMiddlewareWithoutAPI(domainData),
+  //   asyncHandler(require('./singlePost'))
+  // )
 
-// .get('/tags', asyncHandler(require('./tags')))
+  .get('/tags', asyncHandler(require('./tags')))
 
 // Export default
 module.exports = router

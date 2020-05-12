@@ -24,6 +24,12 @@ export class Booru {
       order: undefined,
     },
 
+    tags: {
+      tag: undefined,
+      limit: undefined,
+      pageID: undefined,
+      order: undefined,
+    },
   }
 
   public endpoints: BooruClass.BooruEndpoints = {
@@ -63,6 +69,21 @@ export class Booru {
     }
 
     return ProcessPosts(response)
+  }
+
+  public async getTags(
+    queryObj: BooruData.ProcessedTagQueries
+  ): Promise<BooruResponses.TagResponse[]> {
+    // Declare base URL
+    let URLToFetch = this.endpoints.base + this.endpoints.tags
+
+    URLToFetch = this.addQueriesToURL(URLToFetch, 'tags', queryObj)
+
+    let response = await httpFetch(URLToFetch)
+
+    response = JSON.parse(response)
+
+    return ProcessTags(response)
   }
 
   private addQueriesToURL(
@@ -131,6 +152,23 @@ export class Booru {
 
         break
 
+      case 'tags':
+        // Tag
+        URL += this.queryIdentifier.tags.tag + '=' + tag + '*' // This shouldnt be necessary
+
+        // Limit
+        URL += '&' + this.queryIdentifier.tags.limit + '=' + limit
+
+        // Page ID
+        if (pageID) {
+          URL += '&' + this.queryIdentifier.tags.pageID + '=' + pageID
+        }
+
+        // Order
+        if (order) {
+          URL += '&' + this.queryIdentifier.tags.order + '=' + order
+        }
+        break
 
       default:
         throw new Error('No mode specified')
