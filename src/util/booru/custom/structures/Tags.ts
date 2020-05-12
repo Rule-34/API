@@ -16,10 +16,9 @@ function createTagsFromData(
     count: undefined,
   }
 
-  tmpJSON.name = fetchedTagsData.name
+  tmpJSON.name = fetchedTagsData.name ?? fetchedTagsData.tag
 
-  tmpJSON.count = fetchedTagsData.post_count
-
+  tmpJSON.count = Number(fetchedTagsData.post_count ?? fetchedTagsData.count)
   return tmpJSON
 }
 

@@ -156,7 +156,12 @@ export class Booru {
 
       case 'tags':
         // Tag
-        URL += this.queryIdentifier.tags.tag + '=' + tag + '*' // This shouldnt be necessary
+        URL += this.queryIdentifiers.tags.tag + '=' + tag
+
+        // Tag Ending
+        if (this.queryIdentifiers.tags.tagEnding) {
+          URL += this.queryIdentifiers.tags.tagEnding
+        }
 
         // Limit
         URL += '&' + this.queryIdentifiers.tags.limit + '=' + limit
@@ -171,6 +176,9 @@ export class Booru {
           URL += '&' + this.queryIdentifiers.tags.order + '=' + order
         }
 
+        // Raw methods to add
+        if (this.queryIdentifiers.tags.raw) {
+          URL += '&' + this.queryIdentifiers.tags.raw
         }
         break
 
