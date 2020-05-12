@@ -1,5 +1,5 @@
 export namespace BooruClass {
-  interface QueryIdentifier {
+  interface QueryIdentifiers {
     posts: {
       limit: string
       pageID: string
@@ -11,9 +11,11 @@ export namespace BooruClass {
 
     tags: {
       tag: string
+      tagEnding?: string
       limit?: string
       pageID?: string
       order?: string
+      raw?: string
     }
   }
 
@@ -119,14 +121,15 @@ export namespace BooruResponses {
   }
 
   interface TagRequest {
-    name: string
+    tag?: string
+    name?: string
     post_count?: number
     count?: number
   }
 }
 
 export namespace BooruData {
-  interface ProcessedPostQueries {
+  interface InputPostQueries {
     limit: number
     pageID: number
     tags: string
@@ -135,7 +138,7 @@ export namespace BooruData {
     order?: string
   }
 
-  interface ProcessedTagQueries {
+  interface InputTagQueries {
     tag: string
     limit?: number
     pageID?: number

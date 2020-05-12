@@ -52,7 +52,7 @@ export async function BooruHandler(
   switch (endpoint) {
     case 'posts':
       // POSTS
-      const processedPostQueries = {
+      const inputPostQueries = {
         limit: Number(queryObj.limit ?? 20),
         pageID: Number(queryObj.pid),
         tags: (queryObj.tags as string) ?? '',
@@ -61,17 +61,17 @@ export async function BooruHandler(
         order: queryObj.order as string,
       }
 
-      return await API.getPosts(processedPostQueries)
+      return await API.getPosts(inputPostQueries)
 
     case 'tags':
-      const processedTagQueries = {
+      const inputTagQueries = {
         tag: queryObj.tag as string,
         limit: Number(queryObj.limit ?? 20),
         pageID: Number(queryObj.pid),
         order: (queryObj.order as string) ?? 'count',
       }
 
-      return await API.getTags(processedTagQueries)
+      return await API.getTags(inputTagQueries)
 
     // case 'single-post':
     // const processedSinglePostQueries = {

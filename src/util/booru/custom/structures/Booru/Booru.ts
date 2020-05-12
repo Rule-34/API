@@ -14,7 +14,7 @@ const debug = Debug(`Server:util Booru`)
 export class Booru {
   public booruType = 'booru'
 
-  public queryIdentifier: BooruClass.QueryIdentifier = {
+  public queryIdentifiers: BooruClass.QueryIdentifiers = {
     posts: {
       limit: undefined,
       pageID: undefined,
@@ -26,9 +26,11 @@ export class Booru {
 
     tags: {
       tag: undefined,
+      tagEnding: undefined,
       limit: undefined,
       pageID: undefined,
       order: undefined,
+      raw: undefined,
     },
   }
 
@@ -42,16 +44,16 @@ export class Booru {
 
   constructor(
     endpoints: BooruClass.BooruEndpoints,
-    queryStrings: BooruClass.QueryIdentifier
+    queryIdentifiers: BooruClass.QueryIdentifiers
   ) {
     this.endpoints = endpoints
     this.endpoints.base = `https://${this.endpoints.base}`
 
-    this.queryIdentifier = queryStrings
+    this.queryIdentifiers = queryIdentifiers
   }
 
   public async getPosts(
-    queryObj: BooruData.ProcessedPostQueries
+    queryObj: BooruData.InputPostQueries
   ): Promise<BooruResponses.PostResponse[]> {
     // Declare base URL
     let URLToFetch = this.endpoints.base + this.endpoints.posts
@@ -72,7 +74,7 @@ export class Booru {
   }
 
   public async getTags(
-    queryObj: BooruData.ProcessedTagQueries
+    queryObj: BooruData.InputTagQueries
   ): Promise<BooruResponses.TagResponse[]> {
     // Declare base URL
     let URLToFetch = this.endpoints.base + this.endpoints.tags
@@ -89,7 +91,7 @@ export class Booru {
   private addQueriesToURL(
     URL: string,
     mode: string,
-    queryObj: BooruData.ProcessedPostQueries | BooruData.ProcessedTagQueries
+    queryObj: BooruData.InputPostQueries | BooruData.InputTagQueries
   ): string {
     const {
       limit,
@@ -98,9 +100,9 @@ export class Booru {
       rating,
       score,
       order,
-    } = queryObj as BooruData.ProcessedPostQueries
+    } = queryObj as BooruData.InputPostQueries
 
-    const { tag } = queryObj as BooruData.ProcessedTagQueries
+    const { tag } = queryObj as BooruData.InputTagQueries
 
     // Add & if ? is present
     URL += URL.includes('?') ? '&' : '?'
@@ -108,15 +110,15 @@ export class Booru {
     switch (mode) {
       case 'posts':
         // Limit
-        URL += this.queryIdentifier.posts.limit + '=' + limit
+        URL += this.queryIdentifiers.posts.limit + '=' + limit
 
         // Page ID
         if (pageID) {
-          URL += '&' + this.queryIdentifier.posts.pageID + '=' + pageID
+          URL += '&' + this.queryIdentifiers.posts.pageID + '=' + pageID
         }
 
         // Tags
-        URL += '&' + this.queryIdentifier.posts.tags + '=' + tags
+        URL += '&' + this.queryIdentifiers.posts.tags + '=' + tags
 
         // Rating
         if (rating) {
@@ -137,17 +139,17 @@ export class Booru {
               break
           }
 
-          URL += prefix + this.queryIdentifier.posts.rating + ':' + tmpRating
+          URL += prefix + this.queryIdentifiers.posts.rating + ':' + tmpRating
         }
 
         // Score
         if (score) {
-          URL += '+' + this.queryIdentifier.posts.score + '=' + score
+          URL += '+' + this.queryIdentifiers.posts.score + '=' + score
         }
 
         // Order
         if (order) {
-          URL += '+' + this.queryIdentifier.posts.order + ':' + order
+          URL += '+' + this.queryIdentifiers.posts.order + ':' + order
         }
 
         break
@@ -157,16 +159,18 @@ export class Booru {
         URL += this.queryIdentifier.tags.tag + '=' + tag + '*' // This shouldnt be necessary
 
         // Limit
-        URL += '&' + this.queryIdentifier.tags.limit + '=' + limit
+        URL += '&' + this.queryIdentifiers.tags.limit + '=' + limit
 
         // Page ID
         if (pageID) {
-          URL += '&' + this.queryIdentifier.tags.pageID + '=' + pageID
+          URL += '&' + this.queryIdentifiers.tags.pageID + '=' + pageID
         }
 
         // Order
         if (order) {
-          URL += '&' + this.queryIdentifier.tags.order + '=' + order
+          URL += '&' + this.queryIdentifiers.tags.order + '=' + order
+        }
+
         }
         break
 
