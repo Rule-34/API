@@ -1,7 +1,7 @@
 // Classes
 import {
+  Danbooru2,
   Danbooru,
-  DanbooruOld,
   Gelbooru,
   Shimmie2,
   Moebooru,
@@ -40,21 +40,22 @@ export async function BooruHandler(
       API = new Danbooru(domain as string)
       break
 
-    case 'danbooruOld':
-      API = new DanbooruOld(domain as string)
+    case 'danbooru2':
+      API = new Danbooru2(domain as string)
       break
 
-    case 'shimmie':
+    // MyImouto is quite similar
+    // Danbooru is quite similar
+    case 'moebooru':
+      API = new Moebooru(domain as string)
+      break
+
     case 'shimmie2':
       API = new Shimmie2(domain as string)
       break
 
     case 'gelbooru':
       API = new Gelbooru(domain as string)
-      break
-
-    case 'moebooru':
-      API = new Moebooru(domain as string)
       break
 
     default:

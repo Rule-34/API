@@ -1,14 +1,14 @@
 import { Booru } from './Booru'
 
-export class DanbooruOld extends Booru {
+export class Danbooru2 extends Booru {
   constructor(base: string) {
     super(
       {
         base: base,
-        posts: '/post/index.xml',
-        tags: '/tag/index.xml',
-        singlePost: undefined,
-        randomPost: '/post/index.xml',
+        posts: '/posts.json',
+        tags: '/tags.json',
+        singlePost: '/posts/',
+        randomPost: '/posts.json',
       },
       {
         limit: 'limit',

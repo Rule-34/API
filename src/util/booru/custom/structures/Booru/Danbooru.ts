@@ -5,10 +5,10 @@ export class Danbooru extends Booru {
     super(
       {
         base: base,
-        posts: '/posts.json',
-        tags: '/tags.json',
-        singlePost: '/posts/',
-        randomPost: '/posts.json',
+        posts: '/post/index.xml',
+        tags: '/tag/index.xml',
+        singlePost: undefined,
+        randomPost: '/post/index.xml',
       },
       {
         limit: 'limit',
