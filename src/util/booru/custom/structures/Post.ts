@@ -135,39 +135,33 @@ export function createPostFromData(fetchedPostData: PostRequest): PostResponse {
   /*
    * Tags
    */
-  fetchedPostData.tags = fetchedPostData.tags ?? fetchedPostData.tag_string
 
-  switch (typeof fetchedPostData.tags) {
-    case 'string':
-      tmpJSON.tags =
-        // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-        (fetchedPostData.tags as string)?.trim().split(' ') ??
-        // danbooru.donmai.us
-        fetchedPostData.tag_string?.trim().split(' ')
-      break
+  // Unknown
+  if (Array.isArray(fetchedPostData.tags)) {
+    tmpJSON.tags = fetchedPostData.tags
 
-    case 'object':
-      // If it is already an array
-      if (Array.isArray(fetchedPostData.tags)) {
-        tmpJSON.tags = fetchedPostData.tags
-        break
-      }
+    // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
+  } else if (typeof fetchedPostData.tags === 'string') {
+    tmpJSON.tags = (fetchedPostData.tags as string)?.trim().split(' ')
 
-      // E621 - TODO: will probably break something
-      tmpJSON.tags = []
+    // danbooru.donmai.us
+  } else if (typeof fetchedPostData.tag_string === 'string') {
+    tmpJSON.tags = fetchedPostData.tag_string?.trim().split(' ')
 
-      Object.keys(fetchedPostData.tags).forEach((tagContainer) => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-        // @ts-ignore
-        tmpJSON.tags = tmpJSON.tags.concat(fetchedPostData.tags[tagContainer])
-      })
-      break
+    // E621
+  } else if (typeof fetchedPostData.tags === 'object') {
+    // Fix so .concat exists
+    tmpJSON.tags = []
 
-    default:
-      throw new CustomError(
-        'Unknown tag type' + typeof fetchedPostData.tags,
-        500
-      )
+    Object.keys(fetchedPostData.tags).forEach((tagContainer) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore
+      tmpJSON.tags = tmpJSON.tags.concat(fetchedPostData.tags[tagContainer])
+    })
+
+    // Throw error
+  } else {
+    throw new CustomError('Unknown tag type' + typeof fetchedPostData.tags, 500)
   }
 
   /*
