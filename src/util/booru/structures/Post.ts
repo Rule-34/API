@@ -1,5 +1,5 @@
 // Definitions
-import { BooruResponses, BooruData } from './types'
+import { BooruResponses, BooruData } from '@/types/types'
 
 // Classes
 import { CustomError } from '@/util/classes'

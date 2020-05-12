@@ -1,5 +1,5 @@
 // Definitions
-import { BooruResponses, BooruData } from './types'
+import { BooruResponses, BooruData } from '@/types/types'
 
 // Classes
 import { CustomError } from '@/util/classes'
@@ -17,11 +17,13 @@ function createTagsFromData(
     count: undefined,
   }
   switch (booruType) {
+    // Tags from internal autocomplete API
     case 'shimmie2':
       tmpJSON.name = fetchedTagsData[0]
       tmpJSON.count = fetchedTagsData[1]
       break
 
+    // Tags from transfromed XML
     case 'danbooru':
     case 'gelbooru':
       tmpJSON.name = fetchedTagsData.name
@@ -62,12 +64,7 @@ export function ProcessTags(
 
         counter++
 
-        // End array if we are at the specified limit
-        if (counter >= limit) {
-          break
-        }
-
-        console.log(counter)
+        if (counter >= limit) break
       }
       break
 

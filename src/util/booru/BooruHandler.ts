@@ -1,17 +1,17 @@
+// Types
+import { Request } from 'express'
+import { BooruResponses, BooruData } from '@/types/types'
+
 // Classes
 import { Danbooru2, Danbooru, Gelbooru, Shimmie2 } from './structures/booru'
 import { CustomError } from '@/util/classes'
 
-// Types
-import { Request } from 'express'
-import { BooruResponses } from './structures/types'
-
 export async function BooruHandler(
-  endpoint: string,
+  { booruType, endpoint }: BooruData.DataBetweenFunctions,
   queryObj: Request['query']
 ): Promise<BooruResponses.PostResponse[] | BooruResponses.TagResponse[]> {
   // General
-  const { domain, booruType } = queryObj
+  const { domain } = queryObj
 
   // BOORU
   let API

@@ -1,14 +1,14 @@
 // Types
-import { BooruClass, BooruResponses, BooruData } from '../types'
+import { BooruClass, BooruResponses, BooruData } from '@/types/types'
 
 // Utilities
 import httpFetch from '@/util/booru/httpFetch'
-import customXMLToJson from '@/util/booru/custom/customXMLToJson'
+import XMLToJson from '@/util/booru/XMLToJson'
 import { ProcessPosts } from '../Post'
+import { ProcessTags } from '../Tags'
 
 // Init
 import Debug from 'debug'
-import { ProcessTags } from '../Tags'
 const debug = Debug(`Server:util Booru`)
 
 export class Booru {
@@ -70,14 +70,11 @@ export class Booru {
     } catch (error) {
       debug('Response was not JSON')
 
-      response = await customXMLToJson(response, 'posts')
+      response = await XMLToJson(response, 'posts')
       wasXML = true
     }
 
-    return ProcessPosts(
-      { booruType: this.booruType, wasXML, limit: queryObj.limit },
-      response
-    )
+    return ProcessPosts({ booruType: this.booruType, wasXML }, response)
   }
 
   public async getTags(
@@ -98,7 +95,7 @@ export class Booru {
     } catch {
       debug('Response was not JSON')
 
-      response = await customXMLToJson(response, 'tags')
+      response = await XMLToJson(response, 'tags')
       wasXML = true
     }
 
@@ -206,9 +203,6 @@ export class Booru {
           URL += '&' + this.queryIdentifiers.tags.raw
         }
         break
-
-      default:
-        throw new Error('No mode specified')
     }
 
     return URL
