@@ -1,5 +1,5 @@
 // Definitions
-import { BooruResponses } from './types'
+import { BooruResponses, BooruData } from './types'
 
 // Classes
 import { CustomError } from '@/util/classes'
@@ -9,35 +9,82 @@ import { CustomError } from '@/util/classes'
 // const debug = Debug(`Server:util Post Cleaner`)
 
 function createTagsFromData(
-  fetchedTagsData: BooruResponses.TagRequest
+  booruType: string,
+  fetchedTagsData: any
 ): BooruResponses.TagResponse {
   const tmpJSON: BooruResponses.TagResponse = {
     name: undefined,
     count: undefined,
   }
+  switch (booruType) {
+    case 'shimmie2':
+      tmpJSON.name = fetchedTagsData[0]
+      tmpJSON.count = fetchedTagsData[1]
+      break
 
-  tmpJSON.name = fetchedTagsData.name ?? fetchedTagsData.tag
+    case 'danbooru':
+    case 'gelbooru':
+      tmpJSON.name = fetchedTagsData.name
 
-  tmpJSON.count = Number(fetchedTagsData.post_count ?? fetchedTagsData.count)
+      tmpJSON.count = fetchedTagsData.count
+      break
+
+    case 'danbooru2':
+      tmpJSON.name = fetchedTagsData.name
+      tmpJSON.count = fetchedTagsData.post_count
+      break
+  }
   return tmpJSON
 }
 
-export function ProcessTags(tagsArray: any): BooruResponses.TagResponse[] {
+export function ProcessTags(
+  { booruType, wasXML, limit }: BooruData.DataBetweenFunctions,
+  tagsArray: any
+): BooruResponses.TagResponse[] {
   const ProcessedPosts: BooruResponses.TagResponse[] = []
 
-  if (tagsArray.xml) tagsArray = tagsArray.xml
+  if (wasXML) tagsArray = tagsArray.xml
 
-  // Error handling
-  if (!tagsArray.length) {
-    throw new CustomError(
-      'No data to return, maybe you have too many tags?',
-      422
-    )
+  switch (booruType) {
+    case 'shimmie2':
+      // Error handling
+      if (!Object.keys(tagsArray).length) {
+        throw new CustomError(
+          'No data to return, maybe you have too many tags?',
+          422
+        )
+      }
+
+      let counter = 0
+
+      for (const prop of Object.entries(tagsArray)) {
+        ProcessedPosts.push(createTagsFromData(booruType, prop))
+
+        counter++
+
+        // End array if we are at the specified limit
+        if (counter >= limit) {
+          break
+        }
+
+        console.log(counter)
+      }
+      break
+
+    default:
+      // Error handling
+      if (!tagsArray.length) {
+        throw new CustomError(
+          'No data to return, maybe you have too many tags?',
+          422
+        )
+      }
+
+      tagsArray.forEach((post: any) => {
+        ProcessedPosts.push(createTagsFromData(booruType, post))
+      })
+      break
   }
-
-  tagsArray.forEach((post: BooruResponses.TagRequest) => {
-    ProcessedPosts.push(createTagsFromData(post))
-  })
 
   return ProcessedPosts
 }
