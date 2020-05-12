@@ -7,29 +7,24 @@
     "url": "https://github.com/VoidlessSeven7/Rule-34-API-Auth"
   },
   "author": "Alejandro Akbal",
-  "main": "dist/src/server.js",
+  "main": "dist/server.js",
   "scripts": {
-    "1": "1",
-    "2": "2",
-    "3": "3",
-    "4": "4",
     "start": "npm run serve",
-    "serve": "node dist/src/server.js",
+    "serve": "node dist/server.js",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
     "watch-ts": "tsc -w",
-    "watch-node": "nodemon dist/src/server.js",
+    "watch-node": "nodemon dist/server.js",
     "build": "npm run build-ts && npm run lint",
     "build-ts": "tsc",
     "test": "jest --forceExit --coverage --verbose",
     "watch-test": "npm run test -- --watchAll",
     "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix",
     "debug": "npm run build && npm run watch-debug",
-    "serve-debug": "nodemon --inspect dist/src/server.js",
+    "serve-debug": "nodemon --inspect dist/server.js",
     "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\""
   },
   "_moduleAliases": {
-    "@": "dist/src/",
-    "ext": "external"
+    "@": "dist/"
   },
   "dependencies": {
     "apicache": "^1.5.3",
