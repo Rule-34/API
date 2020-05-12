@@ -116,10 +116,11 @@ export class Booru {
     switch (mode) {
       case 'posts':
         // Limit
-        URL += this.queryIdentifiers.posts.limit + '=' + limit
+        if (limit && this.queryIdentifiers.posts.limit)
+          URL += this.queryIdentifiers.posts.limit + '=' + limit
 
         // Page ID
-        if (pageID) {
+        if (pageID && this.queryIdentifiers.posts.pageID) {
           URL += '&' + this.queryIdentifiers.posts.pageID + '=' + pageID
         }
 
@@ -127,7 +128,7 @@ export class Booru {
         URL += '&' + this.queryIdentifiers.posts.tags + '=' + tags
 
         // Rating
-        if (rating) {
+        if (rating && this.queryIdentifiers.posts.rating) {
           let tmpRating: string
           let prefix: string
 
@@ -149,12 +150,12 @@ export class Booru {
         }
 
         // Score
-        if (score) {
+        if (score && this.queryIdentifiers.posts.score) {
           URL += '+' + this.queryIdentifiers.posts.score + '=' + score
         }
 
         // Order
-        if (order) {
+        if (order && this.queryIdentifiers.posts.order) {
           URL += '+' + this.queryIdentifiers.posts.order + ':' + order
         }
 
@@ -170,15 +171,19 @@ export class Booru {
         }
 
         // Limit
-        URL += '&' + this.queryIdentifiers.tags.limit + '=' + limit
+        if (limit && this.queryIdentifiers.tags.limit) {
+          URL += '&' + this.queryIdentifiers.tags.limit + '=' + limit
+        }
 
         // Page ID
-        if (pageID) {
+        if (pageID && this.queryIdentifiers.tags.pageID) {
           URL += '&' + this.queryIdentifiers.tags.pageID + '=' + pageID
         }
 
         // Order
-        if (order) {
+        if (order && this.queryIdentifiers.tags.order) {
+          console.log(order)
+
           URL += '&' + this.queryIdentifiers.tags.order + '=' + order
         }
 
