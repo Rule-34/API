@@ -25,6 +25,8 @@ function createTagsFromData(
 export function ProcessTags(tagsArray: any): BooruResponses.TagResponse[] {
   const ProcessedPosts: BooruResponses.TagResponse[] = []
 
+  if (tagsArray.xml) tagsArray = tagsArray.xml
+
   // Error handling
   if (!tagsArray.length) {
     throw new CustomError(

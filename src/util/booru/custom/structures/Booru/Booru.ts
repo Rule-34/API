@@ -66,7 +66,7 @@ export class Booru {
       response = JSON.parse(response)
     } catch (error) {
       debug('Response was not JSON')
-      response = await customXMLToJson(response)
+      response = await customXMLToJson(response, 'posts')
       // debug(response)
     }
 
@@ -83,7 +83,13 @@ export class Booru {
 
     let response = await httpFetch(URLToFetch)
 
-    response = JSON.parse(response)
+    try {
+      response = JSON.parse(response)
+    } catch (error) {
+      debug('Response was not JSON')
+      response = await customXMLToJson(response, 'tags')
+      // debug(response)
+    }
 
     return ProcessTags(response)
   }
