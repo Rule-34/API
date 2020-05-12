@@ -2,8 +2,8 @@
 import { BooruClass, BooruResponses, BooruData } from '@/types/types'
 
 // Utilities
-import httpFetch from '@/util/booru/httpFetch'
-import XMLToJson from '@/util/booru/XMLToJson'
+import httpFetch from '@/util/httpFetch'
+import XMLToJson from '@/util/XMLToJson'
 import { ProcessPosts } from '../Post'
 import { ProcessTags } from '../Tags'
 
