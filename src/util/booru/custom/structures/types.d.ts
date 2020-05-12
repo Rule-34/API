@@ -144,4 +144,10 @@ export namespace BooruData {
     pageID?: number
     order?: string
   }
+
+  interface DataBetweenFunctions {
+    booruType: string
+    wasXML: boolean
+    limit?: number
+  }
 }

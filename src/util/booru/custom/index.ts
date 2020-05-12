@@ -18,19 +18,19 @@ export async function BooruHandler(
   switch (booruType) {
     // Moebooru and MyImouto are danbooru
     case 'danbooru':
-      API = new Danbooru(domain as string)
+      API = new Danbooru(booruType, domain as string)
       break
 
     case 'danbooru2':
-      API = new Danbooru2(domain as string)
+      API = new Danbooru2(booruType, domain as string)
       break
 
     case 'shimmie2':
-      API = new Shimmie2(domain as string)
+      API = new Shimmie2(booruType, domain as string)
       break
 
     case 'gelbooru':
-      API = new Gelbooru(domain as string)
+      API = new Gelbooru(booruType, domain as string)
       break
 
     default:

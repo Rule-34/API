@@ -1,8 +1,9 @@
 import { Booru } from './Booru'
 
 export class Danbooru extends Booru {
-  constructor(base: string) {
+  constructor(booruType: string, base: string) {
     super(
+      booruType,
       {
         base: base,
         posts: '/post/index.xml',

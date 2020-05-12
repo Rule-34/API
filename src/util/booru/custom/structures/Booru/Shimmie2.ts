@@ -1,8 +1,9 @@
 import { Booru } from './Booru'
 
 export class Shimmie2 extends Booru {
-  constructor(base: string) {
+  constructor(booruType: string, base: string) {
     super(
+      booruType,
       {
         base: base,
         posts: '/api/danbooru/find_posts',

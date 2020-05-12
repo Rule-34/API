@@ -12,7 +12,7 @@ import { ProcessTags } from '../Tags'
 const debug = Debug(`Server:util Booru`)
 
 export class Booru {
-  public booruType = 'booru'
+  public booruType: string = undefined
 
   public queryIdentifiers: BooruClass.QueryIdentifiers = {
     posts: {
@@ -43,9 +43,12 @@ export class Booru {
   }
 
   constructor(
+    booruType: string,
     endpoints: BooruClass.BooruEndpoints,
     queryIdentifiers: BooruClass.QueryIdentifiers
   ) {
+    this.booruType = booruType
+
     this.endpoints = endpoints
     this.endpoints.base = `https://${this.endpoints.base}`
 
@@ -55,7 +58,7 @@ export class Booru {
   public async getPosts(
     queryObj: BooruData.InputPostQueries
   ): Promise<BooruResponses.PostResponse[]> {
-    // Declare base URL
+    let wasXML = false
     let URLToFetch = this.endpoints.base + this.endpoints.posts
 
     URLToFetch = this.addQueriesToURL(URLToFetch, 'posts', queryObj)
@@ -66,32 +69,43 @@ export class Booru {
       response = JSON.parse(response)
     } catch (error) {
       debug('Response was not JSON')
+
       response = await customXMLToJson(response, 'posts')
-      // debug(response)
+      wasXML = true
     }
 
-    return ProcessPosts(response)
+    return ProcessPosts(
+      { booruType: this.booruType, wasXML, limit: queryObj.limit },
+      response
+    )
   }
 
   public async getTags(
     queryObj: BooruData.InputTagQueries
   ): Promise<BooruResponses.TagResponse[]> {
-    // Declare base URL
+    let wasXML = false
     let URLToFetch = this.endpoints.base + this.endpoints.tags
 
     URLToFetch = this.addQueriesToURL(URLToFetch, 'tags', queryObj)
 
     let response = await httpFetch(URLToFetch)
 
+    // Parse JSON
     try {
       response = JSON.parse(response)
-    } catch (error) {
+
+      // Parse XML
+    } catch {
       debug('Response was not JSON')
+
       response = await customXMLToJson(response, 'tags')
-      // debug(response)
+      wasXML = true
     }
 
-    return ProcessTags(response)
+    return ProcessTags(
+      { booruType: this.booruType, wasXML, limit: queryObj.limit },
+      response
+    )
   }
 
   private addQueriesToURL(
