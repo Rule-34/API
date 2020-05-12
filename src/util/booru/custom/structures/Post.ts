@@ -1,5 +1,5 @@
 // Definitions
-import { PostResponse, PostRequest } from './types'
+import { BooruResponses } from './types'
 
 // Classes
 import { CustomError } from '@/util/classes'
@@ -8,8 +8,10 @@ import { CustomError } from '@/util/classes'
 // import Debug from 'debug'
 // const debug = Debug(`Server:util Post Cleaner`)
 
-export function createPostFromData(fetchedPostData: PostRequest): PostResponse {
-  const tmpJSON: PostResponse = {
+function createPostFromData(
+  fetchedPostData: BooruResponses.PostRequest
+): BooruResponses.PostResponse {
+  const tmpJSON: BooruResponses.PostResponse = {
     id: undefined,
     score: undefined,
     high_res_file: {
@@ -215,8 +217,8 @@ export function createPostFromData(fetchedPostData: PostRequest): PostResponse {
   return tmpJSON
 }
 
-export function ProcessPosts(PostArray: any): PostResponse[] {
-  const ProcessedPosts: PostResponse[] = []
+export function ProcessPosts(PostArray: any): BooruResponses.PostResponse[] {
+  const ProcessedPosts: BooruResponses.PostResponse[] = []
 
   if (PostArray.posts) PostArray = PostArray.posts
   else if (PostArray.xml) PostArray = PostArray.xml
@@ -229,7 +231,7 @@ export function ProcessPosts(PostArray: any): PostResponse[] {
     )
   }
 
-  PostArray.forEach((post: any) => {
+  PostArray.forEach((post: BooruResponses.PostRequest) => {
     ProcessedPosts.push(createPostFromData(post))
   })
 

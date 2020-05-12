@@ -1,100 +1,144 @@
-export interface PostResponse {
-  id: number
-  score: number
-  high_res_file: {
-    url: string
-    height: number
-    width: number
+export namespace BooruClass {
+  interface QueryIdentifier {
+    posts: {
+      limit: string
+      pageID: string
+      tags: string
+      rating?: string
+      score?: string
+      order?: string
+    }
+
+    tags: {
+      tag: string
+      limit?: string
+      pageID?: string
+      order?: string
+    }
   }
-  low_res_file: {
-    url: string
-    height: number
-    width: number
+
+  interface BooruEndpoints {
+    base: string
+    posts: string
+    tags: string
+    singlePost: string
+    randomPost: string
   }
-  preview_file: {
-    url: string
-    height: number
-    width: number
-  }
-  tags: string[]
-  source: string[]
-  rating: string
-  type: string
 }
 
-export interface PostRequest {
-  /**
-   * ID
-   */
-  id: number
+export namespace BooruResponses {
+  interface PostResponse {
+    id: number
+    score: number
+    high_res_file: {
+      url: string
+      height: number
+      width: number
+    }
+    low_res_file: {
+      url: string
+      height: number
+      width: number
+    }
+    preview_file: {
+      url: string
+      height: number
+      width: number
+    }
+    tags: string[]
+    source: string[]
+    rating: string
+    type: string
+  }
 
-  /**
-   * Score
-   */
-  score: number | { total: number }
+  interface PostRequest {
+    /**
+     * ID
+     */
+    id: number
 
-  /**
-   * Media
-   */
+    /**
+     * Score
+     */
+    score: number | { total: number }
 
-  // High res file
-  high_res_file?: { url: string; height: number; width: number } // Transformed XML
-  file_url?: string
-  file?: { url: string; height: number; width: number }
+    /**
+     * Media
+     */
 
-  height?: number
-  image_height?: number
-  width?: number
-  image_width?: number
+    // High res file
+    high_res_file?: { url: string; height: number; width: number } // Transformed XML
+    file_url?: string
+    file?: { url: string; height: number; width: number }
 
-  // Low res file
-  low_res_file?: { url: string; height: number; width: number } // Transformed XML
-  large_file_url?: string
-  sample?: { url: string; height: number; width: number }
-  sample_url?: string
+    height?: number
+    image_height?: number
+    width?: number
+    image_width?: number
 
-  sample_height?: number
-  sample_width?: number
+    // Low res file
+    low_res_file?: { url: string; height: number; width: number } // Transformed XML
+    large_file_url?: string
+    sample?: { url: string; height: number; width: number }
+    sample_url?: string
 
-  // Preview res file
-  preview_file?: { url: string; height: number; width: number } // Transformed XML
-  preview_file_url?: string
-  preview?: { url: string; height: number; width: number }
-  preview_url?: string
+    sample_height?: number
+    sample_width?: number
 
-  preview_height?: number
-  preview_width?: number
+    // Preview res file
+    preview_file?: { url: string; height: number; width: number } // Transformed XML
+    preview_file_url?: string
+    preview?: { url: string; height: number; width: number }
+    preview_url?: string
 
-  /**
-   * Tags
-   */
-  tags?: string | [string[]]
-  tag_string?: string
+    preview_height?: number
+    preview_width?: number
 
-  /**
-   * Source
-   */
-  sources?: Array<string>
-  source?: string
-  source_url?: string
+    /**
+     * Tags
+     */
+    tags?: string | string[]
+    tag_string?: string
 
-  /**
-   * Rating
-   */
-  rating: string
+    /**
+     * Source
+     */
+    sources?: Array<string>
+    source?: string
+    source_url?: string
+
+    /**
+     * Rating
+     */
+    rating: string
+  }
+
+  interface TagResponse {
+    name: string
+    count: number
+  }
+
+  interface TagRequest {
+    name: string
+    post_count?: number
+    count?: number
+  }
 }
 
-export interface ProcessedQueries {
-  limit: number
-  pageID: number
-  tags: string
-  rating: string
-  score: number
-  order: string
+export namespace BooruData {
+  interface ProcessedPostQueries {
+    limit: number
+    pageID: number
+    tags: string
+    rating?: string
+    score?: number
+    order?: string
+  }
 
-  // SINGLE POST
-  postID: number
-
-  // TAGS
-  tag: string
+  interface ProcessedTagQueries {
+    tag: string
+    limit?: number
+    pageID?: number
+    order?: string
+  }
 }

@@ -1,5 +1,5 @@
 // Types
-import { PostResponse, ProcessedQueries } from '../types'
+import { BooruClass, BooruResponses, BooruData } from '../types'
 
 // Utilities
 import httpFetch from '@/util/booru/httpFetch'
@@ -8,38 +8,25 @@ import { ProcessPosts } from '../Post'
 
 // Init
 import Debug from 'debug'
+import { ProcessTags } from '../Tags'
 const debug = Debug(`Server:util Booru`)
-
-interface QueryIdentifier {
-  limit: string
-  pageID: string
-  tags: string
-  rating?: string
-  score?: string
-  order?: string
-}
-
-interface BooruEndpoints {
-  base: string
-  posts: string
-  tags: string
-  singlePost: string
-  randomPost: string
-}
 
 export class Booru {
   public booruType = 'booru'
 
-  public queryIdentifier: QueryIdentifier = {
-    limit: undefined,
-    pageID: undefined,
-    tags: undefined,
-    rating: undefined,
-    score: undefined,
-    order: undefined,
+  public queryIdentifier: BooruClass.QueryIdentifier = {
+    posts: {
+      limit: undefined,
+      pageID: undefined,
+      tags: undefined,
+      rating: undefined,
+      score: undefined,
+      order: undefined,
+    },
+
   }
 
-  public endpoints: BooruEndpoints = {
+  public endpoints: BooruClass.BooruEndpoints = {
     base: undefined,
     posts: undefined,
     tags: undefined,
@@ -47,14 +34,19 @@ export class Booru {
     randomPost: undefined,
   }
 
-  constructor(endpoints: BooruEndpoints, queryStrings: QueryIdentifier) {
+  constructor(
+    endpoints: BooruClass.BooruEndpoints,
+    queryStrings: BooruClass.QueryIdentifier
+  ) {
     this.endpoints = endpoints
     this.endpoints.base = `https://${this.endpoints.base}`
 
     this.queryIdentifier = queryStrings
   }
 
-  public async getPosts(queryObj: ProcessedQueries): Promise<PostResponse[]> {
+  public async getPosts(
+    queryObj: BooruData.ProcessedPostQueries
+  ): Promise<BooruResponses.PostResponse[]> {
     // Declare base URL
     let URLToFetch = this.endpoints.base + this.endpoints.posts
 
@@ -76,25 +68,34 @@ export class Booru {
   private addQueriesToURL(
     URL: string,
     mode: string,
-    queryObj: ProcessedQueries
+    queryObj: BooruData.ProcessedPostQueries | BooruData.ProcessedTagQueries
   ): string {
-    const { limit, pageID, tags, rating, score, order } = queryObj
+    const {
+      limit,
+      pageID,
+      tags,
+      rating,
+      score,
+      order,
+    } = queryObj as BooruData.ProcessedPostQueries
+
+    const { tag } = queryObj as BooruData.ProcessedTagQueries
+
+    // Add & if ? is present
+    URL += URL.includes('?') ? '&' : '?'
 
     switch (mode) {
       case 'posts':
-        // Add & if ? is present
-        URL += URL.includes('?') ? '&' : '?'
-
         // Limit
-        URL += this.queryIdentifier.limit + '=' + limit
+        URL += this.queryIdentifier.posts.limit + '=' + limit
 
         // Page ID
         if (pageID) {
-          URL += '&' + this.queryIdentifier.pageID + '=' + pageID
+          URL += '&' + this.queryIdentifier.posts.pageID + '=' + pageID
         }
 
         // Tags
-        URL += '&' + this.queryIdentifier.tags + '=' + tags
+        URL += '&' + this.queryIdentifier.posts.tags + '=' + tags
 
         // Rating
         if (rating) {
@@ -115,23 +116,21 @@ export class Booru {
               break
           }
 
-          URL += prefix + this.queryIdentifier.rating + ':' + tmpRating
+          URL += prefix + this.queryIdentifier.posts.rating + ':' + tmpRating
         }
 
         // Score
         if (score) {
-          URL += '+' + this.queryIdentifier.score + '=' + score
+          URL += '+' + this.queryIdentifier.posts.score + '=' + score
         }
 
         // Order
         if (order) {
-          URL += '+' + this.queryIdentifier.order + ':' + order
+          URL += '+' + this.queryIdentifier.posts.order + ':' + order
         }
 
         break
 
-      // case 'tags':
-      //   break
 
       default:
         throw new Error('No mode specified')

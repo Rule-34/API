@@ -10,7 +10,7 @@ import { CustomError } from '@/util/classes'
 
 // Types
 import { Request } from 'express'
-import { PostResponse, ProcessedQueries } from './structures/types'
+import { BooruResponses } from './structures/types'
 
 export async function BooruHandler(
   endpoint: string,
