@@ -10,13 +10,23 @@ export class Danbooru extends Booru {
         singlePost: undefined,
         randomPost: '/post/index.xml',
       },
+
       {
-        limit: 'limit',
-        pageID: 'page',
-        tags: 'tags',
-        rating: 'rating',
-        score: 'score',
-        order: 'order',
+        posts: {
+          limit: 'limit',
+          pageID: 'page',
+          tags: 'tags',
+          rating: 'rating',
+          score: 'score',
+          order: 'order',
+        },
+
+        tags: {
+          tag: 'name',
+          limit: 'limit',
+          pageID: 'page',
+          order: 'order',
+        },
       }
     )
   }
