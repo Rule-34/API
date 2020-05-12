@@ -1,5 +1,5 @@
 // Definitions
-import { BooruResponses } from './types'
+import { BooruResponses, BooruData } from './types'
 
 // Classes
 import { CustomError } from '@/util/classes'
@@ -9,6 +9,7 @@ import { CustomError } from '@/util/classes'
 // const debug = Debug(`Server:util Post Cleaner`)
 
 function createPostFromData(
+  booruType: string,
   fetchedPostData: BooruResponses.PostRequest
 ): BooruResponses.PostResponse {
   const tmpJSON: BooruResponses.PostResponse = {
@@ -43,142 +44,117 @@ function createPostFromData(
   /*
    * Score
    */
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore // Disabled because I dont know how I could do this
-  tmpJSON.score = fetchedPostData.score?.total ?? fetchedPostData.score
+  switch (booruType) {
+    case 'danbooru2':
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore // Disabled because I dont know how I could do this
+      if (typeof fetchedPostData.score.total === 'number') {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+        // @ts-ignore // Disabled because I dont know how I could do this
+        tmpJSON.score = fetchedPostData.score.total
+        break
+      }
+      tmpJSON.score = fetchedPostData.score as number
+      break
+
+    default:
+      tmpJSON.score = fetchedPostData.score as number
+      break
+  }
 
   /*
    * File URLs
    */
-  tmpJSON.high_res_file = {
-    url:
-      // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.high_res_file?.url ??
-      // lolibooru | danbooru
-      fetchedPostData.file_url ??
-      // E621 - Modern boorus
-      fetchedPostData.file?.url,
 
-    width:
-      // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.high_res_file?.width ??
-      // lolibooru
-      fetchedPostData.width ??
-      // E621 - Modern boorus
-      fetchedPostData.file?.width ??
-      // danbooru.donmai.us
-      fetchedPostData.image_width,
-
-    height:
-      // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.high_res_file?.height ??
-      // lolibooru
-      fetchedPostData.height ??
-      // E621 - Modern boorus
-      fetchedPostData.file?.height ??
-      // danbooru.donmai.us
-      fetchedPostData.image_height,
-  }
-
-  tmpJSON.low_res_file = {
-    url:
-      // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.low_res_file?.url ??
-      // lolibooru
-      fetchedPostData.sample_url ??
-      // E621 - Modern boorus
-      fetchedPostData.sample?.url ??
-      // danbooru.donmai.us
-      fetchedPostData.large_file_url,
-
-    width:
-      // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.low_res_file?.width ??
-      // lolibooru
-      fetchedPostData.sample_width ??
-      // E621 - Modern boorus
-      fetchedPostData.sample?.width,
-
-    height:
-      // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.low_res_file?.height ??
-      // lolibooru
-      fetchedPostData.sample_height ??
-      // E621 - Modern boorus
-      fetchedPostData.sample?.height,
-  }
-
-  tmpJSON.preview_file = {
-    url:
-      // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.preview_file?.url ??
+  switch (booruType) {
+    case 'danbooru2':
       // E621
-      fetchedPostData.preview?.url ??
-      // danbooru.donmai.us
-      fetchedPostData.preview_file_url,
+      if (fetchedPostData.file) {
+        tmpJSON.high_res_file = {
+          url: fetchedPostData.file.url,
+          width: fetchedPostData.file.width,
+          height: fetchedPostData.file.height,
+        }
 
-    width:
-      // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.preview_file?.width ??
-      // lolibooru
-      fetchedPostData.preview_width ??
-      // E621
-      fetchedPostData.preview?.width,
+        tmpJSON.low_res_file = {
+          url: fetchedPostData.sample.url,
+          width: fetchedPostData.sample.width,
+          height: fetchedPostData.sample.height,
+        }
 
-    height:
-      // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-      fetchedPostData.preview_file?.height ??
-      // lolibooru
-      fetchedPostData.preview_height ??
-      // E621
-      fetchedPostData.preview?.height,
+        tmpJSON.preview_file = {
+          url: fetchedPostData.preview.url,
+          width: fetchedPostData.preview.width,
+          height: fetchedPostData.preview.height,
+        }
+
+        break
+      }
+
+      // Most danbooru2 types
+      tmpJSON.high_res_file = {
+        url: fetchedPostData.file_url,
+        width: fetchedPostData.image_width,
+        height: fetchedPostData.image_height,
+      }
+
+      tmpJSON.low_res_file = {
+        url: fetchedPostData.large_file_url,
+      }
+
+      tmpJSON.preview_file = {
+        url: fetchedPostData.preview_file_url,
+      }
+      break
+
+    default:
+      tmpJSON.high_res_file = fetchedPostData.high_res_file
+      tmpJSON.low_res_file = fetchedPostData.low_res_file
+      tmpJSON.preview_file = fetchedPostData.preview_file
+      break
   }
 
   /*
    * Tags
    */
+  switch (booruType) {
+    case 'danbooru2':
+      if (fetchedPostData.tag_string) {
+        tmpJSON.tags = fetchedPostData.tag_string?.trim().split(' ')
+        break
+      }
 
-  // Unknown
-  if (Array.isArray(fetchedPostData.tags)) {
-    tmpJSON.tags = fetchedPostData.tags
+      tmpJSON.tags = []
 
-    // rule34.xxx | rule34.paheal.net | gelbooru | safebooru - XML transformed boorus
-  } else if (typeof fetchedPostData.tags === 'string') {
-    tmpJSON.tags = (fetchedPostData.tags as string)?.trim().split(' ')
+      Object.keys(fetchedPostData.tags).forEach((tagContainer) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+        // @ts-ignore
+        tmpJSON.tags = tmpJSON.tags.concat(fetchedPostData.tags[tagContainer])
+      })
+      break
 
-    // danbooru.donmai.us
-  } else if (typeof fetchedPostData.tag_string === 'string') {
-    tmpJSON.tags = fetchedPostData.tag_string?.trim().split(' ')
-
-    // E621
-  } else if (typeof fetchedPostData.tags === 'object') {
-    // Fix so .concat exists
-    tmpJSON.tags = []
-
-    Object.keys(fetchedPostData.tags).forEach((tagContainer) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-      // @ts-ignore
-      tmpJSON.tags = tmpJSON.tags.concat(fetchedPostData.tags[tagContainer])
-    })
-
-    // Throw error
-  } else {
-    throw new CustomError('Unknown tag type' + typeof fetchedPostData.tags, 500)
+    default:
+      tmpJSON.tags = (fetchedPostData.tags as string)?.trim().split(' ')
+      break
   }
 
   /*
    * Source
    */
-  if (fetchedPostData.source) {
-    tmpJSON.source = [fetchedPostData.source]
 
-    // danbooru.donmai.us
-  } else if (fetchedPostData.source_url) {
-    tmpJSON.source = [fetchedPostData.source]
+  switch (booruType) {
+    case 'danbooru2':
+      if (fetchedPostData.sources) {
+        tmpJSON.source = fetchedPostData.sources
+        break
+      }
 
-    // E621
-  } else if (fetchedPostData.sources) {
-    tmpJSON.source = fetchedPostData.sources
+      tmpJSON.source = [fetchedPostData.source]
+      break
+
+    default:
+      tmpJSON.source = [fetchedPostData.source]
+      break
   }
 
   /*
@@ -217,11 +193,23 @@ function createPostFromData(
   return tmpJSON
 }
 
-export function ProcessPosts(PostArray: any): BooruResponses.PostResponse[] {
+export function ProcessPosts(
+  { booruType, wasXML }: BooruData.DataBetweenFunctions,
+  PostArray: any
+): BooruResponses.PostResponse[] {
   const ProcessedPosts: BooruResponses.PostResponse[] = []
 
-  if (PostArray.posts) PostArray = PostArray.posts
-  else if (PostArray.xml) PostArray = PostArray.xml
+  if (wasXML) PostArray = PostArray.xml
+
+  switch (booruType) {
+    case 'danbooru2':
+      // E621 only
+      if (PostArray.posts) PostArray = PostArray.posts
+      break
+
+    // default:
+    //   break
+  }
 
   // Error handling
   if (!PostArray.length) {
@@ -232,7 +220,7 @@ export function ProcessPosts(PostArray: any): BooruResponses.PostResponse[] {
   }
 
   PostArray.forEach((post: BooruResponses.PostRequest) => {
-    ProcessedPosts.push(createPostFromData(post))
+    ProcessedPosts.push(createPostFromData(booruType, post))
   })
 
   return ProcessedPosts

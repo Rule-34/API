@@ -39,13 +39,13 @@ export namespace BooruResponses {
     }
     low_res_file: {
       url: string
-      height: number
-      width: number
+      height?: number
+      width?: number
     }
     preview_file: {
       url: string
-      height: number
-      width: number
+      height?: number
+      width?: number
     }
     tags: string[]
     source: string[]
