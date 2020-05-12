@@ -19,20 +19,6 @@ export async function BooruHandler(
   // General
   const { domain, booruType } = queryObj
 
-  // POSTS
-  const processedQueries: ProcessedQueries = {
-    limit: Number(queryObj.limit ?? 20),
-    pageID: Number(queryObj.pid),
-    tags: (queryObj.tags as string) ?? '',
-    rating: queryObj.rating as string,
-    score: Number(queryObj.score),
-    order: queryObj.order as string,
-    // SINGLE POST
-    postID: Number(queryObj.postID),
-    // TAGS
-    tag: queryObj.tag as string,
-  }
-
   // BOORU
   let API
   switch (booruType) {
@@ -64,9 +50,26 @@ export async function BooruHandler(
 
   // ENDPOINT
   switch (endpoint) {
-    // POSTS
     case 'posts':
-      return await API.getPosts(processedQueries)
+      // POSTS
+      const processedPostQueries = {
+        limit: Number(queryObj.limit ?? 20),
+        pageID: Number(queryObj.pid),
+        tags: (queryObj.tags as string) ?? '',
+        rating: queryObj.rating as string,
+        score: Number(queryObj.score),
+        order: queryObj.order as string,
+      }
+
+      return await API.getPosts(processedPostQueries)
+
+
+    // case 'single-post':
+    // const processedSinglePostQueries = {
+    //   postID: Number(queryObj.postID),
+    // }
+
+    // return await API.getTags(processedTagQueries)
 
     default:
       throw new CustomError('No endpoint specified', 400)
