@@ -22,18 +22,13 @@ export async function BooruHandler(
   // BOORU
   let API
   switch (booruType) {
+    // Moebooru and MyImouto are danbooru
     case 'danbooru':
       API = new Danbooru(domain as string)
       break
 
     case 'danbooru2':
       API = new Danbooru2(domain as string)
-      break
-
-    // MyImouto is quite similar
-    // Danbooru is quite similar
-    case 'moebooru':
-      API = new Moebooru(domain as string)
       break
 
     case 'shimmie2':
