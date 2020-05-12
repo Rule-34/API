@@ -5,18 +5,28 @@ export class Shimmie2 extends Booru {
     super(
       {
         base: base,
-        posts: '/api/danbooru/post/index.xml',
-        tags: '/api/internal/autocomplete',
+        posts: '/api/danbooru/find_posts',
+        tags: '/api/internal/autocomplete', // the /api/danbooru/find_tags is the absolute worth thing
         singlePost: '/api/danbooru/post/index.xml',
         randomPost: undefined,
       },
+
       {
-        limit: 'limit',
-        pageID: 'pid',
-        tags: 'tags',
-        // rating: 'rating',
-        score: 'score',
-        // order: 'order',
+        posts: {
+          limit: 'limit',
+          pageID: 'pid',
+          tags: 'tags',
+          // rating: 'rating',
+          score: 'score',
+          // order: 'order',
+        },
+
+        tags: {
+          tag: 's',
+          limit: undefined,
+          pageID: undefined,
+          order: undefined,
+        },
       }
     )
   }
