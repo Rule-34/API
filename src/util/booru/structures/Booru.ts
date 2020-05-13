@@ -107,6 +107,30 @@ export class Booru {
     })
   }
 
+  public async getRandomPost(
+    queryObj: BooruData.RequestedRandomPostQueries
+  ): Promise<BooruResponses.Response[]> {
+    let URLToFetch = this.endpoints.base + this.endpoints.randomPost
+
+    URLToFetch = this.addQueriesToURL(URLToFetch, 'random-post', queryObj)
+
+    let response = await httpFetch(URLToFetch)
+
+    try {
+      response = JSON.parse(response)
+    } catch (error) {
+      debug('Response was not JSON')
+
+      response = await XMLToJson(response, 'posts')
+    }
+
+    return processData({
+      data: response,
+      mode: 'posts',
+      booruType: this.booruType,
+    })
+  }
+
   public async getTags(
     queryObj: BooruData.RequestedTagQueries
   ): Promise<BooruResponses.Response[]> {
@@ -224,6 +248,61 @@ export class Booru {
             URL += URL.includes('?') ? '&' : '?'
 
             URL += this.queryIdentifiers.singlePost.id + '=' + id
+
+            break
+        }
+        break
+
+      case 'random-post':
+        switch (this.booruType) {
+          case 'gelbooru':
+          case 'shimmie2':
+            throw new CustomError(
+              'This type of booru doesnt support random-post',
+              404
+            )
+
+          default:
+            // Add & if ? is present
+            URL += URL.includes('?') ? '&' : '?'
+
+            // Limit
+            if (limit && this.queryIdentifiers.posts.limit)
+              URL += this.queryIdentifiers.posts.limit + '=' + limit
+
+            // Tags
+            URL += '&' + this.queryIdentifiers.posts.tags + '=' + tags
+
+            // Rating
+            if (rating && this.queryIdentifiers.posts.rating) {
+              let tmpRating: string
+              let prefix: string
+
+              switch (rating.charAt(0)) {
+                case '-':
+                  // debug('Sign detected')
+                  prefix = '-'
+                  tmpRating = rating.substring(1)
+                  break
+
+                // No '+' case because + gets encoded to space
+                default:
+                  prefix = '+'
+                  tmpRating = rating
+                  break
+              }
+
+              URL +=
+                prefix + this.queryIdentifiers.posts.rating + ':' + tmpRating
+            }
+
+            // Order random
+            URL += '+' + this.queryIdentifiers.posts.order + ':' + 'random'
+
+            // Score
+            if (score && this.queryIdentifiers.posts.score) {
+              URL += '+' + this.queryIdentifiers.posts.score + ':' + score
+            }
 
             break
         }

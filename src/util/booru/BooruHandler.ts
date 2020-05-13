@@ -70,12 +70,15 @@ export async function BooruHandler(
 
       return await API.getSinglePost(processedSinglePostQueries)
 
-    // case 'random-post':
-    //   const processedSinglePostQueries = {
-    //     postID: Number(queryObj.postID),
-    //   }
+    case 'random-post':
+      const processedRandomPostQueries = {
+        limit: Number(queryObj.limit ?? 1),
+        tags: (queryObj.tags as string) ?? '',
+        rating: queryObj.rating as string,
+        score: queryObj.score as string,
+      }
 
-    //   return await API.getSinglePost(processedSinglePostQueries)
+      return await API.getRandomPost(processedRandomPostQueries)
 
     default:
       throw new CustomError('No endpoint specified', 422)

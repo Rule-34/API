@@ -149,6 +149,13 @@ export namespace BooruData {
     id: number
   }
 
+  interface RequestedRandomPostQueries {
+    limit?: number
+    tags?: string
+    rating?: string
+    score?: string
+  }
+
   interface RequestedTagQueries {
     tag: string
     limit?: number
