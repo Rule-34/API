@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import { Router, Request, Response } from 'express'
 import asyncHandler from 'express-async-handler'
 
@@ -10,28 +9,22 @@ const router = Router()
 /*
  ** Routes
  */
-router
-  // .get('/', defaultResponse(domainData))
+router.get(
+  '/:booruType/:endpoint',
+  asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
+      const queryObj = req.query
+      // debug(req.params.booruType)
+      // debug(req.params.endpoint)
 
-  .get(
-    '/:booruType/:endpoint',
-    asyncHandler(
-      async (req: Request, res: Response): Promise<void> => {
-        const queryObj = req.query
-        // debug(requestUrl)
-        // debug(req.params.booruType)
-        // debug(req.params.endpoint)
+      const jsonResult: object = await BooruHandler(
+        { booruType: req.params.booruType, endpoint: req.params.endpoint },
+        queryObj
+      )
 
-        const jsonResult: object = await BooruHandler(
-          { booruType: req.params.booruType, endpoint: req.params.endpoint },
-          queryObj
-        )
-
-        // Reply
-        res.json(jsonResult)
-      }
-    )
+      res.json(jsonResult)
+    }
   )
+)
 
-// Export default
 module.exports = router
