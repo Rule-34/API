@@ -9,9 +9,11 @@ import { BooruHandler } from '@/util/booru/BooruHandler'
 module.exports = async (req: Request, res: Response): Promise<void> => {
   const queryObj = req.query
   // debug(requestUrl)
+  // debug(req.params.booruType)
+  // debug(req.params.endpoint)
 
   const jsonResult: object = await BooruHandler(
-    { booruType: 'shimmie2', endpoint: 'posts' },
+    { booruType: req.params.booruType, endpoint: req.params.endpoint },
     queryObj
   )
 

@@ -10,7 +10,7 @@ const router = Router()
 router
   // .get('/', defaultResponse(domainData))
 
-  .get('/posts', asyncHandler(require('./posts')))
+  .get('/:booruType/:endpoint', asyncHandler(require('./posts')))
   // .get('/single-post', asyncHandler(require('./singlePost')))
 
   // .get(
