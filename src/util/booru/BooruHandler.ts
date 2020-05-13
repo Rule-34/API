@@ -3,7 +3,7 @@ import { Request } from 'express'
 import { BooruResponses, BooruData } from '@/types/types'
 
 // Classes
-import { Danbooru2, Danbooru, Gelbooru, Shimmie2 } from './structures/booru'
+import { Danbooru2, Danbooru, Gelbooru, Shimmie2 } from './structures'
 import { CustomError } from '@/util/classes'
 
 export async function BooruHandler(
