@@ -17,9 +17,9 @@ export class Shimmie2 extends Booru {
           limit: 'limit',
           pageID: 'pid',
           tags: 'tags',
-          // rating: 'rating',
+          rating: undefined,
           score: 'score',
-          // order: 'order',
+          order: undefined,
         },
 
         singlePost: {
@@ -28,9 +28,11 @@ export class Shimmie2 extends Booru {
 
         tags: {
           tag: 's',
+          tagEnding: undefined,
           limit: undefined,
           pageID: undefined,
           order: undefined,
+          raw: undefined,
         },
       }
     )

@@ -23,7 +23,7 @@ export class Danbooru2 extends Booru {
         },
 
         singlePost: {
-          id: undefined,
+          id: undefined, // Not necessary
         },
 
         tags: {

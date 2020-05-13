@@ -23,14 +23,16 @@ export class Danbooru extends Booru {
         },
 
         singlePost: {
-          id: undefined,
+          id: undefined, // No known way to do this
         },
 
         tags: {
           tag: 'name',
+          tagEnding: undefined,
           limit: 'limit',
           pageID: 'page',
           order: 'order',
+          raw: undefined,
         },
       }
     )

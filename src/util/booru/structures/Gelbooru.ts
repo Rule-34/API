@@ -9,7 +9,7 @@ export class Gelbooru extends Booru {
         posts: '/index.php?page=dapi&s=post&q=index',
         tags: '/index.php?page=dapi&s=tag&q=index',
         singlePost: '/index.php?page=dapi&s=post&q=index',
-        randomPost: undefined,
+        randomPost: undefined, // Only works for gelbooru.com
       },
 
       {
@@ -19,7 +19,7 @@ export class Gelbooru extends Booru {
           tags: 'tags',
           rating: 'rating',
           score: 'score',
-          order: 'order',
+          order: 'sort', // Only works for gelbooru.com
         },
 
         singlePost: {
@@ -32,7 +32,7 @@ export class Gelbooru extends Booru {
           limit: 'limit',
           pageID: undefined,
           order: 'orderby',
-          // raw: 'json=1',
+          raw: undefined,
         },
       }
     )
