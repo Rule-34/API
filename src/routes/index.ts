@@ -22,20 +22,10 @@ router
 /**
  * Static routes
  */
-router.get('/', require('./default'))
-
-if (process.env.NODE_ENV === 'development') {
-  router.get('/test', require('./test'))
-}
 
 /**
  * Dynamic routes
  */
-fs.readdirSync(__dirname + '/booru', { withFileTypes: true })
-  .filter((dir) => dir.isDirectory())
-  .map((dir) => {
-    // console.log('Direction ' + dir.name)
-    router.use(`/${dir.name}`, require(`./booru/${dir.name}`))
-  })
+router.use(`/booru`, require(`./booru`))
 
 export default router
