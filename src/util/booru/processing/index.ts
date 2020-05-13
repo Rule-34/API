@@ -47,8 +47,8 @@ export default function processData({
           data = [data]
           break
 
-        default:
-          break
+        // default:
+        //   break
       }
 
       // Error handling

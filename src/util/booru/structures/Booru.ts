@@ -11,7 +11,7 @@ import Debug from 'debug'
 import { CustomError } from '@/util/classes'
 const debug = Debug(`Server:util Booru Class`)
 
-export class Booru {
+export abstract class Booru {
   public booruType: string = undefined
 
   public queryIdentifiers: BooruClass.QueryIdentifiers = {
