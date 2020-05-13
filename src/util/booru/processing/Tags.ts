@@ -29,7 +29,6 @@ export function createTagsFromData(
     case 'danbooru':
     case 'gelbooru':
       tmpJSON.name = fetchedTagsData.name
-
       tmpJSON.count = fetchedTagsData.count
       break
 

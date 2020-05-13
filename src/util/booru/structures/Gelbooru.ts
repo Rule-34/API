@@ -32,7 +32,7 @@ export class Gelbooru extends Booru {
           limit: 'limit',
           pageID: undefined,
           order: 'orderby',
-          raw: 'json=1',
+          // raw: 'json=1',
         },
       }
     )
