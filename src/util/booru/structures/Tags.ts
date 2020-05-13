@@ -40,12 +40,10 @@ function createTagsFromData(
 }
 
 export function ProcessTags(
-  { booruType, wasXML, limit }: BooruData.DataBetweenFunctions,
+  { booruType, limit }: BooruData.DataBetweenFunctions,
   tagsArray: any
 ): BooruResponses.TagResponse[] {
   const ProcessedPosts: BooruResponses.TagResponse[] = []
-
-  if (wasXML) tagsArray = tagsArray.xml
 
   switch (booruType) {
     case 'shimmie2':

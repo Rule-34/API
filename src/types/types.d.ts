@@ -148,7 +148,6 @@ export namespace BooruData {
   interface DataBetweenFunctions {
     booruType: string
     endpoint?: string
-    wasXML?: boolean
     limit?: number
   }
 }

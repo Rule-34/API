@@ -9,7 +9,7 @@ import { ProcessTags } from '../Tags'
 
 // Init
 import Debug from 'debug'
-const debug = Debug(`Server:util Booru`)
+const debug = Debug(`Server:util Booru Class`)
 
 export class Booru {
   public booruType: string = undefined
@@ -58,7 +58,6 @@ export class Booru {
   public async getPosts(
     queryObj: BooruData.InputPostQueries
   ): Promise<BooruResponses.PostResponse[]> {
-    let wasXML = false
     let URLToFetch = this.endpoints.base + this.endpoints.posts
 
     URLToFetch = this.addQueriesToURL(URLToFetch, 'posts', queryObj)
@@ -71,16 +70,14 @@ export class Booru {
       debug('Response was not JSON')
 
       response = await XMLToJson(response, 'posts')
-      wasXML = true
     }
 
-    return ProcessPosts({ booruType: this.booruType, wasXML }, response)
+    return ProcessPosts({ booruType: this.booruType }, response)
   }
 
   public async getTags(
     queryObj: BooruData.InputTagQueries
   ): Promise<BooruResponses.TagResponse[]> {
-    let wasXML = false
     let URLToFetch = this.endpoints.base + this.endpoints.tags
 
     URLToFetch = this.addQueriesToURL(URLToFetch, 'tags', queryObj)
@@ -96,11 +93,10 @@ export class Booru {
       debug('Response was not JSON')
 
       response = await XMLToJson(response, 'tags')
-      wasXML = true
     }
 
     return ProcessTags(
-      { booruType: this.booruType, wasXML, limit: queryObj.limit },
+      { booruType: this.booruType, limit: queryObj.limit },
       response
     )
   }

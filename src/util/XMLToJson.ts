@@ -50,14 +50,21 @@ export default async (xml: string, mode: string): Promise<string> => {
   // Ready camaro
   await ready()
 
+  let JSONData
+
   switch (mode) {
     case 'posts':
-      return await transform(xml, postsTemplate)
+      JSONData = await transform(xml, postsTemplate)
+      break
 
     case 'tags':
-      return await transform(xml, tagsTemplate)
+      JSONData = await transform(xml, tagsTemplate)
+      break
 
     default:
       throw new Error('No mode specified')
   }
+
+  // Just return the Array, no object needed
+  return JSONData.xml
 }

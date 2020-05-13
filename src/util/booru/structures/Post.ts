@@ -194,12 +194,10 @@ function createPostFromData(
 }
 
 export function ProcessPosts(
-  { booruType, wasXML }: BooruData.DataBetweenFunctions,
+  { booruType }: BooruData.DataBetweenFunctions,
   PostArray: any
 ): BooruResponses.PostResponse[] {
   const ProcessedPosts: BooruResponses.PostResponse[] = []
-
-  if (wasXML) PostArray = PostArray.xml
 
   switch (booruType) {
     case 'danbooru2':
