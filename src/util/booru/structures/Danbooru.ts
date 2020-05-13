@@ -1,5 +1,7 @@
 import { Booru } from './Booru'
 
+// API help page --> https://lolibooru.moe/help/api
+
 export class Danbooru extends Booru {
   constructor(booruType: string, base: string) {
     super(

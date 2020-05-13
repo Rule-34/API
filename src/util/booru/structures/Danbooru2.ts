@@ -1,5 +1,7 @@
 import { Booru } from './Booru'
 
+// API help page --> https://danbooru.donmai.us/wiki_pages/help:api
+
 export class Danbooru2 extends Booru {
   constructor(booruType: string, base: string) {
     super(

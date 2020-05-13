@@ -1,5 +1,7 @@
 import { Booru } from './Booru'
 
+// API help page --> https://gelbooru.com/index.php?page=wiki&s=view&id=18780
+
 export class Gelbooru extends Booru {
   constructor(booruType: string, base: string) {
     super(

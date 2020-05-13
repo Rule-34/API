@@ -1,5 +1,7 @@
 import { Booru } from './Booru'
 
+// API help page --> It has no documentation at all
+
 export class Shimmie2 extends Booru {
   constructor(booruType: string, base: string) {
     super(
