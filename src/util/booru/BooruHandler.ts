@@ -34,13 +34,13 @@ export async function BooruHandler(
       break
 
     default:
-      throw new CustomError('No known booru type', 400)
+      throw new CustomError('No known booru type', 422)
   }
 
   // ENDPOINT
   switch (endpoint) {
     case 'posts':
-      // POSTS
+      // Default values if not set
       const inputPostQueries = {
         limit: Number(queryObj.limit ?? 20),
         pageID: Number(queryObj.pid),
@@ -53,6 +53,7 @@ export async function BooruHandler(
       return await API.getPosts(inputPostQueries)
 
     case 'tags':
+      // Default values if not set
       const inputTagQueries = {
         tag: queryObj.tag as string,
         limit: Number(queryObj.limit ?? 20),
@@ -70,6 +71,6 @@ export async function BooruHandler(
     // return await API.getTags(processedTagQueries)
 
     default:
-      throw new CustomError('No endpoint specified', 400)
+      throw new CustomError('No endpoint specified', 422)
   }
 }
