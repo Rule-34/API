@@ -133,7 +133,7 @@ export namespace BooruResponses {
 }
 
 export namespace BooruData {
-  interface InputPostQueries {
+  interface RequestedPostQueries {
     limit?: number
     pageID?: number
     tags?: string
@@ -142,11 +142,11 @@ export namespace BooruData {
     order?: string
   }
 
-  interface InputSinglePostQueries {
+  interface RequestedSinglePostQueries {
     id: number
   }
 
-  interface InputTagQueries {
+  interface RequestedTagQueries {
     tag: string
     limit?: number
     pageID?: number

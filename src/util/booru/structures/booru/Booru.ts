@@ -60,7 +60,7 @@ export class Booru {
   }
 
   public async getPosts(
-    queryObj: BooruData.InputPostQueries
+    queryObj: BooruData.RequestedPostQueries
   ): Promise<BooruResponses.PostResponse[]> {
     let URLToFetch = this.endpoints.base + this.endpoints.posts
 
@@ -84,7 +84,7 @@ export class Booru {
   }
 
   public async getTags(
-    queryObj: BooruData.InputTagQueries
+    queryObj: BooruData.RequestedTagQueries
   ): Promise<BooruResponses.TagResponse[]> {
     let URLToFetch = this.endpoints.base + this.endpoints.tags
 
@@ -112,7 +112,7 @@ export class Booru {
   }
 
   public async getSinglePost(
-    queryObj: BooruData.InputSinglePostQueries
+    queryObj: BooruData.RequestedSinglePostQueries
   ): Promise<BooruResponses.PostResponse[]> {
     let URLToFetch = this.endpoints.base + this.endpoints.singlePost
 
@@ -139,9 +139,9 @@ export class Booru {
     URL: string,
     mode: string,
     queryObj:
-      | BooruData.InputPostQueries
-      | BooruData.InputTagQueries
-      | BooruData.InputSinglePostQueries
+      | BooruData.RequestedPostQueries
+      | BooruData.RequestedTagQueries
+      | BooruData.RequestedSinglePostQueries
   ): string {
     const {
       limit,
@@ -150,11 +150,11 @@ export class Booru {
       rating,
       score,
       order,
-    } = queryObj as BooruData.InputPostQueries
+    } = queryObj as BooruData.RequestedPostQueries
 
-    const { tag } = queryObj as BooruData.InputTagQueries
+    const { tag } = queryObj as BooruData.RequestedTagQueries
 
-    const { id } = queryObj as BooruData.InputSinglePostQueries
+    const { id } = queryObj as BooruData.RequestedSinglePostQueries
 
     switch (mode) {
       case 'posts':
