@@ -7,11 +7,11 @@ import 'module-alias/register'
 import request from 'supertest'
 import app from '../src/app'
 
-import domains from '../external/r34-shared/booru-list.json'
+import domains from '../src/external/booru-list.json'
 
 /* ---------------- POSTS ---------------- */
 describe.each(domains)('Random post', (domain) => {
-  const url = `/${domain.short}/random-post`
+  const url = `/booru/${domain.type}/random-post?domain=${domain.domain}`
 
   // Sleep some seconds between route fetches
   beforeEach(async () => {
@@ -19,7 +19,7 @@ describe.each(domains)('Random post', (domain) => {
     await new Promise((r) => setTimeout(r, 300))
   })
 
-  test(`Route ${domain.short} response's length is adequate`, (done) => {
+  test(`Route ${domain.domain} response's length is adequate`, (done) => {
     request(app)
       .get(url)
       .set('Accept', 'application/json')
@@ -36,9 +36,9 @@ describe.each(domains)('Random post', (domain) => {
       })
   })
 
-  test(`Route ${domain.short} response's score is adequate`, (done) => {
+  test(`Route ${domain.domain} response's score is adequate`, (done) => {
     request(app)
-      .get(url + '?score=>=50')
+      .get(url + '&score=>=50')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)

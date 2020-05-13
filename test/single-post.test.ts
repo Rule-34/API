@@ -7,19 +7,21 @@ import 'module-alias/register'
 import request from 'supertest'
 import app from '../src/app'
 
-import domains from '../external/r34-shared/booru-list.json'
+import domains from '../src/external/booru-list.json'
 
 /* ---------------- SINGLE POST ---------------- */
 describe.each(domains)('Single Post', (domain) => {
+  const url = `/booru/${domain.type}/single-post?domain=${domain.domain}&id=100`
+
   // Sleep some seconds between route fetches
   beforeEach(async () => {
     console.log('Waiting!')
     await new Promise((r) => setTimeout(r, 300))
   })
 
-  test(`Route ${domain.short} response's ID is the requested ID`, (done) => {
+  test(`Route ${domain.domain} response's ID is the requested ID`, (done) => {
     request(app)
-      .get(`/${domain.short}/single-post/?id=100`)
+      .get(url)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)

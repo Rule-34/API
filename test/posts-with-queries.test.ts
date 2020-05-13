@@ -7,11 +7,11 @@ import 'module-alias/register'
 import request from 'supertest'
 import app from '../src/app'
 
-import domains from '../external/r34-shared/booru-list.json'
+import domains from '../src/external/booru-list.json'
 
 /* ---------------- POSTS WITH QUERIES ---------------- */
 describe.each(domains)('Posts', (domain) => {
-  const url = `/${domain.short}/posts?limit=5`
+  const url = `/booru/${domain.type}/posts?domain=${domain.domain}&limit=5`
 
   // Sleep some seconds between route fetches
   beforeEach(async () => {
@@ -19,7 +19,7 @@ describe.each(domains)('Posts', (domain) => {
     await new Promise((r) => setTimeout(r, 300))
   })
 
-  test(`Route ${domain.short} responds with valid post length`, (done) => {
+  test(`Route ${domain.domain} responds with valid post length`, (done) => {
     request(app)
       .get(url)
       .set('Accept', 'application/json')
@@ -38,7 +38,7 @@ describe.each(domains)('Posts', (domain) => {
       })
   })
 
-  test(`Route ${domain.short} response's rating is safe`, (done) => {
+  test(`Route ${domain.domain} response's rating is safe`, (done) => {
     request(app)
       .get(`${url}&rating=safe`)
       .set('Accept', 'application/json')
@@ -57,7 +57,7 @@ describe.each(domains)('Posts', (domain) => {
       })
   })
 
-  test(`Route ${domain.short} response's rating is everything but safe`, (done) => {
+  test(`Route ${domain.domain} response's rating is everything but safe`, (done) => {
     request(app)
       .get(`${url}&rating=-safe`)
       .set('Accept', 'application/json')

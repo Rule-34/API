@@ -7,11 +7,11 @@ import 'module-alias/register'
 import request from 'supertest'
 import app from '../src/app'
 
-import domains from '../external/r34-shared/booru-list.json'
+import domains from '../src/external/booru-list.json'
 
 /* ---------------- POSTS ---------------- */
 describe.each(domains)('Posts', (domain) => {
-  const url = `/${domain.short}/posts?limit=5`
+  const url = `/booru/${domain.type}/posts?domain=${domain.domain}&limit=5`
 
   // Sleep some seconds between route fetches
   beforeEach(async () => {
@@ -19,7 +19,7 @@ describe.each(domains)('Posts', (domain) => {
     await new Promise((r) => setTimeout(r, 300))
   })
 
-  test(`Route ${domain.short} responds with valid post ID`, (done) => {
+  test(`Route ${domain.domain} responds with valid post ID`, (done) => {
     request(app)
       .get(url)
       .set('Accept', 'application/json')
@@ -38,16 +38,16 @@ describe.each(domains)('Posts', (domain) => {
       })
   })
 
-  test(`Route ${domain.short} responds with valid file URL`, (done) => {
+  test(`Route ${domain.domain} responds with valid file URL`, (done) => {
     request(app)
       .get(url)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
       .expect((res) => {
-        res.body.forEach((element: { high_res_file: string }) => {
+        res.body.forEach((element: any) => {
           try {
-            new URL(element.high_res_file)
+            new URL(element.high_res_file.url)
           } catch (error) {
             throw new Error('URL is not a valid')
           }
@@ -59,7 +59,7 @@ describe.each(domains)('Posts', (domain) => {
       })
   })
 
-  test(`Route ${domain.short} responds with valid media type`, (done) => {
+  test(`Route ${domain.domain} responds with valid media type`, (done) => {
     request(app)
       .get(url)
       .set('Accept', 'application/json')

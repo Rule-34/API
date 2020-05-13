@@ -7,11 +7,11 @@ import 'module-alias/register'
 import request from 'supertest'
 import app from '../src/app'
 
-import domains from '../external/r34-shared/booru-list.json'
+import domains from '../src/external/booru-list.json'
 
 /* ---------------- TAGS ---------------- */
 describe.each(domains)('Tags', (domain) => {
-  const url = `/${domain.short}/tags`
+  const url = `/booru/${domain.type}/tags?domain=${domain.domain}`
 
   // Sleep some seconds between route fetches
   beforeEach(async () => {
@@ -19,16 +19,16 @@ describe.each(domains)('Tags', (domain) => {
     await new Promise((r) => setTimeout(r, 300))
   })
 
-  test(`Route ${domain.short} response's is an integer`, (done) => {
+  test(`Route ${domain.domain} response's is an integer`, (done) => {
     request(app)
-      .get(`${url}?tag=pok`)
+      .get(`${url}&tag=pok`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
       .expect((res) => {
         res.body.forEach((element: { count: number }) => {
           if (!Number.isInteger(element.count)) {
-            throw new Error('Count is not an int')
+            throw new Error('Count is not an int: ' + element.count)
           }
         })
       })
@@ -38,9 +38,9 @@ describe.each(domains)('Tags', (domain) => {
       })
   })
 
-  test(`Route ${domain.short} response's length is valid`, (done) => {
+  test(`Route ${domain.domain} response's length is valid`, (done) => {
     request(app)
-      .get(`${url}?tag=pok&limit=5`)
+      .get(`${url}&tag=pok&limit=5`)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
