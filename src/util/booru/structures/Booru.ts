@@ -90,7 +90,7 @@ export class Booru {
 
     URLToFetch = this.addQueriesToURL(URLToFetch, 'single-post', queryObj)
 
-    let response: any = await httpFetch(URLToFetch)
+    let response = await httpFetch(URLToFetch)
 
     try {
       response = JSON.parse(response)

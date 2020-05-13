@@ -4,8 +4,8 @@ import { query, validationResult, ValidationChain } from 'express-validator'
 import { CustomError } from '@/util/classes'
 
 // Init
-import Debug from 'debug'
-const debug = Debug(`Server:middleware Query Validation`)
+// import Debug from 'debug'
+// const debug = Debug(`Server:middleware Query Validation`)
 
 /**
  * Helpers
