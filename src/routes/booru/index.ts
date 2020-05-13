@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import asyncHandler from 'express-async-handler'
+
+// Util
+import { BooruHandler } from '@/util/booru/BooruHandler'
 
 const router = Router()
 
@@ -10,16 +13,25 @@ const router = Router()
 router
   // .get('/', defaultResponse(domainData))
 
-  .get('/:booruType/:endpoint', asyncHandler(require('./posts')))
-  // .get('/single-post', asyncHandler(require('./singlePost')))
+  .get(
+    '/:booruType/:endpoint',
+    asyncHandler(
+      async (req: Request, res: Response): Promise<void> => {
+        const queryObj = req.query
+        // debug(requestUrl)
+        // debug(req.params.booruType)
+        // debug(req.params.endpoint)
 
-  // .get(
-  //   '/random-post',
-  //   randomMiddlewareWithoutAPI(domainData),
-  //   asyncHandler(require('./singlePost'))
-  // )
+        const jsonResult: object = await BooruHandler(
+          { booruType: req.params.booruType, endpoint: req.params.endpoint },
+          queryObj
+        )
 
-  .get('/tags', asyncHandler(require('./tags')))
+        // Reply
+        res.json(jsonResult)
+      }
+    )
+  )
 
 // Export default
 module.exports = router

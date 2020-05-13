@@ -22,10 +22,6 @@ router
 /**
  * Static routes
  */
-
-/**
- * Dynamic routes
- */
 router.use(`/booru`, require(`./booru`))
 
 export default router
