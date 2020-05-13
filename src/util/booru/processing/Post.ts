@@ -1,14 +1,11 @@
 // Definitions
-import { BooruResponses, BooruData } from '@/types/types'
-
-// Classes
-import { CustomError } from '@/util/classes'
+import { BooruResponses } from '@/types/types'
 
 // Init
 // import Debug from 'debug'
 // const debug = Debug(`Server:util Post Cleaner`)
 
-function createPostFromData(
+export function createPostFromData(
   booruType: string,
   fetchedPostData: BooruResponses.PostRequest
 ): BooruResponses.PostResponse {
@@ -191,35 +188,4 @@ function createPostFromData(
     : 'image'
 
   return tmpJSON
-}
-
-export function ProcessPosts(
-  { booruType }: BooruData.DataBetweenFunctions,
-  PostArray: any
-): BooruResponses.PostResponse[] {
-  const ProcessedPosts: BooruResponses.PostResponse[] = []
-
-  switch (booruType) {
-    case 'danbooru2':
-      // E621 only
-      if (PostArray.posts) PostArray = PostArray.posts
-      break
-
-    // default:
-    //   break
-  }
-
-  // Error handling
-  if (!PostArray.length) {
-    throw new CustomError(
-      'No data to return, maybe you have too many tags?',
-      422
-    )
-  }
-
-  PostArray.forEach((post: BooruResponses.PostRequest) => {
-    ProcessedPosts.push(createPostFromData(booruType, post))
-  })
-
-  return ProcessedPosts
 }

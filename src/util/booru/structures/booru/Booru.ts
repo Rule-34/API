@@ -72,7 +72,11 @@ export class Booru {
       response = await XMLToJson(response, 'posts')
     }
 
-    return ProcessPosts({ booruType: this.booruType }, response)
+    return processData({
+      data: response,
+      mode: 'posts',
+      booruType: this.booruType,
+    })
   }
 
   public async getTags(
@@ -95,10 +99,13 @@ export class Booru {
       response = await XMLToJson(response, 'tags')
     }
 
-    return ProcessTags(
-      { booruType: this.booruType, limit: queryObj.limit },
-      response
-    )
+    return processData({
+      data: response,
+      mode: 'tags',
+      booruType: this.booruType,
+      limit: queryObj.limit,
+    })
+  }
   }
 
   private addQueriesToURL(
