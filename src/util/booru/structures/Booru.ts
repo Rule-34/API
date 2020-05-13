@@ -61,7 +61,7 @@ export class Booru {
 
   public async getPosts(
     queryObj: BooruData.RequestedPostQueries
-  ): Promise<BooruResponses.PostResponse[]> {
+  ): Promise<BooruResponses.Response[]> {
     let URLToFetch = this.endpoints.base + this.endpoints.posts
 
     URLToFetch = this.addQueriesToURL(URLToFetch, 'posts', queryObj)
@@ -85,7 +85,7 @@ export class Booru {
 
   public async getTags(
     queryObj: BooruData.RequestedTagQueries
-  ): Promise<BooruResponses.TagResponse[]> {
+  ): Promise<BooruResponses.Response[]> {
     let URLToFetch = this.endpoints.base + this.endpoints.tags
 
     URLToFetch = this.addQueriesToURL(URLToFetch, 'tags', queryObj)
@@ -113,7 +113,7 @@ export class Booru {
 
   public async getSinglePost(
     queryObj: BooruData.RequestedSinglePostQueries
-  ): Promise<BooruResponses.PostResponse[]> {
+  ): Promise<BooruResponses.Response[]> {
     let URLToFetch = this.endpoints.base + this.endpoints.singlePost
 
     URLToFetch = this.addQueriesToURL(URLToFetch, 'single-post', queryObj)
