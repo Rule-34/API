@@ -7,16 +7,21 @@ import { BooruResponses } from '@/types/types'
 
 export function createTagsFromData(
   booruType: string,
-  fetchedTagsData: any
+  fetchedTagsData: BooruResponses.TagRequest
 ): BooruResponses.TagResponse {
   const tmpJSON: BooruResponses.TagResponse = {
     name: undefined,
     count: undefined,
   }
+
   switch (booruType) {
     // Tags from internal autocomplete API
     case 'shimmie2':
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore // Disabled because I dont know how I could handle this weird response
       tmpJSON.name = fetchedTagsData[0]
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore // Disabled because I dont know how I could handle this weird response
       tmpJSON.count = fetchedTagsData[1]
       break
 

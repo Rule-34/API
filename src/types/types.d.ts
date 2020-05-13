@@ -33,6 +33,9 @@ export namespace BooruClass {
 }
 
 export namespace BooruResponses {
+  type Response = PostResponse | TagResponse
+  // type Request = PostRequest | TagRequest
+
   interface PostResponse {
     id: number
     score: number
@@ -154,6 +157,8 @@ export namespace BooruData {
   }
 
   interface DataBetweenFunctions {
+    data?: any
+    mode?: string
     booruType: string
     endpoint?: string
     limit?: number

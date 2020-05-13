@@ -9,7 +9,7 @@ import { CustomError } from '@/util/classes'
 export async function BooruHandler(
   { booruType, endpoint }: BooruData.DataBetweenFunctions,
   queryObj: Request['query']
-): Promise<BooruResponses.PostResponse[] | BooruResponses.TagResponse[]> {
+): Promise<BooruResponses.Response[]> {
   // General
   const { domain } = queryObj
 
@@ -70,7 +70,12 @@ export async function BooruHandler(
 
       return await API.getSinglePost(processedSinglePostQueries)
 
-    // return await API.getTags(processedTagQueries)
+    // case 'random-post':
+    //   const processedSinglePostQueries = {
+    //     postID: Number(queryObj.postID),
+    //   }
+
+    //   return await API.getSinglePost(processedSinglePostQueries)
 
     default:
       throw new CustomError('No endpoint specified', 422)

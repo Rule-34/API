@@ -1,4 +1,4 @@
-import { BooruData, BooruResponses } from 'types'
+import { BooruResponses, BooruData } from 'types'
 
 import { CustomError } from '@/util/classes'
 import { createPostFromData } from './Post'
@@ -9,8 +9,8 @@ export default function processData({
   mode,
   booruType,
   limit,
-}: any): any[] {
-  const ProcessedData: any[] = []
+}: BooruData.DataBetweenFunctions): BooruResponses.Response[] {
+  const ProcessedData: BooruResponses.Response[] = []
 
   switch (mode) {
     case 'posts':
@@ -78,6 +78,8 @@ export default function processData({
           let counter = 0
 
           for (const prop of Object.entries(data)) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+            // @ts-ignore // Disabled because I dont know how I could handle this weird response
             ProcessedData.push(createTagsFromData(booruType, prop))
 
             counter++
