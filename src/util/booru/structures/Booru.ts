@@ -83,6 +83,30 @@ export class Booru {
     })
   }
 
+  public async getSinglePost(
+    queryObj: BooruData.RequestedSinglePostQueries
+  ): Promise<BooruResponses.Response[]> {
+    let URLToFetch = this.endpoints.base + this.endpoints.singlePost
+
+    URLToFetch = this.addQueriesToURL(URLToFetch, 'single-post', queryObj)
+
+    let response: any = await httpFetch(URLToFetch)
+
+    try {
+      response = JSON.parse(response)
+    } catch (error) {
+      debug('Response was not JSON')
+
+      response = await XMLToJson(response, 'posts')
+    }
+
+    return processData({
+      data: response,
+      mode: 'single-post',
+      booruType: this.booruType,
+    })
+  }
+
   public async getTags(
     queryObj: BooruData.RequestedTagQueries
   ): Promise<BooruResponses.Response[]> {
@@ -108,30 +132,6 @@ export class Booru {
       mode: 'tags',
       booruType: this.booruType,
       limit: queryObj.limit,
-    })
-  }
-
-  public async getSinglePost(
-    queryObj: BooruData.RequestedSinglePostQueries
-  ): Promise<BooruResponses.Response[]> {
-    let URLToFetch = this.endpoints.base + this.endpoints.singlePost
-
-    URLToFetch = this.addQueriesToURL(URLToFetch, 'single-post', queryObj)
-
-    let response: any = await httpFetch(URLToFetch)
-
-    try {
-      response = JSON.parse(response)
-    } catch (error) {
-      debug('Response was not JSON')
-
-      response = await XMLToJson(response, 'posts')
-    }
-
-    return processData({
-      data: response,
-      mode: 'single-post',
-      booruType: this.booruType,
     })
   }
 
