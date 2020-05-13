@@ -22,6 +22,10 @@ export class Gelbooru extends Booru {
           order: 'order',
         },
 
+        singlePost: {
+          id: 'id',
+        },
+
         tags: {
           tag: 'name_pattern',
           tagEnding: '%',

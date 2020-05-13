@@ -22,6 +22,10 @@ export class Shimmie2 extends Booru {
           // order: 'order',
         },
 
+        singlePost: {
+          id: 'id',
+        },
+
         tags: {
           tag: 's',
           limit: undefined,

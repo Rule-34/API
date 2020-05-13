@@ -8,7 +8,7 @@ export class Danbooru2 extends Booru {
         base: base,
         posts: '/posts.json',
         tags: '/tags.json',
-        singlePost: '/posts/',
+        singlePost: '/posts/%.json',
         randomPost: '/posts.json',
       },
 
@@ -20,6 +20,10 @@ export class Danbooru2 extends Booru {
           rating: 'rating',
           score: 'score',
           order: 'order',
+        },
+
+        singlePost: {
+          id: undefined,
         },
 
         tags: {

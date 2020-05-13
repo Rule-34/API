@@ -63,10 +63,12 @@ export async function BooruHandler(
 
       return await API.getTags(inputTagQueries)
 
-    // case 'single-post':
-    // const processedSinglePostQueries = {
-    //   postID: Number(queryObj.postID),
-    // }
+    case 'single-post':
+      const processedSinglePostQueries = {
+        id: Number(queryObj.id),
+      }
+
+      return await API.getSinglePost(processedSinglePostQueries)
 
     // return await API.getTags(processedTagQueries)
 

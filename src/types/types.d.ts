@@ -9,6 +9,10 @@ export namespace BooruClass {
       order?: string
     }
 
+    singlePost: {
+      id?: string
+    }
+
     tags: {
       tag: string
       tagEnding?: string
@@ -130,12 +134,16 @@ export namespace BooruResponses {
 
 export namespace BooruData {
   interface InputPostQueries {
-    limit: number
-    pageID: number
-    tags: string
+    limit?: number
+    pageID?: number
+    tags?: string
     rating?: string
     score?: number
     order?: string
+  }
+
+  interface InputSinglePostQueries {
+    id: number
   }
 
   interface InputTagQueries {

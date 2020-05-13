@@ -8,7 +8,7 @@ export class Danbooru extends Booru {
         base: base,
         posts: '/post/index.xml',
         tags: '/tag/index.xml',
-        singlePost: undefined,
+        singlePost: undefined, // No known way to do this
         randomPost: '/post/index.xml',
       },
 
@@ -20,6 +20,10 @@ export class Danbooru extends Booru {
           rating: 'rating',
           score: 'score',
           order: 'order',
+        },
+
+        singlePost: {
+          id: undefined,
         },
 
         tags: {

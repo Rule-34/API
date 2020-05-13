@@ -4,11 +4,11 @@ import { BooruClass, BooruResponses, BooruData } from '@/types/types'
 // Utilities
 import httpFetch from '@/util/httpFetch'
 import XMLToJson from '@/util/XMLToJson'
-import { ProcessPosts } from '../Post'
-import { ProcessTags } from '../Tags'
+import processData from '@/util/booru/processing'
 
 // Init
 import Debug from 'debug'
+import { CustomError } from '@/util/classes'
 const debug = Debug(`Server:util Booru Class`)
 
 export class Booru {
@@ -22,6 +22,10 @@ export class Booru {
       rating: undefined,
       score: undefined,
       order: undefined,
+    },
+
+    singlePost: {
+      id: undefined,
     },
 
     tags: {
@@ -106,12 +110,38 @@ export class Booru {
       limit: queryObj.limit,
     })
   }
+
+  public async getSinglePost(
+    queryObj: BooruData.InputSinglePostQueries
+  ): Promise<BooruResponses.PostResponse[]> {
+    let URLToFetch = this.endpoints.base + this.endpoints.singlePost
+
+    URLToFetch = this.addQueriesToURL(URLToFetch, 'single-post', queryObj)
+
+    let response: any = await httpFetch(URLToFetch)
+
+    try {
+      response = JSON.parse(response)
+    } catch (error) {
+      debug('Response was not JSON')
+
+      response = await XMLToJson(response, 'posts')
+    }
+
+    return processData({
+      data: response,
+      mode: 'single-post',
+      booruType: this.booruType,
+    })
   }
 
   private addQueriesToURL(
     URL: string,
     mode: string,
-    queryObj: BooruData.InputPostQueries | BooruData.InputTagQueries
+    queryObj:
+      | BooruData.InputPostQueries
+      | BooruData.InputTagQueries
+      | BooruData.InputSinglePostQueries
   ): string {
     const {
       limit,
@@ -124,11 +154,13 @@ export class Booru {
 
     const { tag } = queryObj as BooruData.InputTagQueries
 
-    // Add & if ? is present
-    URL += URL.includes('?') ? '&' : '?'
+    const { id } = queryObj as BooruData.InputSinglePostQueries
 
     switch (mode) {
       case 'posts':
+        // Add & if ? is present
+        URL += URL.includes('?') ? '&' : '?'
+
         // Limit
         if (limit && this.queryIdentifiers.posts.limit)
           URL += this.queryIdentifiers.posts.limit + '=' + limit
@@ -175,7 +207,32 @@ export class Booru {
 
         break
 
+      case 'single-post':
+        switch (this.booruType) {
+          case 'danbooru':
+            throw new CustomError(
+              'This type of booru doesnt support single-post',
+              404
+            )
+
+          case 'danbooru2':
+            URL = URL.replace('%', (id as unknown) as string)
+            break
+
+          default:
+            // Add & if ? is present
+            URL += URL.includes('?') ? '&' : '?'
+
+            URL += this.queryIdentifiers.singlePost.id + '=' + id
+
+            break
+        }
+        break
+
       case 'tags':
+        // Add & if ? is present
+        URL += URL.includes('?') ? '&' : '?'
+
         // Tag
         URL += this.queryIdentifiers.tags.tag + '=' + tag
 
