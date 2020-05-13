@@ -46,7 +46,7 @@ export async function BooruHandler(
         pageID: Number(queryObj.pid),
         tags: (queryObj.tags as string) ?? '',
         rating: queryObj.rating as string,
-        score: Number(queryObj.score),
+        score: queryObj.score as string,
         order: queryObj.order as string,
       }
 

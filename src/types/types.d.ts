@@ -141,7 +141,7 @@ export namespace BooruData {
     pageID?: number
     tags?: string
     rating?: string
-    score?: number
+    score?: string
     order?: string
   }
 

@@ -197,7 +197,7 @@ export class Booru {
 
         // Score
         if (score && this.queryIdentifiers.posts.score) {
-          URL += '+' + this.queryIdentifiers.posts.score + '=' + score
+          URL += '+' + this.queryIdentifiers.posts.score + ':' + score
         }
 
         // Order
