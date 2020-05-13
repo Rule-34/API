@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Router } from 'express'
-import fs from 'fs'
 
 const router = Router()
 
