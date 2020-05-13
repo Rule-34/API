@@ -195,14 +195,14 @@ export class Booru {
           URL += prefix + this.queryIdentifiers.posts.rating + ':' + tmpRating
         }
 
-        // Score
-        if (score && this.queryIdentifiers.posts.score) {
-          URL += '+' + this.queryIdentifiers.posts.score + ':' + score
-        }
-
         // Order
         if (order && this.queryIdentifiers.posts.order) {
           URL += '+' + this.queryIdentifiers.posts.order + ':' + order
+        }
+
+        // Score
+        if (score && this.queryIdentifiers.posts.score) {
+          URL += '+' + this.queryIdentifiers.posts.score + ':' + score
         }
 
         break
