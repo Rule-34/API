@@ -111,6 +111,11 @@ export function createPostFromData(
       break
   }
 
+  // Delete empty "" urls
+  if (tmpJSON.high_res_file.url === '') tmpJSON.high_res_file.url = null
+  if (tmpJSON.low_res_file.url === '') tmpJSON.low_res_file.url = null
+  if (tmpJSON.preview_file.url === '') tmpJSON.preview_file.url = null
+
   /*
    * Tags
    */
@@ -153,6 +158,11 @@ export function createPostFromData(
       tmpJSON.source = [fetchedPostData.source]
       break
   }
+
+  // Remove empty "" sources
+  tmpJSON.source.forEach((source, index) => {
+    if (source === '') tmpJSON.source.splice(index)
+  })
 
   /*
    * Rating
