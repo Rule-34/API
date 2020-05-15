@@ -128,6 +128,8 @@ export namespace BooruResponses {
   }
 
   interface TagRequest {
+    value?: string
+    label?: string
     tag?: string
     name?: string
     post_count?: number

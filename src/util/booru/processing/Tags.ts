@@ -28,6 +28,14 @@ export function createTagsFromData(
     // Tags from transfromed XML
     case 'danbooru':
     case 'gelbooru':
+      // For autocomplete.php boorus (like rule34.xxx)
+      if (fetchedTagsData.label) {
+        tmpJSON.name = fetchedTagsData.value
+
+        tmpJSON.count = Number(fetchedTagsData.label.match(/\d+/g))
+        break
+      }
+
       tmpJSON.name = fetchedTagsData.name
       tmpJSON.count = fetchedTagsData.count
       break
