@@ -332,8 +332,6 @@ export abstract class Booru {
 
         // Order
         if (order && this.queryIdentifiers.tags.order) {
-          console.log(order)
-
           URL += '&' + this.queryIdentifiers.tags.order + '=' + order
         }
 
