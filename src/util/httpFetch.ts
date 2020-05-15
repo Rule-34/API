@@ -1,4 +1,5 @@
 import fetch from 'node-fetch'
+import he from 'he'
 
 // Init
 import Debug from 'debug'
@@ -18,12 +19,17 @@ export default async (url: string): Promise<string> => {
     },
   })
     .then(async (res) => {
+      let tmpData
       // Check for HTTP status errors
       if (!res.ok) {
         throw new Error('Network response was not ok')
       }
 
-      return await res.text()
+      tmpData = await res.text()
+
+      tmpData = he.decode(tmpData)
+
+      return tmpData
     })
     .catch((error) => {
       throw new Error(`Fetch: ${error}`)
