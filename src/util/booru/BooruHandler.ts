@@ -11,26 +11,59 @@ export async function BooruHandler(
   queryObj: Request['query']
 ): Promise<BooruResponses.Response[]> {
   // General
-  const { domain } = queryObj
+  const { domain, json } = queryObj
+
+  // Extract values from JSON
+  let tmpJSON
+  let requestedEndpoints
+  let requestedQueryIdentifiers
+
+  if (json) {
+    tmpJSON = JSON.parse(json as string)
+    requestedEndpoints = tmpJSON.endpoints
+    requestedQueryIdentifiers = tmpJSON.queryIdentifiers
+
+    // console.log({ requestedEndpoints, requestedQueryIdentifiers })
+  }
 
   // BOORU
   let API
   switch (booruType) {
     // Moebooru and MyImouto are danbooru
     case 'danbooru':
-      API = new Danbooru(booruType, domain as string)
+      API = new Danbooru(
+        booruType,
+        domain as string,
+        requestedEndpoints,
+        requestedQueryIdentifiers
+      )
       break
 
     case 'danbooru2':
-      API = new Danbooru2(booruType, domain as string)
+      API = new Danbooru2(
+        booruType,
+        domain as string,
+        requestedEndpoints,
+        requestedQueryIdentifiers
+      )
       break
 
     case 'shimmie2':
-      API = new Shimmie2(booruType, domain as string)
+      API = new Shimmie2(
+        booruType,
+        domain as string,
+        requestedEndpoints,
+        requestedQueryIdentifiers
+      )
       break
 
     case 'gelbooru':
-      API = new Gelbooru(booruType, domain as string)
+      API = new Gelbooru(
+        booruType,
+        domain as string,
+        requestedEndpoints,
+        requestedQueryIdentifiers
+      )
       break
 
     default:
