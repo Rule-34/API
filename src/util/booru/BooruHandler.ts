@@ -11,15 +11,15 @@ export async function BooruHandler(
   queryObj: Request['query']
 ): Promise<BooruResponses.Response[]> {
   // General
-  const { domain, json } = queryObj
+  const { domain, config } = queryObj
 
   // Extract values from JSON
   let tmpJSON
   let requestedEndpoints
   let requestedQueryIdentifiers
 
-  if (json) {
-    tmpJSON = JSON.parse(json as string)
+  if (config) {
+    tmpJSON = JSON.parse(config as string)
     requestedEndpoints = tmpJSON.endpoints
     requestedQueryIdentifiers = tmpJSON.queryIdentifiers
 
