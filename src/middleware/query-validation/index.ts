@@ -29,12 +29,12 @@ export const postsValidation = (): ValidationChain[] => {
     query('rating').isString().optional(),
     query('score').isString().optional(),
     query('order').isString().optional(),
-    query('json').isString().optional(),
+    query('config').isString().optional(),
   ]
 }
 
 export const singlePostValidation = (): ValidationChain[] => {
-  return [query('id').isInt().notEmpty(), query('json').isString().optional()]
+  return [query('id').isInt().notEmpty(), query('config').isString().optional()]
 }
 
 export const tagsValidation = (): ValidationChain[] => {
@@ -45,7 +45,7 @@ export const tagsValidation = (): ValidationChain[] => {
     query('limit').isInt().optional(),
     query('order').isString().optional(),
     query('pid').isInt().optional(),
-    query('json').isString().optional(),
+    query('config').isString().optional(),
   ]
 }
 
