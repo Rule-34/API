@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 
 const router = Router()
 
@@ -21,6 +21,10 @@ router
 /**
  * Static routes
  */
+router.get(`/`, function (req: Request, res: Response) {
+  res.json({ status: 'UP' })
+})
+
 router.use(`/booru`, require(`./booru`))
 
 export default router
