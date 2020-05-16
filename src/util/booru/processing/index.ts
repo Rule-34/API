@@ -28,7 +28,7 @@ export default function processData({
       if (!data.length) {
         throw new CustomError(
           'No data to return, maybe you have too many tags?',
-          422
+          204
         )
       }
 
@@ -55,7 +55,7 @@ export default function processData({
       if (!data.length) {
         throw new CustomError(
           'No data to return, maybe you have too many tags?',
-          422
+          204
         )
       }
 
@@ -71,7 +71,7 @@ export default function processData({
           if (!Object.keys(data).length) {
             throw new CustomError(
               'No data to return, maybe you have too many tags?',
-              422
+              204
             )
           }
 
@@ -93,7 +93,7 @@ export default function processData({
           if (!data.length) {
             throw new CustomError(
               'No data to return, maybe you have too many tags?',
-              422
+              204
             )
           }
 
