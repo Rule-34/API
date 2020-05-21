@@ -111,15 +111,20 @@ export function createPostFromData(
       break
   }
 
-  // Fix for rule34.xxx
-  tmpJSON.high_res_file.url = tmpJSON.high_res_file.url.replace('xxx/', 'xxx//')
-  tmpJSON.low_res_file.url = tmpJSON.low_res_file.url.replace('xxx/', 'xxx//')
-  tmpJSON.preview_file.url = tmpJSON.preview_file.url.replace('xxx/', 'xxx//')
-
   // Delete empty "" urls
   if (tmpJSON.high_res_file.url === '') tmpJSON.high_res_file.url = null
   if (tmpJSON.low_res_file.url === '') tmpJSON.low_res_file.url = null
   if (tmpJSON.preview_file.url === '') tmpJSON.preview_file.url = null
+
+  // Fix for rule34.xxx
+  if (RegExp('xxx/').test(tmpJSON.high_res_file.url)) {
+    tmpJSON.high_res_file.url = tmpJSON.high_res_file.url.replace(
+      'xxx/',
+      'xxx//'
+    )
+    tmpJSON.low_res_file.url = tmpJSON.low_res_file.url.replace('xxx/', 'xxx//')
+    tmpJSON.preview_file.url = tmpJSON.preview_file.url.replace('xxx/', 'xxx//')
+  }
 
   /*
    * Tags
