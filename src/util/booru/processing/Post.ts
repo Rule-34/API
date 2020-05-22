@@ -150,6 +150,9 @@ export function createPostFromData(
       break
   }
 
+  // Remove duplicates
+  tmpJSON.tags = [...new Set(tmpJSON.tags)]
+
   /*
    * Source
    */
