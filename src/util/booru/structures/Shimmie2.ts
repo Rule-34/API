@@ -1,16 +1,16 @@
-import { Booru } from './Booru'
-import { BooruClass } from 'types'
+import { GenericBooru } from './Booru'
+import { Booru } from 'types'
 
 // API help page --> It has no documentation at all
 
-export class Shimmie2 extends Booru {
+export class Shimmie2 extends GenericBooru {
   constructor(
     booruType: string,
     base: string,
-    requestedEndpoints: BooruClass.BooruEndpoints,
-    requestedQueryIdentifiers: BooruClass.QueryIdentifiers
+    requestedEndpoints: Booru.Classes.GenericBooru.Endpoints,
+    requestedQueryIdentifiers: Booru.Classes.GenericBooru.QueryIdentifiers
   ) {
-    const defaultEndpoints: BooruClass.BooruEndpoints = {
+    const defaultEndpoints: Booru.Classes.GenericBooru.Endpoints = {
       base: base,
       posts: '/api/danbooru/find_posts',
       tags: '/api/internal/autocomplete', // the /api/danbooru/find_tags is the absolute worth thing
@@ -18,7 +18,7 @@ export class Shimmie2 extends Booru {
       randomPost: undefined,
     }
 
-    const defaultQueryIdentifiers: BooruClass.QueryIdentifiers = {
+    const defaultQueryIdentifiers: Booru.Classes.GenericBooru.QueryIdentifiers = {
       posts: {
         limit: 'limit',
         pageID: 'pid',

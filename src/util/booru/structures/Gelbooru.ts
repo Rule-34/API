@@ -1,16 +1,16 @@
-import { Booru } from './Booru'
-import { BooruClass } from 'types'
+import { GenericBooru } from './Booru'
+import { Booru } from 'types'
 
 // API help page --> https://gelbooru.com/index.php?page=wiki&s=view&id=18780
 
-export class Gelbooru extends Booru {
+export class Gelbooru extends GenericBooru {
   constructor(
     booruType: string,
     base: string,
-    requestedEndpoints: BooruClass.BooruEndpoints,
-    requestedQueryIdentifiers: BooruClass.QueryIdentifiers
+    requestedEndpoints: Booru.Classes.GenericBooru.Endpoints,
+    requestedQueryIdentifiers: Booru.Classes.GenericBooru.QueryIdentifiers
   ) {
-    const defaultEndpoints: BooruClass.BooruEndpoints = {
+    const defaultEndpoints: Booru.Classes.GenericBooru.Endpoints = {
       base: base,
       posts: '/index.php?page=dapi&s=post&q=index',
       tags: '/index.php?page=dapi&s=tag&q=index',
@@ -18,7 +18,7 @@ export class Gelbooru extends Booru {
       randomPost: undefined, // Only works for gelbooru.com
     }
 
-    const defaultQueryIdentifiers: BooruClass.QueryIdentifiers = {
+    const defaultQueryIdentifiers: Booru.Classes.GenericBooru.QueryIdentifiers = {
       posts: {
         limit: 'limit',
         pageID: 'pid',

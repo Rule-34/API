@@ -1,16 +1,16 @@
-import { Booru } from './Booru'
-import { BooruClass } from 'types'
+import { GenericBooru } from './Booru'
+import { Booru } from 'types'
 
 // API help page --> https://danbooru.donmai.us/wiki_pages/help:api
 
-export class Danbooru2 extends Booru {
+export class Danbooru2 extends GenericBooru {
   constructor(
     booruType: string,
     base: string,
-    requestedEndpoints: BooruClass.BooruEndpoints,
-    requestedQueryIdentifiers: BooruClass.QueryIdentifiers
+    requestedEndpoints: Booru.Classes.GenericBooru.Endpoints,
+    requestedQueryIdentifiers: Booru.Classes.GenericBooru.QueryIdentifiers
   ) {
-    const defaultEndpoints: BooruClass.BooruEndpoints = {
+    const defaultEndpoints: Booru.Classes.GenericBooru.Endpoints = {
       base: base,
       posts: '/posts.json',
       tags: '/tags.json',
@@ -18,7 +18,7 @@ export class Danbooru2 extends Booru {
       randomPost: '/posts.json',
     }
 
-    const defaultQueryIdentifiers: BooruClass.QueryIdentifiers = {
+    const defaultQueryIdentifiers: Booru.Classes.GenericBooru.QueryIdentifiers = {
       posts: {
         limit: 'limit',
         pageID: 'page',

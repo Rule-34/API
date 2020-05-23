@@ -1,16 +1,16 @@
-import { Booru } from './Booru'
-import { BooruClass } from 'types'
+import { GenericBooru } from './Booru'
+import { Booru } from 'types'
 
 // API help page --> https://lolibooru.moe/help/api
 
-export class Danbooru extends Booru {
+export class Danbooru extends GenericBooru {
   constructor(
     booruType: string,
     base: string,
-    requestedEndpoints: BooruClass.BooruEndpoints,
-    requestedQueryIdentifiers: BooruClass.QueryIdentifiers
+    requestedEndpoints: Booru.Classes.GenericBooru.Endpoints,
+    requestedQueryIdentifiers: Booru.Classes.GenericBooru.QueryIdentifiers
   ) {
-    const defaultEndpoints: BooruClass.BooruEndpoints = {
+    const defaultEndpoints: Booru.Classes.GenericBooru.Endpoints = {
       base: base,
       posts: '/post/index.xml',
       tags: '/tag/index.xml',
@@ -18,7 +18,7 @@ export class Danbooru extends Booru {
       randomPost: '/post/index.xml',
     }
 
-    const defaultQueryIdentifiers: BooruClass.QueryIdentifiers = {
+    const defaultQueryIdentifiers: Booru.Classes.GenericBooru.QueryIdentifiers = {
       posts: {
         limit: 'limit',
         pageID: 'page',

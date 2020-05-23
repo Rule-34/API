@@ -1,5 +1,5 @@
 // Definitions
-import { BooruResponses } from '@/types/types'
+import { Booru } from '@/types/types'
 
 // Init
 // import Debug from 'debug'
@@ -7,9 +7,9 @@ import { BooruResponses } from '@/types/types'
 
 export function createTagsFromData(
   booruType: string,
-  fetchedTagsData: BooruResponses.TagRequest
-): BooruResponses.TagResponse {
-  const tmpJSON: BooruResponses.TagResponse = {
+  fetchedTagsData: Booru.Structures.Data.Raw.Tag
+): Booru.Structures.Data.Processed.Tag {
+  const tmpJSON: Booru.Structures.Data.Processed.Tag = {
     name: undefined,
     count: undefined,
   }

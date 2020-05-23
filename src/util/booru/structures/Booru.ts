@@ -1,5 +1,5 @@
 // Types
-import { BooruClass, BooruResponses, BooruData } from '@/types/types'
+import { Booru } from '@/types/types'
 
 // Utilities
 import httpFetch from '@/util/httpFetch'
@@ -11,10 +11,10 @@ import Debug from 'debug'
 import { CustomError } from '@/util/classes'
 const debug = Debug(`Server:util Booru Class`)
 
-export abstract class Booru {
+export abstract class GenericBooru {
   public booruType: string = undefined
 
-  public queryIdentifiers: BooruClass.QueryIdentifiers = {
+  public queryIdentifiers: Booru.Classes.GenericBooru.QueryIdentifiers = {
     posts: {
       limit: undefined,
       pageID: undefined,
@@ -38,7 +38,7 @@ export abstract class Booru {
     },
   }
 
-  public endpoints: BooruClass.BooruEndpoints = {
+  public endpoints: Booru.Classes.GenericBooru.Endpoints = {
     base: undefined,
     posts: undefined,
     tags: undefined,
@@ -48,8 +48,8 @@ export abstract class Booru {
 
   constructor(
     booruType: string,
-    endpoints: BooruClass.BooruEndpoints,
-    queryIdentifiers: BooruClass.QueryIdentifiers
+    endpoints: Booru.Classes.GenericBooru.Endpoints,
+    queryIdentifiers: Booru.Classes.GenericBooru.QueryIdentifiers
   ) {
     this.booruType = booruType
 
@@ -60,8 +60,8 @@ export abstract class Booru {
   }
 
   public async getPosts(
-    queryObj: BooruData.RequestedPostQueries
-  ): Promise<BooruResponses.Response[]> {
+    queryObj: Booru.Structures.Requests.Queries.Posts
+  ): Promise<Booru.Structures.Data.Processed.Response[]> {
     let URLToFetch = this.endpoints.base + this.endpoints.posts
 
     URLToFetch = this.addQueriesToURL(URLToFetch, 'posts', queryObj)
@@ -84,8 +84,8 @@ export abstract class Booru {
   }
 
   public async getSinglePost(
-    queryObj: BooruData.RequestedSinglePostQueries
-  ): Promise<BooruResponses.Response[]> {
+    queryObj: Booru.Structures.Requests.Queries.SinglePost
+  ): Promise<Booru.Structures.Data.Processed.Response[]> {
     let URLToFetch = this.endpoints.base + this.endpoints.singlePost
 
     URLToFetch = this.addQueriesToURL(URLToFetch, 'single-post', queryObj)
@@ -108,8 +108,8 @@ export abstract class Booru {
   }
 
   public async getRandomPost(
-    queryObj: BooruData.RequestedRandomPostQueries
-  ): Promise<BooruResponses.Response[]> {
+    queryObj: Booru.Structures.Requests.Queries.RandomPost
+  ): Promise<Booru.Structures.Data.Processed.Response[]> {
     let URLToFetch = this.endpoints.base + this.endpoints.randomPost
 
     URLToFetch = this.addQueriesToURL(URLToFetch, 'random-post', queryObj)
@@ -132,8 +132,8 @@ export abstract class Booru {
   }
 
   public async getTags(
-    queryObj: BooruData.RequestedTagQueries
-  ): Promise<BooruResponses.Response[]> {
+    queryObj: Booru.Structures.Requests.Queries.Tags
+  ): Promise<Booru.Structures.Data.Processed.Response[]> {
     let URLToFetch = this.endpoints.base + this.endpoints.tags
 
     URLToFetch = this.addQueriesToURL(URLToFetch, 'tags', queryObj)
@@ -163,9 +163,9 @@ export abstract class Booru {
     URL: string,
     mode: string,
     queryObj:
-      | BooruData.RequestedPostQueries
-      | BooruData.RequestedTagQueries
-      | BooruData.RequestedSinglePostQueries
+      | Booru.Structures.Requests.Queries.Posts
+      | Booru.Structures.Requests.Queries.Tags
+      | Booru.Structures.Requests.Queries.SinglePost
   ): string {
     const {
       limit,
@@ -174,11 +174,11 @@ export abstract class Booru {
       rating,
       score,
       order,
-    } = queryObj as BooruData.RequestedPostQueries
+    } = queryObj as Booru.Structures.Requests.Queries.Posts
 
-    const { tag } = queryObj as BooruData.RequestedTagQueries
+    const { tag } = queryObj as Booru.Structures.Requests.Queries.Tags
 
-    const { id } = queryObj as BooruData.RequestedSinglePostQueries
+    const { id } = queryObj as Booru.Structures.Requests.Queries.SinglePost
 
     switch (mode) {
       case 'posts':

@@ -1,4 +1,4 @@
-import { BooruResponses, BooruData } from 'types'
+import { Booru, Miscellaneous } from 'types'
 
 import { CustomError } from '@/util/classes'
 import { createPostFromData } from './Post'
@@ -9,8 +9,8 @@ export default function processData({
   mode,
   booruType,
   limit,
-}: BooruData.DataBetweenFunctions): BooruResponses.Response[] {
-  const ProcessedData: BooruResponses.Response[] = []
+}: Miscellaneous.DataBetweenFunctions): Booru.Structures.Data.Processed.Response[] {
+  const ProcessedData: Booru.Structures.Data.Processed.Response[] = []
 
   switch (mode) {
     case 'posts':

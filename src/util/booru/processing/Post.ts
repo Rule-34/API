@@ -1,5 +1,5 @@
 // Definitions
-import { BooruResponses, BooruStructures } from '@/types/types'
+import { Booru } from '@/types/types'
 
 // Init
 // import Debug from 'debug'
@@ -7,9 +7,9 @@ import { BooruResponses, BooruStructures } from '@/types/types'
 
 export function createPostFromData(
   booruType: string,
-  fetchedPostData: BooruResponses.PostRequest
-): BooruStructures.Post {
-  const Post: BooruStructures.Post = {
+  fetchedPostData: Booru.Structures.Data.Raw.Post
+): Booru.Structures.Data.Processed.Post {
+  const Post: Booru.Structures.Data.Processed.Post = {
     id: undefined,
     score: undefined,
     high_res_file: {
