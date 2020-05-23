@@ -137,6 +137,37 @@ export namespace BooruResponses {
   }
 }
 
+export namespace BooruStructures {
+  interface Post {
+    id: number
+    score: number
+    high_res_file: {
+      url: string
+      height: number
+      width: number
+    }
+    low_res_file: {
+      url: string
+      height?: number
+      width?: number
+    }
+    preview_file: {
+      url: string
+      height?: number
+      width?: number
+    }
+    tags: string[]
+    source: string[]
+    rating: string
+    type: string
+  }
+
+  interface Tag {
+    name: string
+    count: number
+  }
+}
+
 export namespace BooruData {
   interface RequestedPostQueries {
     limit?: number

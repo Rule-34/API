@@ -1,5 +1,5 @@
 // Definitions
-import { BooruResponses } from '@/types/types'
+import { BooruResponses, BooruStructures } from '@/types/types'
 
 // Init
 // import Debug from 'debug'
@@ -8,8 +8,8 @@ import { BooruResponses } from '@/types/types'
 export function createPostFromData(
   booruType: string,
   fetchedPostData: BooruResponses.PostRequest
-): BooruResponses.PostResponse {
-  const tmpJSON: BooruResponses.PostResponse = {
+): BooruStructures.Post {
+  const Post: BooruStructures.Post = {
     id: undefined,
     score: undefined,
     high_res_file: {
@@ -27,8 +27,8 @@ export function createPostFromData(
       height: undefined,
       width: undefined,
     },
-    tags: undefined,
-    source: undefined,
+    tags: [],
+    source: [],
     rating: undefined,
     type: undefined,
   }
@@ -36,7 +36,7 @@ export function createPostFromData(
   /*
    * ID
    */
-  tmpJSON.id = fetchedPostData.id
+  Post.id = fetchedPostData.id
 
   /*
    * Score
@@ -48,14 +48,14 @@ export function createPostFromData(
       if (typeof fetchedPostData.score.total === 'number') {
         // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
         // @ts-ignore // Disabled because I dont know how I could do this
-        tmpJSON.score = fetchedPostData.score.total
+        Post.score = fetchedPostData.score.total
         break
       }
-      tmpJSON.score = fetchedPostData.score as number
+      Post.score = fetchedPostData.score as number
       break
 
     default:
-      tmpJSON.score = fetchedPostData.score as number
+      Post.score = fetchedPostData.score as number
       break
   }
 
@@ -67,19 +67,19 @@ export function createPostFromData(
     case 'danbooru2':
       // E621
       if (fetchedPostData.file) {
-        tmpJSON.high_res_file = {
+        Post.high_res_file = {
           url: fetchedPostData.file.url,
           width: fetchedPostData.file.width,
           height: fetchedPostData.file.height,
         }
 
-        tmpJSON.low_res_file = {
+        Post.low_res_file = {
           url: fetchedPostData.sample.url,
           width: fetchedPostData.sample.width,
           height: fetchedPostData.sample.height,
         }
 
-        tmpJSON.preview_file = {
+        Post.preview_file = {
           url: fetchedPostData.preview.url,
           width: fetchedPostData.preview.width,
           height: fetchedPostData.preview.height,
@@ -89,41 +89,38 @@ export function createPostFromData(
       }
 
       // Most danbooru2 types
-      tmpJSON.high_res_file = {
+      Post.high_res_file = {
         url: fetchedPostData.file_url,
         width: fetchedPostData.image_width,
         height: fetchedPostData.image_height,
       }
 
-      tmpJSON.low_res_file = {
+      Post.low_res_file = {
         url: fetchedPostData.large_file_url,
       }
 
-      tmpJSON.preview_file = {
+      Post.preview_file = {
         url: fetchedPostData.preview_file_url,
       }
       break
 
     default:
-      tmpJSON.high_res_file = fetchedPostData.high_res_file
-      tmpJSON.low_res_file = fetchedPostData.low_res_file
-      tmpJSON.preview_file = fetchedPostData.preview_file
+      Post.high_res_file = fetchedPostData.high_res_file
+      Post.low_res_file = fetchedPostData.low_res_file
+      Post.preview_file = fetchedPostData.preview_file
       break
   }
 
   // Delete empty "" urls
-  if (tmpJSON.high_res_file.url === '') tmpJSON.high_res_file.url = null
-  if (tmpJSON.low_res_file.url === '') tmpJSON.low_res_file.url = null
-  if (tmpJSON.preview_file.url === '') tmpJSON.preview_file.url = null
+  if (Post.high_res_file.url === '') Post.high_res_file.url = null
+  if (Post.low_res_file.url === '') Post.low_res_file.url = null
+  if (Post.preview_file.url === '') Post.preview_file.url = null
 
   // Fix for rule34.xxx
-  if (RegExp('xxx/').test(tmpJSON.high_res_file.url)) {
-    tmpJSON.high_res_file.url = tmpJSON.high_res_file.url.replace(
-      'xxx/',
-      'xxx//'
-    )
-    tmpJSON.low_res_file.url = tmpJSON.low_res_file.url.replace('xxx/', 'xxx//')
-    tmpJSON.preview_file.url = tmpJSON.preview_file.url.replace('xxx/', 'xxx//')
+  if (RegExp('xxx/').test(Post.high_res_file.url)) {
+    Post.high_res_file.url = Post.high_res_file.url.replace('xxx/', 'xxx//')
+    Post.low_res_file.url = Post.low_res_file.url.replace('xxx/', 'xxx//')
+    Post.preview_file.url = Post.preview_file.url.replace('xxx/', 'xxx//')
   }
 
   /*
@@ -132,26 +129,24 @@ export function createPostFromData(
   switch (booruType) {
     case 'danbooru2':
       if (fetchedPostData.tag_string) {
-        tmpJSON.tags = fetchedPostData.tag_string?.trim().split(' ')
+        Post.tags = fetchedPostData.tag_string?.trim().split(' ')
         break
       }
-
-      tmpJSON.tags = []
 
       Object.keys(fetchedPostData.tags).forEach((tagContainer) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
         // @ts-ignore
-        tmpJSON.tags = tmpJSON.tags.concat(fetchedPostData.tags[tagContainer])
+        Post.tags = Post.tags.concat(fetchedPostData.tags[tagContainer])
       })
       break
 
     default:
-      tmpJSON.tags = (fetchedPostData.tags as string)?.trim().split(' ')
+      Post.tags = (fetchedPostData.tags as string)?.trim().split(' ')
       break
   }
 
   // Remove duplicates
-  tmpJSON.tags = [...new Set(tmpJSON.tags)]
+  Post.tags = [...new Set(Post.tags)]
 
   /*
    * Source
@@ -160,21 +155,21 @@ export function createPostFromData(
   switch (booruType) {
     case 'danbooru2':
       if (fetchedPostData.sources) {
-        tmpJSON.source = fetchedPostData.sources
+        Post.source = fetchedPostData.sources
         break
       }
 
-      tmpJSON.source = [fetchedPostData.source]
+      Post.source = [fetchedPostData.source]
       break
 
     default:
-      tmpJSON.source = [fetchedPostData.source]
+      Post.source = [fetchedPostData.source]
       break
   }
 
   // Remove empty "" sources
-  tmpJSON.source.forEach((source, index) => {
-    if (source === '') tmpJSON.source.splice(index)
+  Post.source.forEach((source, index) => {
+    if (source === '') Post.source.splice(index)
   })
 
   /*
@@ -182,33 +177,33 @@ export function createPostFromData(
    */
   switch (fetchedPostData.rating) {
     case 'e':
-      tmpJSON.rating = 'explicit'
+      Post.rating = 'explicit'
       break
 
     case 'q':
     case 'suggestive': // Derpibooru
-      tmpJSON.rating = 'questionable'
+      Post.rating = 'questionable'
       break
 
     case 's':
-      tmpJSON.rating = 'safe'
+      Post.rating = 'safe'
       break
 
     case 'u':
-      tmpJSON.rating = 'unrated'
+      Post.rating = 'unrated'
       break
 
     default:
-      tmpJSON.rating = 'unknown'
+      Post.rating = 'unknown'
       break
   }
 
   /*
    * Media type
    */
-  tmpJSON.type = /\.(webm|mp4|ogg)$/.test(tmpJSON.high_res_file.url)
+  Post.type = /\.(webm|mp4|ogg)$/.test(Post.high_res_file.url)
     ? 'video'
     : 'image'
 
-  return tmpJSON
+  return Post
 }
