@@ -2,7 +2,7 @@ import { Booru, Miscellaneous } from 'types'
 
 import { CustomError } from '@/util/classes'
 import { createPostFromData } from './Post'
-import { createTagsFromData } from './Tags'
+import { createTagFromData } from './Tags'
 
 export default function processData({
   data,
@@ -80,7 +80,7 @@ export default function processData({
           for (const prop of Object.entries(data)) {
             // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
             // @ts-ignore // Disabled because I dont know how I could handle this weird response
-            ProcessedData.push(createTagsFromData(booruType, prop))
+            ProcessedData.push(createTagFromData(booruType, prop))
 
             counter++
 
@@ -98,7 +98,7 @@ export default function processData({
           }
 
           data.forEach((post: any) => {
-            ProcessedData.push(createTagsFromData(booruType, post))
+            ProcessedData.push(createTagFromData(booruType, post))
           })
           break
       }

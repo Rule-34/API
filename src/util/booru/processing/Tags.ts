@@ -5,11 +5,11 @@ import { Booru } from '@/types/types'
 // import Debug from 'debug'
 // const debug = Debug(`Server:util Post Cleaner`)
 
-export function createTagsFromData(
+export function createTagFromData(
   booruType: string,
   fetchedTagsData: Booru.Structures.Data.Raw.Tag
 ): Booru.Structures.Data.Processed.Tag {
-  const tmpJSON: Booru.Structures.Data.Processed.Tag = {
+  const Tag: Booru.Structures.Data.Processed.Tag = {
     name: undefined,
     count: undefined,
   }
@@ -19,31 +19,31 @@ export function createTagsFromData(
     case 'shimmie2':
       // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore // Disabled because I dont know how I could handle this weird response
-      tmpJSON.name = fetchedTagsData[0]
+      Tag.name = fetchedTagsData[0]
       // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore // Disabled because I dont know how I could handle this weird response
-      tmpJSON.count = fetchedTagsData[1]
+      Tag.count = fetchedTagsData[1]
       break
 
-    // Tags from transfromed XML
+    // Tags from transformed XML
     case 'danbooru':
     case 'gelbooru':
       // For autocomplete.php boorus (like rule34.xxx)
       if (fetchedTagsData.label) {
-        tmpJSON.name = fetchedTagsData.value
+        Tag.name = fetchedTagsData.value
 
-        tmpJSON.count = Number(fetchedTagsData.label.match(/\d+/g))
+        Tag.count = Number(fetchedTagsData.label.match(/\d+/g))
         break
       }
 
-      tmpJSON.name = fetchedTagsData.name
-      tmpJSON.count = fetchedTagsData.count
+      Tag.name = fetchedTagsData.name
+      Tag.count = fetchedTagsData.count
       break
 
     case 'danbooru2':
-      tmpJSON.name = fetchedTagsData.name
-      tmpJSON.count = fetchedTagsData.post_count
+      Tag.name = fetchedTagsData.name
+      Tag.count = fetchedTagsData.post_count
       break
   }
-  return tmpJSON
+  return Tag
 }
