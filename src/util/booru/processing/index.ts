@@ -1,7 +1,7 @@
 import { BooruResponses, BooruData } from 'types'
 
 import { CustomError } from '@/util/classes'
-import { Post } from './Post'
+import { createPostFromData } from './Post'
 import { createTagsFromData } from './Tags'
 
 export default function processData({
@@ -33,7 +33,7 @@ export default function processData({
       }
 
       data.forEach((post: any) => {
-        ProcessedData.push(new Post(booruType, post).toObject())
+        ProcessedData.push(createPostFromData(booruType, post))
       })
 
       break
@@ -60,7 +60,7 @@ export default function processData({
       }
 
       data.forEach((post: any) => {
-        ProcessedData.push(new Post(booruType, post).toObject())
+        ProcessedData.push(createPostFromData(booruType, post))
       })
       break
 
