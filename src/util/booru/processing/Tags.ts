@@ -17,12 +17,9 @@ export function createTagFromData(
   switch (booruType) {
     // Tags from internal autocomplete API
     case 'shimmie2':
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-      // @ts-ignore // Disabled because I dont know how I could handle this weird response
-      Tag.name = fetchedTagsData[0]
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-      // @ts-ignore // Disabled because I dont know how I could handle this weird response
-      Tag.count = fetchedTagsData[1]
+      // These type of tags are html, very weird
+      Tag.name = (fetchedTagsData as any)[0]
+      Tag.count = (fetchedTagsData as any)[1]
       break
 
     // Tags from transformed XML

@@ -17,7 +17,7 @@ router.get(
       // debug(req.params.booruType)
       // debug(req.params.endpoint)
 
-      const jsonResult: object = await BooruHandler(
+      const jsonResult = await BooruHandler(
         { booruType: req.params.booruType, endpoint: req.params.endpoint },
         queryObj
       )

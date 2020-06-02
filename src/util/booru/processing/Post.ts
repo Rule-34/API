@@ -43,12 +43,10 @@ export function createPostFromData(
    */
   switch (booruType) {
     case 'danbooru2':
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-      // @ts-ignore // Disabled because I dont know how I could do this
-      if (typeof fetchedPostData.score.total === 'number') {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-        // @ts-ignore // Disabled because I dont know how I could do this
-        Post.score = fetchedPostData.score.total
+      if (
+        typeof (fetchedPostData.score as { total: number }).total === 'number'
+      ) {
+        Post.score = (fetchedPostData.score as { total: number }).total
         break
       }
       Post.score = fetchedPostData.score as number
@@ -134,9 +132,7 @@ export function createPostFromData(
       }
 
       Object.keys(fetchedPostData.tags).forEach((tagContainer) => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-        // @ts-ignore
-        Post.tags = Post.tags.concat(fetchedPostData.tags[tagContainer])
+        Post.tags = Post.tags.concat(tagContainer)
       })
       break
 
