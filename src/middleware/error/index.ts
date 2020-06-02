@@ -15,7 +15,7 @@ export default (
   const { message, stack } = err
   const { messageArray, status = 500 } = err as GenericAPIError
 
-  debug(stack)
+  if (status >= 400) debug(stack)
 
   res.status(status).json({
     error: {
