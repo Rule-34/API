@@ -56,15 +56,12 @@ export const queryValidate = (
 ): void => {
   const errors = validationResult(req)
 
-  // Check if there is any error
   if (!errors.isEmpty()) {
-    // Create array of errors
-    const extractedErrors: Array<object> = []
-    errors.array().map((err) => extractedErrors.push({ [err.param]: err.msg }))
+    const extractedErrors = errors
+      .array()
+      .map((err) => `${err.msg} on param ${err.param}`)
 
-    next(
-      new CustomError('Check the following query errors', 422, extractedErrors)
-    )
+    next(new GenericAPIError(extractedErrors, 422))
     return
   }
 

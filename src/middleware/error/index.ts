@@ -13,23 +13,17 @@ export default (
   next: NextFunction
 ): void => {
   // Extract values from err
-  const { status = 500, stack } = err
+  const { messageArray, status, stack } = err
 
   debug(stack)
 
-  let message: string | object = err.message
-
-  // If message is an Array of messages
-  if (err.messageArray) {
-    message = err.messageArray
-  }
-
   res.status(status).json({
     error: {
-      code: err.status,
-      message,
+      code: status,
+      errors: messageArray,
+
       // Only send stack if we are in development
-      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+      stack: process.env.NODE_ENV === 'development' ? stack : undefined,
     },
   })
 }
