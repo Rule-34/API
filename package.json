@@ -27,6 +27,7 @@
     "@": "dist/"
   },
   "dependencies": {
+    "@sentry/node": "^5.16.0",
     "apicache": "^1.5.3",
     "body-parser": "^1.19.0",
     "camaro": "^6.0.1",
@@ -43,7 +44,6 @@
     "helmet": "^3.22.0",
     "module-alias": "^2.2.2",
     "morgan": "^1.10.0",
-    "newrelic": "^6.8.0",
     "node-fetch": "^2.6.0",
     "winston": "^3.2.1"
   },
