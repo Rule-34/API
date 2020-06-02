@@ -67,7 +67,7 @@ export async function BooruHandler(
       break
 
     default:
-      throw new GenericAPIError(['No known booru type'], 422)
+      throw new GenericAPIError('No known booru type', null, 422)
   }
 
   // ENDPOINT
@@ -114,6 +114,6 @@ export async function BooruHandler(
       return await API.getRandomPost(processedRandomPostQueries)
 
     default:
-      throw new GenericAPIError(['No endpoint specified'], 422)
+      throw new GenericAPIError('No endpoint specified', null, 422)
   }
 }

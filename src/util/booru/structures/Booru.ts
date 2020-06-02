@@ -235,7 +235,8 @@ export abstract class GenericBooru {
         switch (this.booruType) {
           case 'danbooru':
             throw new GenericAPIError(
-              ['This type of booru doesnt support single-post'],
+              'This type of booru doesnt support single-post',
+              null,
               404
             )
 
@@ -258,7 +259,8 @@ export abstract class GenericBooru {
           case 'gelbooru':
           case 'shimmie2':
             throw new GenericAPIError(
-              ['This type of booru doesnt support random-post'],
+              'This type of booru doesnt support random-post',
+              null,
               404
             )
 

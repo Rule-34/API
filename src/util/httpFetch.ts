@@ -3,7 +3,6 @@ import he from 'he'
 
 // Init
 import Debug from 'debug'
-import { GenericAPIError } from './classes'
 const debug = Debug('Server:util Fetch')
 
 // Gets the content from the passed url and returns it

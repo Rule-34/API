@@ -61,7 +61,7 @@ export const queryValidate = (
       .array()
       .map((err) => `${err.msg} on param ${err.param}`)
 
-    next(new GenericAPIError(extractedErrors, 422))
+    next(new GenericAPIError('Query errors', extractedErrors, 422))
     return
   }
 
