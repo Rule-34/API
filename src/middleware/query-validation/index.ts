@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { query, validationResult, ValidationChain } from 'express-validator'
 
-import { CustomError } from '@/util/classes'
+import { GenericAPIError } from '@/util/classes'
 
 // Init
 // import Debug from 'debug'

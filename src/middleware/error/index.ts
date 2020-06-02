@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from 'express'
 
-import { CustomError } from '@/util/classes'
+import { GenericAPIError } from '@/util/classes'
 
 // Init
 import Debug from 'debug'
 const debug = Debug(`Server:middleware Error Handler`)
 
 export default (
-  err: CustomError,
+  err: GenericAPIError,
   req: Request,
   res: Response,
   next: NextFunction

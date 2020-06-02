@@ -4,7 +4,7 @@ import { Booru, Miscellaneous } from '@/types/types'
 
 // Classes
 import { Danbooru2, Danbooru, Gelbooru, Shimmie2 } from './structures'
-import { CustomError } from '@/util/classes'
+import { GenericAPIError } from '@/util/classes'
 
 export async function BooruHandler(
   { booruType, endpoint }: Miscellaneous.DataBetweenFunctions,
@@ -67,7 +67,7 @@ export async function BooruHandler(
       break
 
     default:
-      throw new CustomError('No known booru type', 422)
+      throw new GenericAPIError(['No known booru type'], 422)
   }
 
   // ENDPOINT
@@ -114,6 +114,6 @@ export async function BooruHandler(
       return await API.getRandomPost(processedRandomPostQueries)
 
     default:
-      throw new CustomError('No endpoint specified', 422)
+      throw new GenericAPIError(['No endpoint specified'], 422)
   }
 }

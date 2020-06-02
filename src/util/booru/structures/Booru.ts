@@ -8,7 +8,7 @@ import processData from '@/util/booru/processing'
 
 // Init
 import Debug from 'debug'
-import { CustomError } from '@/util/classes'
+import { GenericAPIError } from '@/util/classes'
 const debug = Debug(`Server:util Booru Class`)
 
 export abstract class GenericBooru {
@@ -234,8 +234,8 @@ export abstract class GenericBooru {
       case 'single-post':
         switch (this.booruType) {
           case 'danbooru':
-            throw new CustomError(
-              'This type of booru doesnt support single-post',
+            throw new GenericAPIError(
+              ['This type of booru doesnt support single-post'],
               404
             )
 
@@ -257,8 +257,8 @@ export abstract class GenericBooru {
         switch (this.booruType) {
           case 'gelbooru':
           case 'shimmie2':
-            throw new CustomError(
-              'This type of booru doesnt support random-post',
+            throw new GenericAPIError(
+              ['This type of booru doesnt support random-post'],
               404
             )
 
