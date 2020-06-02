@@ -1,4 +1,5 @@
 import express from 'express'
+import * as Sentry from '@sentry/node'
 // Utils
 import bodyParser from 'body-parser'
 import compression from 'compression'
@@ -14,11 +15,20 @@ import baseRouter from './routes'
 // Create Express server
 const app = express()
 
+// Sentry Error Analytics
+if (process.env.NODE_ENV === 'production') {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+  })
+
+  app.use(Sentry.Handlers.requestHandler() as express.RequestHandler)
+}
+
 // Express configuration
 app.set('trust proxy', 1)
 app.set('port', process.env.PORT || 8100)
 
-// Express middleware
+// Middleware
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(compression({ threshold: 0 }))
@@ -65,6 +75,10 @@ switch (process.env.NODE_ENV) {
  * Routes
  */
 app.use(baseRouter)
+
+// Sentry Error Analytics
+if (process.env.NODE_ENV === 'production')
+  app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler)
 
 //  Error handler
 app.use(errorHandler)
