@@ -1,4 +1,4 @@
-import { ready, transform } from 'camaro'
+import { transform } from 'camaro'
 
 const postsTemplate = {
   xml: [
@@ -47,9 +47,6 @@ const tagsTemplate = {
  * @xml XML data
  */
 export default async (xml: string, mode: string): Promise<string> => {
-  // Ready camaro
-  await ready()
-
   let JSONData
 
   switch (mode) {
