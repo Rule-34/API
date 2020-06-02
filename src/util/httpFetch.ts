@@ -3,6 +3,7 @@ import he from 'he'
 
 // Init
 import Debug from 'debug'
+import { GenericAPIError } from './classes'
 const debug = Debug('Server:util Fetch')
 
 // Gets the content from the passed url and returns it
@@ -17,23 +18,19 @@ export default async (url: string): Promise<string> => {
       'User-Agent':
         'Rule 34 API (https://github.com/VoidlessSeven7/Rule-34-API)',
     },
+  }).then(async (res) => {
+    let tmpData
+    // Check for HTTP status errors
+    if (!res.ok) {
+      throw new Error('Network response was not ok')
+    }
+
+    tmpData = await res.text()
+
+    tmpData = he.decode(tmpData)
+
+    return tmpData
   })
-    .then(async (res) => {
-      let tmpData
-      // Check for HTTP status errors
-      if (!res.ok) {
-        throw new Error('Network response was not ok')
-      }
-
-      tmpData = await res.text()
-
-      tmpData = he.decode(tmpData)
-
-      return tmpData
-    })
-    .catch((error) => {
-      throw new Error(`Fetch: ${error}`)
-    })
 
   // debug(data)
 
