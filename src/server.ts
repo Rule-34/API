@@ -3,11 +3,6 @@ dotenv.config()
 
 import 'module-alias/register'
 
-// Analytics
-if (process.env.NODE_ENV === 'production') {
-  require('newrelic')
-}
-
 import app from './app'
 
 /**
