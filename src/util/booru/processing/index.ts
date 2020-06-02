@@ -1,6 +1,6 @@
 import { Booru, Miscellaneous } from 'types'
 
-import { CustomError } from '@/util/classes'
+import { EmptyDataError } from '@/util/classes'
 import { createPostFromData } from './Post'
 import { createTagFromData } from './Tags'
 
@@ -26,10 +26,7 @@ export default function processData({
 
       // Error handling
       if (!data.length) {
-        throw new CustomError(
-          'No data to return, maybe you have too many tags?',
-          204
-        )
+        throw new EmptyDataError()
       }
 
       data.forEach((post: any) => {
@@ -53,10 +50,7 @@ export default function processData({
 
       // Error handling
       if (!data.length) {
-        throw new CustomError(
-          'No data to return, maybe you have too many tags?',
-          204
-        )
+        throw new EmptyDataError()
       }
 
       data.forEach((post: any) => {
@@ -69,18 +63,13 @@ export default function processData({
         case 'shimmie2':
           // Error handling
           if (!Object.keys(data).length) {
-            throw new CustomError(
-              'No data to return, maybe you have too many tags?',
-              204
-            )
+            throw new EmptyDataError()
           }
 
           let counter = 0
 
           for (const prop of Object.entries(data)) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-            // @ts-ignore // Disabled because I dont know how I could handle this weird response
-            ProcessedData.push(createTagFromData(booruType, prop))
+            ProcessedData.push(createTagFromData(booruType, prop as any))
 
             counter++
 
@@ -91,10 +80,7 @@ export default function processData({
         default:
           // Error handling
           if (!data.length) {
-            throw new CustomError(
-              'No data to return, maybe you have too many tags?',
-              204
-            )
+            throw new EmptyDataError()
           }
 
           data.forEach((post: any) => {
