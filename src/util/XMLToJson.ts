@@ -1,7 +1,5 @@
 import { transform } from 'camaro'
 
-import { EmptyDataError } from '@/util/classes'
-
 const postsTemplate = {
   xml: [
     '/posts/post',
@@ -63,9 +61,6 @@ export default async (xml: string, mode: string): Promise<string> => {
     default:
       throw new Error('No mode specified')
   }
-
-  if (!JSONData || !JSONData.xml || !JSONData.xml.length)
-    throw new EmptyDataError()
 
   // Just return the Array, no object needed
   return JSONData.xml
