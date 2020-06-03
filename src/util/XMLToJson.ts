@@ -44,18 +44,17 @@ const tagsTemplate = {
 
 /**
  * Transforms XML to Json using a template
- * @xml XML data
  */
-export default async (xml: string, mode: string): Promise<string> => {
+export default async (XML: string, mode: 'posts' | 'tags'): Promise<any> => {
   let JSONData
 
   switch (mode) {
     case 'posts':
-      JSONData = await transform(xml, postsTemplate)
+      JSONData = await transform(XML, postsTemplate)
       break
 
     case 'tags':
-      JSONData = await transform(xml, tagsTemplate)
+      JSONData = await transform(XML, tagsTemplate)
       break
 
     default:
