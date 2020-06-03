@@ -15,7 +15,7 @@ export default async (url: string): Promise<string> => {
   const data = await fetch(url, {
     headers: {
       'User-Agent':
-        'Rule 34 API (https://github.com/VoidlessSeven7/Rule-34-API)',
+        'Rule 34 API (https://github.com/AlejandroAkbal/Rule-34-API)',
     },
   }).then(async (res) => {
     let tmpData

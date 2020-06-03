@@ -4,7 +4,7 @@
   "description": "An Auth API",
   "repository": {
     "type": "git",
-    "url": "https://github.com/VoidlessSeven7/Rule-34-API-Auth"
+    "url": "https://github.com/AlejandroAkbal/Rule-34-API-Auth"
   },
   "author": "Alejandro Akbal",
   "main": "dist/server.js",
