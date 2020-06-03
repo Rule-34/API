@@ -5,33 +5,30 @@ import he from 'he'
 import Debug from 'debug'
 const debug = Debug('Server:util Fetch')
 
-// Gets the content from the passed url and returns it
-export default async (url: string): Promise<string> => {
-  // Encode url
-  url = encodeURI(url)
+export default async (URL: string): Promise<any> => {
+  URL = encodeURI(URL)
 
-  debug(url)
+  debug(URL)
 
-  const data = await fetch(url, {
+  const options = {
     headers: {
       'User-Agent':
         'Rule 34 API (https://github.com/AlejandroAkbal/Rule-34-API)',
     },
-  }).then(async (res) => {
-    let tmpData
-    // Check for HTTP status errors
-    if (!res.ok) {
-      throw new Error(res.statusText)
-    }
+  }
 
-    tmpData = await res.text()
+  let data = await fetch(URL, options)
+    //
+    .then(async (res) => {
+      if (!res.ok) {
+        throw new Error(res.statusText)
+      }
 
-    tmpData = he.decode(tmpData)
+      return res.text()
+    })
 
-    return tmpData
-  })
-
-  // debug(data)
+  // Decode HTML chars
+  data = he.decode(data)
 
   return data
 }
