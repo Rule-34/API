@@ -23,7 +23,6 @@ export default (
       message,
       errors: messageArray,
 
-      // Only send stack if we are in development
       stack: process.env.NODE_ENV === 'development' ? stack : undefined,
     },
   })
