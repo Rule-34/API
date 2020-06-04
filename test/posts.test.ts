@@ -65,14 +65,15 @@ describe.each(domains)('Posts', (domain) => {
       .expect('Content-Type', /json/)
       .expect(200)
       .expect((res) => {
-        res.body.forEach((element: { type: string }) => {
-          switch (element.type) {
+        res.body.forEach((element: { media_type: string }) => {
+          switch (element.media_type) {
             case 'video':
             case 'image':
+            case 'unknown':
               break
 
             default:
-              throw new Error('Type is not valid: ' + element.type)
+              throw new Error('Type is not valid: ' + element.media_type)
           }
         })
       })
