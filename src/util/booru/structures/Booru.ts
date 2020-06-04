@@ -2,7 +2,7 @@
 import { Booru } from '@/types/types'
 
 // Utilities
-import HTTPFetch from '@/util/HTTPFetch'
+import FetchUtil from '@/util/FetchUtil'
 import XMLToJson from '@/util/XMLToJson'
 
 // Classes
@@ -176,7 +176,7 @@ export abstract class GenericBooru {
     URL: string,
     mode: 'posts' | 'tags'
   ): Promise<any[]> {
-    let data = await HTTPFetch(URL)
+    let data = await FetchUtil(URL)
 
     try {
       data = JSON.parse(data)
