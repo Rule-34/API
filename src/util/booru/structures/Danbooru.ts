@@ -1,24 +1,32 @@
-import { GenericBooru } from './Booru'
-import { Booru } from 'types'
+// Types
+import { Booru } from '@/types/types'
 
-// API help page --> https://lolibooru.moe/help/api
+// Classes
+import { GenericBooru } from './Booru'
+import { DanbooruPost } from './data/Post'
+import { DanbooruTag } from './data/Tag'
 
 export class Danbooru extends GenericBooru {
+  // API help page --> https://lolibooru.moe/help/api
   constructor(
-    booruType: string,
     base: string,
-    requestedEndpoints: Booru.Classes.GenericBooru.Endpoints,
-    requestedQueryIdentifiers: Booru.Classes.GenericBooru.QueryIdentifiers
+    booruType: GenericBooru['booruType'],
+    {
+      requestedEndpoints,
+      requestedQueryIdentifiers,
+    }: {
+      requestedEndpoints: GenericBooru['endpoints']
+      requestedQueryIdentifiers: GenericBooru['queryIdentifiers']
+    }
   ) {
-    const defaultEndpoints: Booru.Classes.GenericBooru.Endpoints = {
+    const defaultEndpoints: GenericBooru['endpoints'] = {
       base: base,
       posts: '/post/index.xml',
       tags: '/tag/index.xml',
-      singlePost: undefined, // No known way to do this
+      singlePost: undefined,
       randomPost: '/post/index.xml',
     }
-
-    const defaultQueryIdentifiers: Booru.Classes.GenericBooru.QueryIdentifiers = {
+    const defaultQueryIdentifiers: GenericBooru['queryIdentifiers'] = {
       posts: {
         limit: 'limit',
         pageID: 'page',
@@ -27,11 +35,9 @@ export class Danbooru extends GenericBooru {
         score: 'score',
         order: 'order',
       },
-
       singlePost: {
-        id: undefined, // No known way to do this
+        id: undefined,
       },
-
       tags: {
         tag: 'name',
         tagEnding: undefined,
@@ -41,13 +47,22 @@ export class Danbooru extends GenericBooru {
         raw: undefined,
       },
     }
-
     super(
       booruType,
-
       { ...defaultEndpoints, ...requestedEndpoints },
-
       { ...defaultQueryIdentifiers, ...requestedQueryIdentifiers }
     )
+  }
+
+  protected createPost(
+    data: Booru.Structures.Data.Raw.Post
+  ): Booru.Structures.Data.Processed.Post {
+    return new DanbooruPost(data).toJSON()
+  }
+
+  protected createTag(
+    data: Booru.Structures.Data.Raw.Tag
+  ): Booru.Structures.Data.Processed.Tag {
+    return new DanbooruTag(data).toJSON()
   }
 }

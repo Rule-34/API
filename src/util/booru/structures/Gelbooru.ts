@@ -1,37 +1,43 @@
-import { GenericBooru } from './Booru'
-import { Booru } from 'types'
+// Types
+import { Booru } from '@/types/types'
 
-// API help page --> https://gelbooru.com/index.php?page=wiki&s=view&id=18780
+// Classes
+import { GenericBooru } from './Booru'
+import { GelbooruPost } from './data/Post'
+import { GelbooruTag } from './data/Tag'
 
 export class Gelbooru extends GenericBooru {
+  // API help page --> https://gelbooru.com/index.php?page=wiki&s=view&id=18780
   constructor(
-    booruType: string,
     base: string,
-    requestedEndpoints: Booru.Classes.GenericBooru.Endpoints,
-    requestedQueryIdentifiers: Booru.Classes.GenericBooru.QueryIdentifiers
+    booruType: GenericBooru['booruType'],
+    {
+      requestedEndpoints,
+      requestedQueryIdentifiers,
+    }: {
+      requestedEndpoints: GenericBooru['endpoints']
+      requestedQueryIdentifiers: GenericBooru['queryIdentifiers']
+    }
   ) {
-    const defaultEndpoints: Booru.Classes.GenericBooru.Endpoints = {
+    const defaultEndpoints: GenericBooru['endpoints'] = {
       base: base,
       posts: '/index.php?page=dapi&s=post&q=index',
       tags: '/index.php?page=dapi&s=tag&q=index',
       singlePost: '/index.php?page=dapi&s=post&q=index',
-      randomPost: undefined, // Only works for gelbooru.com
+      randomPost: undefined,
     }
-
-    const defaultQueryIdentifiers: Booru.Classes.GenericBooru.QueryIdentifiers = {
+    const defaultQueryIdentifiers: GenericBooru['queryIdentifiers'] = {
       posts: {
         limit: 'limit',
         pageID: 'pid',
         tags: 'tags',
         rating: 'rating',
         score: 'score',
-        order: 'sort', // Only works for gelbooru.com
+        order: 'sort',
       },
-
       singlePost: {
         id: 'id',
       },
-
       tags: {
         tag: 'name_pattern',
         tagEnding: '%',
@@ -41,13 +47,21 @@ export class Gelbooru extends GenericBooru {
         raw: undefined,
       },
     }
-
     super(
       booruType,
-
       { ...defaultEndpoints, ...requestedEndpoints },
-
       { ...defaultQueryIdentifiers, ...requestedQueryIdentifiers }
     )
+  }
+  protected createPost(
+    data: Booru.Structures.Data.Raw.Post
+  ): Booru.Structures.Data.Processed.Post {
+    return new GelbooruPost(data).toJSON()
+  }
+
+  protected createTag(
+    data: Booru.Structures.Data.Raw.Tag
+  ): Booru.Structures.Data.Processed.Tag {
+    return new GelbooruTag(data).toJSON()
   }
 }

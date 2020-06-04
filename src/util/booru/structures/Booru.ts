@@ -2,54 +2,55 @@
 import { Booru } from '@/types/types'
 
 // Utilities
-import httpFetch from '@/util/httpFetch'
+import HTTPFetch from '@/util/HTTPFetch'
 import XMLToJson from '@/util/XMLToJson'
-import processData from '@/util/booru/processing'
+
+// Classes
+import { EmptyDataError, GenericAPIError } from '@/util/classes'
 
 // Init
 import Debug from 'debug'
-import { GenericAPIError } from '@/util/classes'
 const debug = Debug(`Server:util Booru Class`)
 
 export abstract class GenericBooru {
-  public booruType: string = undefined
+  booruType: string
 
-  public queryIdentifiers: Booru.Classes.GenericBooru.QueryIdentifiers = {
+  queryIdentifiers: {
     posts: {
-      limit: undefined,
-      pageID: undefined,
-      tags: undefined,
-      rating: undefined,
-      score: undefined,
-      order: undefined,
-    },
+      limit: string
+      pageID: string
+      tags: string
+      rating?: string
+      score?: string
+      order?: string
+    }
 
     singlePost: {
-      id: undefined,
-    },
+      id?: string
+    }
 
     tags: {
-      tag: undefined,
-      tagEnding: undefined,
-      limit: undefined,
-      pageID: undefined,
-      order: undefined,
-      raw: undefined,
-    },
+      tag: string
+      tagEnding?: string
+      limit?: string
+      pageID?: string
+      order?: string
+      raw?: string
+    }
   }
 
-  public endpoints: Booru.Classes.GenericBooru.Endpoints = {
-    base: undefined,
-    posts: undefined,
-    tags: undefined,
-    singlePost: undefined,
-    randomPost: undefined,
+  endpoints: {
+    base: string
+    posts: string
+    tags: string
+    singlePost?: string
+    randomPost?: string
   }
 
   constructor(
-    booruType: string,
-    endpoints: Booru.Classes.GenericBooru.Endpoints,
-    queryIdentifiers: Booru.Classes.GenericBooru.QueryIdentifiers
+    booruType: GenericBooru['booruType'],
+    endpoints: GenericBooru['endpoints'],
+    queryIdentifiers: GenericBooru['queryIdentifiers']
   ) {
     this.booruType = booruType
 
@@ -60,288 +61,350 @@ export abstract class GenericBooru {
   }
 
   public async getPosts(
-    queryObj: Booru.Structures.Requests.Queries.Posts
+    queries: Booru.Structures.Requests.Queries.Posts
   ): Promise<Booru.Structures.Data.Processed.Response[]> {
-    let URLToFetch = this.endpoints.base + this.endpoints.posts
+    const Posts: Booru.Structures.Data.Processed.Post[] = []
 
-    URLToFetch = this.addQueriesToURL(URLToFetch, 'posts', queryObj)
+    this.checkEndpointIsSupported(this.endpoints.posts)
 
-    let response = await httpFetch(URLToFetch)
+    const URLToFetch = this.addQueriesToURL(
+      this.endpoints.base + this.endpoints.posts,
+      'posts',
+      queries
+    )
 
-    try {
-      response = JSON.parse(response)
-    } catch (error) {
-      debug('Response was not JSON')
+    const data = await this.fetchAndParseData(URLToFetch, 'posts')
 
-      response = await XMLToJson(response, 'posts')
-    }
+    this.checkForEmptyPostsData(data)
 
-    return processData({
-      data: response,
-      mode: 'posts',
-      booruType: this.booruType,
+    data.forEach((data: Booru.Structures.Data.Raw.Post) => {
+      Posts.push(this.createPost(data))
     })
+
+    return Posts
   }
 
   public async getSinglePost(
-    queryObj: Booru.Structures.Requests.Queries.SinglePost
+    queries: Booru.Structures.Requests.Queries.SinglePost
   ): Promise<Booru.Structures.Data.Processed.Response[]> {
-    let URLToFetch = this.endpoints.base + this.endpoints.singlePost
+    const Posts: Booru.Structures.Data.Processed.Post[] = []
 
-    URLToFetch = this.addQueriesToURL(URLToFetch, 'single-post', queryObj)
+    this.checkEndpointIsSupported(this.endpoints.singlePost)
 
-    let response = await httpFetch(URLToFetch)
+    const URLToFetch = this.addQueriesToURL(
+      this.endpoints.base + this.endpoints.singlePost,
+      'single-post',
+      queries
+    )
 
-    try {
-      response = JSON.parse(response)
-    } catch (error) {
-      debug('Response was not JSON')
+    const data = await this.fetchAndParseData(URLToFetch, 'posts')
 
-      response = await XMLToJson(response, 'posts')
-    }
+    this.checkForEmptyPostsData(data)
 
-    return processData({
-      data: response,
-      mode: 'single-post',
-      booruType: this.booruType,
+    data.forEach((data: Booru.Structures.Data.Raw.Post) => {
+      Posts.push(this.createPost(data))
     })
+
+    return Posts
   }
 
   public async getRandomPost(
-    queryObj: Booru.Structures.Requests.Queries.RandomPost
+    queries: Booru.Structures.Requests.Queries.RandomPost
   ): Promise<Booru.Structures.Data.Processed.Response[]> {
-    let URLToFetch = this.endpoints.base + this.endpoints.randomPost
+    const Posts: Booru.Structures.Data.Processed.Post[] = []
 
-    URLToFetch = this.addQueriesToURL(URLToFetch, 'random-post', queryObj)
+    this.checkEndpointIsSupported(this.endpoints.randomPost)
 
-    let response = await httpFetch(URLToFetch)
+    const URLToFetch = this.addQueriesToURL(
+      this.endpoints.base + this.endpoints.randomPost,
+      'random-post',
+      queries
+    )
 
-    try {
-      response = JSON.parse(response)
-    } catch (error) {
-      debug('Response was not JSON')
+    const data = await this.fetchAndParseData(URLToFetch, 'posts')
 
-      response = await XMLToJson(response, 'posts')
-    }
+    this.checkForEmptyPostsData(data)
 
-    return processData({
-      data: response,
-      mode: 'posts',
-      booruType: this.booruType,
+    data.forEach((data: Booru.Structures.Data.Raw.Post) => {
+      Posts.push(this.createPost(data))
     })
+
+    return Posts
   }
 
   public async getTags(
-    queryObj: Booru.Structures.Requests.Queries.Tags
+    queries: Booru.Structures.Requests.Queries.Tags
   ): Promise<Booru.Structures.Data.Processed.Response[]> {
-    let URLToFetch = this.endpoints.base + this.endpoints.tags
+    this.checkEndpointIsSupported(this.endpoints.tags)
 
-    URLToFetch = this.addQueriesToURL(URLToFetch, 'tags', queryObj)
+    const URLToFetch = this.addQueriesToURL(
+      this.endpoints.base + this.endpoints.tags,
+      'tags',
+      queries
+    )
 
-    let response = await httpFetch(URLToFetch)
+    const data = await this.fetchAndParseData(URLToFetch, 'tags')
 
-    // Parse JSON
-    try {
-      response = JSON.parse(response)
+    this.checkForEmptyTagsData(data)
 
-      // Parse XML
-    } catch {
-      debug('Response was not JSON')
+    const Tags = this.createTagArray(data, queries)
 
-      response = await XMLToJson(response, 'tags')
-    }
-
-    return processData({
-      data: response,
-      mode: 'tags',
-      booruType: this.booruType,
-      limit: queryObj.limit,
-    })
+    return Tags
   }
 
-  private addQueriesToURL(
+  protected createTagArray(
+    data: any,
+    queries: Booru.Structures.Requests.Queries.Tags
+  ): Booru.Structures.Data.Processed.Tag[] {
+    const Tags: Booru.Structures.Data.Processed.Tag[] = []
+
+    data.forEach((data: Booru.Structures.Data.Raw.Tag) => {
+      Tags.push(this.createTag(data))
+    })
+
+    return Tags
+  }
+
+  protected abstract createPost(
+    data: Booru.Structures.Data.Raw.Post
+  ): Booru.Structures.Data.Processed.Post
+  protected abstract createTag(
+    data: Booru.Structures.Data.Raw.Tag
+  ): Booru.Structures.Data.Processed.Tag
+
+  protected async fetchAndParseData(
     URL: string,
-    mode: string,
-    queryObj:
+    mode: 'posts' | 'tags'
+  ): Promise<any[]> {
+    let data = await HTTPFetch(URL)
+
+    try {
+      data = JSON.parse(data)
+    } catch (error) {
+      debug('Response was not JSON')
+
+      data = await XMLToJson(data, mode)
+    }
+
+    data = this.customFetchAndParseDataModification(data)
+
+    return data
+  }
+
+  protected customFetchAndParseDataModification(data: any): any {
+    // For any booru that wants to modify this method and its data in any way
+    return data
+  }
+
+  protected checkEndpointIsSupported(endpoint: string | undefined): void {
+    if (!endpoint)
+      throw new GenericAPIError(
+        'This type of booru doesnt support this functionality',
+        undefined,
+        400
+      )
+  }
+
+  protected checkForEmptyPostsData(data: any[]): void {
+    if (!data || !data.length) throw new EmptyDataError()
+  }
+
+  protected checkForEmptyTagsData(data: any[]): void {
+    if (!data || !data.length) throw new EmptyDataError()
+  }
+
+  protected addQueriesToURL(
+    URL: string,
+    mode: 'posts' | 'single-post' | 'random-post' | 'tags',
+    queries:
       | Booru.Structures.Requests.Queries.Posts
       | Booru.Structures.Requests.Queries.Tags
       | Booru.Structures.Requests.Queries.SinglePost
   ): string {
-    const {
-      limit,
-      pageID,
-      tags,
-      rating,
-      score,
-      order,
-    } = queryObj as Booru.Structures.Requests.Queries.Posts
-
-    const { tag } = queryObj as Booru.Structures.Requests.Queries.Tags
-
-    const { id } = queryObj as Booru.Structures.Requests.Queries.SinglePost
+    // Add query appender
+    URL += URL.includes('?') ? '&' : '?'
 
     switch (mode) {
       case 'posts':
-        // Add & if ? is present
-        URL += URL.includes('?') ? '&' : '?'
-
-        // Limit
-        if (limit && this.queryIdentifiers.posts.limit)
-          URL += this.queryIdentifiers.posts.limit + '=' + limit
-
-        // Page ID
-        if (pageID && this.queryIdentifiers.posts.pageID) {
-          URL += '&' + this.queryIdentifiers.posts.pageID + '=' + pageID
-        }
-
-        // Tags
-        URL += '&' + this.queryIdentifiers.posts.tags + '=' + tags
-
-        // Rating
-        if (rating && this.queryIdentifiers.posts.rating) {
-          let tmpRating: string
-          let prefix: string
-
-          switch (rating.charAt(0)) {
-            case '-':
-              // debug('Sign detected')
-              prefix = '-'
-              tmpRating = rating.substring(1)
-              break
-
-            // No '+' case because + gets encoded to space
-            default:
-              prefix = '+'
-              tmpRating = rating
-              break
-          }
-
-          URL += prefix + this.queryIdentifiers.posts.rating + ':' + tmpRating
-        }
-
-        // Order
-        if (order && this.queryIdentifiers.posts.order) {
-          URL += '+' + this.queryIdentifiers.posts.order + ':' + order
-        }
-
-        // Score
-        if (score && this.queryIdentifiers.posts.score) {
-          URL += '+' + this.queryIdentifiers.posts.score + ':' + score
-        }
-
+        URL = this.addPostQueries(
+          URL,
+          queries as Booru.Structures.Requests.Queries.Posts
+        )
         break
 
       case 'single-post':
-        switch (this.booruType) {
-          case 'danbooru':
-            throw new GenericAPIError(
-              'This type of booru doesnt support single-post',
-              null,
-              404
-            )
-
-          case 'danbooru2':
-            URL = URL.replace('%', (id as unknown) as string)
-            break
-
-          default:
-            // Add & if ? is present
-            URL += URL.includes('?') ? '&' : '?'
-
-            URL += this.queryIdentifiers.singlePost.id + '=' + id
-
-            break
-        }
+        URL = this.addSinglePostQueries(
+          URL,
+          queries as Booru.Structures.Requests.Queries.SinglePost
+        )
         break
 
       case 'random-post':
-        switch (this.booruType) {
-          case 'gelbooru':
-          case 'shimmie2':
-            throw new GenericAPIError(
-              'This type of booru doesnt support random-post',
-              null,
-              404
-            )
-
-          default:
-            // Add & if ? is present
-            URL += URL.includes('?') ? '&' : '?'
-
-            // Limit
-            if (limit && this.queryIdentifiers.posts.limit)
-              URL += this.queryIdentifiers.posts.limit + '=' + limit
-
-            // Tags
-            URL += '&' + this.queryIdentifiers.posts.tags + '=' + tags
-
-            // Rating
-            if (rating && this.queryIdentifiers.posts.rating) {
-              let tmpRating: string
-              let prefix: string
-
-              switch (rating.charAt(0)) {
-                case '-':
-                  // debug('Sign detected')
-                  prefix = '-'
-                  tmpRating = rating.substring(1)
-                  break
-
-                // No '+' case because + gets encoded to space
-                default:
-                  prefix = '+'
-                  tmpRating = rating
-                  break
-              }
-
-              URL +=
-                prefix + this.queryIdentifiers.posts.rating + ':' + tmpRating
-            }
-
-            // Order random
-            URL += '+' + this.queryIdentifiers.posts.order + ':' + 'random'
-
-            // Score
-            if (score && this.queryIdentifiers.posts.score) {
-              URL += '+' + this.queryIdentifiers.posts.score + ':' + score
-            }
-
-            break
-        }
+        URL = this.addRandomPostQueries(
+          URL,
+          queries as Booru.Structures.Requests.Queries.Posts
+        )
         break
 
       case 'tags':
-        // Add & if ? is present
-        URL += URL.includes('?') ? '&' : '?'
-
-        // Tag
-        URL += this.queryIdentifiers.tags.tag + '=' + tag
-
-        // Tag Ending
-        if (this.queryIdentifiers.tags.tagEnding) {
-          URL += this.queryIdentifiers.tags.tagEnding
-        }
-
-        // Limit
-        if (limit && this.queryIdentifiers.tags.limit) {
-          URL += '&' + this.queryIdentifiers.tags.limit + '=' + limit
-        }
-
-        // Page ID
-        if (pageID && this.queryIdentifiers.tags.pageID) {
-          URL += '&' + this.queryIdentifiers.tags.pageID + '=' + pageID
-        }
-
-        // Order
-        if (order && this.queryIdentifiers.tags.order) {
-          URL += '&' + this.queryIdentifiers.tags.order + '=' + order
-        }
-
-        // Raw methods to add
-        if (this.queryIdentifiers.tags.raw) {
-          URL += '&' + this.queryIdentifiers.tags.raw
-        }
+        URL = this.addTagsQueries(
+          URL,
+          queries as Booru.Structures.Requests.Queries.Tags
+        )
         break
+
+      default:
+        throw new Error('No mode specified')
+    }
+
+    return URL
+  }
+
+  protected addPostQueries(
+    URL: string,
+    queries: Booru.Structures.Requests.Queries.Posts
+  ): string {
+    const { limit, pageID, tags, rating, score, order } = queries
+
+    // Limit
+    if (limit && this.queryIdentifiers.posts.limit)
+      URL += this.queryIdentifiers.posts.limit + '=' + limit
+
+    // Page ID
+    if (pageID && this.queryIdentifiers.posts.pageID) {
+      URL += '&' + this.queryIdentifiers.posts.pageID + '=' + pageID
+    }
+
+    // Tags
+    URL += '&' + this.queryIdentifiers.posts.tags + '=' + tags
+
+    // Rating
+    if (rating && this.queryIdentifiers.posts.rating) {
+      let tmpRating: string
+      let prefix: string
+
+      switch (rating.charAt(0)) {
+        case '-':
+          // debug('Sign detected')
+          prefix = '-'
+          tmpRating = rating.substring(1)
+          break
+
+        // case ' ': //TODO: this
+        // case '+':
+
+        // No '+' case because + gets encoded to space
+        default:
+          prefix = '+'
+          tmpRating = rating
+          break
+      }
+
+      URL += prefix + this.queryIdentifiers.posts.rating + ':' + tmpRating
+    }
+
+    // Order
+    if (order && this.queryIdentifiers.posts.order) {
+      URL += '+' + this.queryIdentifiers.posts.order + ':' + order
+    }
+
+    // Score
+    if (score && this.queryIdentifiers.posts.score) {
+      URL += '+' + this.queryIdentifiers.posts.score + ':' + score
+    }
+
+    return URL
+  }
+
+  protected addSinglePostQueries(
+    URL: string,
+    queries: Booru.Structures.Requests.Queries.SinglePost
+  ): string {
+    const { id } = queries
+
+    URL += this.queryIdentifiers.singlePost.id + '=' + id
+
+    return URL
+  }
+
+  protected addRandomPostQueries(
+    URL: string,
+    queries: Booru.Structures.Requests.Queries.Posts
+  ): string {
+    const { limit, pageID, tags, rating, score, order } = queries
+
+    // Limit
+    if (limit && this.queryIdentifiers.posts.limit)
+      URL += this.queryIdentifiers.posts.limit + '=' + limit
+
+    // Tags
+    URL += '&' + this.queryIdentifiers.posts.tags + '=' + tags
+
+    // Rating
+    if (rating && this.queryIdentifiers.posts.rating) {
+      let tmpRating: string
+      let prefix: string
+
+      switch (rating.charAt(0)) {
+        case '-':
+          // debug('Sign detected')
+          prefix = '-'
+          tmpRating = rating.substring(1)
+          break
+
+        // No '+' case because + gets encoded to space
+        default:
+          prefix = '+'
+          tmpRating = rating
+          break
+      }
+
+      URL += prefix + this.queryIdentifiers.posts.rating + ':' + tmpRating
+    }
+
+    // Order random
+    URL += '+' + this.queryIdentifiers.posts.order + ':' + 'random'
+
+    // Score
+    if (score && this.queryIdentifiers.posts.score) {
+      URL += '+' + this.queryIdentifiers.posts.score + ':' + score
+    }
+
+    return URL
+  }
+
+  protected addTagsQueries(
+    URL: string,
+    queries: Booru.Structures.Requests.Queries.Tags
+  ): string {
+    const { tag, limit, pageID, order } = queries
+
+    // Tag
+    URL += this.queryIdentifiers.tags.tag + '=' + tag
+
+    // Tag Ending
+    if (this.queryIdentifiers.tags.tagEnding) {
+      URL += this.queryIdentifiers.tags.tagEnding
+    }
+
+    // Limit
+    if (limit && this.queryIdentifiers.tags.limit) {
+      URL += '&' + this.queryIdentifiers.tags.limit + '=' + limit
+    }
+
+    // Page ID
+    if (pageID && this.queryIdentifiers.tags.pageID) {
+      URL += '&' + this.queryIdentifiers.tags.pageID + '=' + pageID
+    }
+
+    // Order
+    if (order && this.queryIdentifiers.tags.order) {
+      URL += '&' + this.queryIdentifiers.tags.order + '=' + order
+    }
+
+    // Raw methods to add
+    if (this.queryIdentifiers.tags.raw) {
+      URL += '&' + this.queryIdentifiers.tags.raw
     }
 
     return URL
