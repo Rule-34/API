@@ -11,6 +11,7 @@
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
 
+    "strict": true,
     "removeComments": true,
 
     "sourceMap": true,
