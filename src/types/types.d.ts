@@ -1,40 +1,4 @@
 export namespace Booru {
-  namespace Classes {
-    namespace GenericBooru {
-      interface QueryIdentifiers {
-        posts: {
-          limit: string
-          pageID: string
-          tags: string
-          rating?: string
-          score?: string
-          order?: string
-        }
-
-        singlePost: {
-          id?: string
-        }
-
-        tags: {
-          tag: string
-          tagEnding?: string
-          limit?: string
-          pageID?: string
-          order?: string
-          raw?: string
-        }
-      }
-
-      interface Endpoints {
-        base: string
-        posts: string
-        tags: string
-        singlePost: string
-        randomPost: string
-      }
-    }
-  }
-
   namespace Structures {
     namespace Data {
       namespace Raw {
@@ -54,45 +18,45 @@ export namespace Booru {
            */
 
           // High res file
-          high_res_file?: { url: string; height: number; width: number } // Transformed XML
-          file_url?: string
-          file?: { url: string; height: number; width: number }
+          high_res_file: { url: string; height: number; width: number } // Transformed XML
+          file_url: string
+          file: { url: string; height: number; width: number }
 
-          height?: number
-          image_height?: number
-          width?: number
-          image_width?: number
+          height: number
+          image_height: number
+          width: number
+          image_width: number
 
           // Low res file
-          low_res_file?: { url: string; height: number; width: number } // Transformed XML
-          large_file_url?: string
-          sample?: { url: string; height: number; width: number }
-          sample_url?: string
+          low_res_file: { url: string; height: number; width: number } // Transformed XML
+          large_file_url: string
+          sample: { url: string; height: number; width: number }
+          sample_url: string
 
-          sample_height?: number
-          sample_width?: number
+          sample_height: number
+          sample_width: number
 
           // Preview res file
-          preview_file?: { url: string; height: number; width: number } // Transformed XML
-          preview_file_url?: string
-          preview?: { url: string; height: number; width: number }
-          preview_url?: string
+          preview_file: { url: string; height: number; width: number } // Transformed XML
+          preview_file_url: string
+          preview: { url: string; height: number; width: number }
+          preview_url: string
 
-          preview_height?: number
-          preview_width?: number
+          preview_height: number
+          preview_width: number
 
           /**
            * Tags
            */
-          tags?: string | string[]
-          tag_string?: string
+          tags: string | string[]
+          tag_string: string
 
           /**
            * Source
            */
-          sources?: Array<string>
-          source?: string
-          source_url?: string
+          sources: Array<string>
+          source: string
+          source_url: string
 
           /**
            * Rating
@@ -117,24 +81,24 @@ export namespace Booru {
           id: number
           score: number
           high_res_file: {
-            url: string
-            height: number
-            width: number
+            url: string | null
+            height: number | null
+            width: number | null
           }
           low_res_file: {
-            url: string
-            height?: number
-            width?: number
+            url: string | null
+            height: number | null
+            width: number | null
           }
           preview_file: {
-            url: string
-            height?: number
-            width?: number
+            url: string | null
+            height: number | null
+            width: number | null
           }
           tags: string[]
           source: string[]
           rating: string
-          type: string
+          media_type: string
         }
 
         interface Tag {
