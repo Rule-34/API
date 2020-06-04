@@ -1,18 +1,19 @@
 import express from 'express'
 import * as Sentry from '@sentry/node'
-// Utils
+
+// Middleware
 import bodyParser from 'body-parser'
 import compression from 'compression'
 import morgan from 'morgan'
-// Security
 import cors from 'cors'
 import helmet from 'helmet'
-// Errors
+
+// Own middleware
 import errorHandler from './middleware/error'
+
 // Routes
 import baseRouter from './routes'
 
-// Create Express server
 const app = express()
 
 // Sentry Error Analytics
@@ -49,7 +50,6 @@ switch (process.env.NODE_ENV) {
     app.use(morgan('dev'))
     break
 
-  case 'production':
   default:
     // CORS
     app.use(
@@ -71,9 +71,7 @@ switch (process.env.NODE_ENV) {
     break
 }
 
-/**
- * Routes
- */
+// Routes
 app.use(baseRouter)
 
 // Sentry Error Analytics

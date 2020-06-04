@@ -6,15 +6,8 @@ import 'module-alias/register'
 import app from './app'
 
 /**
- * Error Handler. Provides full stack - remove for production
+ * Start Express server
  */
-
-/**
- * Start Express server.
- */
-
-// console.log('Estamos en ' + process.env.NODE_ENV)
-
 const server = app.listen(app.get('port'), () => {
   console.log(
     `

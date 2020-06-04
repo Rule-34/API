@@ -22,8 +22,6 @@ export async function BooruHandler(
     tmpJSON = JSON.parse(config as string)
     requestedEndpoints = tmpJSON.endpoints
     requestedQueryIdentifiers = tmpJSON.queryIdentifiers
-
-    // console.log({ requestedEndpoints, requestedQueryIdentifiers })
   }
 
   // BOORU
@@ -114,6 +112,6 @@ export async function BooruHandler(
       return await API.getRandomPost(processedRandomPostQueries)
 
     default:
-      throw new GenericAPIError('No endpoint specified', null, 422)
+      throw new GenericAPIError('No endpoint specified', undefined, 422)
   }
 }

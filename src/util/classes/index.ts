@@ -8,8 +8,8 @@ export class GenericAPIError extends Error {
   ) {
     super(message)
 
-    this.messageArray = messageArray
-    this.status = status
+    this.messageArray = messageArray as string[]
+    this.status = status as number
 
     this.name = this.constructor.name
   }
@@ -17,6 +17,6 @@ export class GenericAPIError extends Error {
 
 export class EmptyDataError extends GenericAPIError {
   constructor(status = 204) {
-    super(null, null, status)
+    super(undefined, undefined, status)
   }
 }

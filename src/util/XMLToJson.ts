@@ -45,7 +45,7 @@ const tagsTemplate = {
 /**
  * Transforms XML to Json using a template
  */
-export default async (XML: string, mode: 'posts' | 'tags'): Promise<any> => {
+export default async (XML: string, mode: 'posts' | 'tags'): Promise<any[]> => {
   let JSONData
 
   switch (mode) {
