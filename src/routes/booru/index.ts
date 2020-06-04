@@ -17,12 +17,12 @@ router.get(
       // debug(req.params.booruType)
       // debug(req.params.endpoint)
 
-      const jsonResult = await BooruHandler(
+      const JSONResult = await BooruHandler(
         { booruType: req.params.booruType, endpoint: req.params.endpoint },
         queryObj
       )
 
-      res.json(jsonResult)
+      res.json(JSONResult)
     }
   )
 )
