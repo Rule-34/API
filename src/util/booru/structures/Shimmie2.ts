@@ -35,7 +35,7 @@ export class Shimmie2 extends GenericBooru {
         pageID: 'pid',
         tags: 'tags',
         rating: undefined,
-        score: 'score',
+        score: undefined,
         order: undefined,
       },
       singlePost: {
