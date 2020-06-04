@@ -27,7 +27,7 @@
     "@": "dist/"
   },
   "dependencies": {
-    "@sentry/node": "^5.16.0",
+    "@sentry/node": "^5.16.1",
     "apicache": "^1.5.3",
     "body-parser": "^1.19.0",
     "camaro": "^6.0.1",
