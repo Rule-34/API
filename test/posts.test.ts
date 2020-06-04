@@ -15,7 +15,6 @@ describe.each(domains)('Posts', (domain) => {
 
   // Sleep some seconds between route fetches
   beforeEach(async () => {
-    console.log('Waiting!')
     await new Promise((r) => setTimeout(r, 300))
   })
 
