@@ -2,8 +2,12 @@
 import { Request } from 'express'
 import { Booru, Miscellaneous } from '@/types/types'
 
-// Classes
-import { Danbooru2, Danbooru, Gelbooru, Shimmie2 } from './structures'
+import { Gelbooru } from './structures/Gelbooru'
+import { Shimmie2 } from './structures/Shimmie2'
+import { Danbooru } from './structures/Danbooru'
+import { Danbooru2 } from './structures/Danbooru2'
+import { E621 } from './structures/E621'
+
 import { GenericAPIError } from '@/util/classes'
 
 export async function BooruHandler(
@@ -14,102 +18,104 @@ export async function BooruHandler(
   const { domain, config } = queryObj
 
   // Extract values from JSON
-  let tmpJSON
   let requestedEndpoints
   let requestedQueryIdentifiers
 
   if (config) {
-    tmpJSON = JSON.parse(config as string)
+    const tmpJSON = JSON.parse(config as string)
     requestedEndpoints = tmpJSON.endpoints
     requestedQueryIdentifiers = tmpJSON.queryIdentifiers
   }
 
-  // BOORU
+  /*
+   *  BOORU
+   */
   let API
   switch (booruType) {
-    // Moebooru and MyImouto are danbooru
-    case 'danbooru':
-      API = new Danbooru(
-        booruType,
-        domain as string,
+    case 'gelbooru':
+      API = new Gelbooru(domain as string, booruType, {
         requestedEndpoints,
-        requestedQueryIdentifiers
-      )
-      break
-
-    case 'danbooru2':
-      API = new Danbooru2(
-        booruType,
-        domain as string,
-        requestedEndpoints,
-        requestedQueryIdentifiers
-      )
+        requestedQueryIdentifiers,
+      })
       break
 
     case 'shimmie2':
-      API = new Shimmie2(
-        booruType,
-        domain as string,
+      API = new Shimmie2(domain as string, booruType, {
         requestedEndpoints,
-        requestedQueryIdentifiers
-      )
+        requestedQueryIdentifiers,
+      })
       break
 
-    case 'gelbooru':
-      API = new Gelbooru(
-        booruType,
-        domain as string,
+    // Moebooru and MyImouto are danbooru
+    case 'danbooru':
+      API = new Danbooru(domain as string, booruType, {
         requestedEndpoints,
-        requestedQueryIdentifiers
-      )
+        requestedQueryIdentifiers,
+      })
+      break
+
+    case 'danbooru2':
+      API = new Danbooru2(domain as string, booruType, {
+        requestedEndpoints,
+        requestedQueryIdentifiers,
+      })
+      break
+
+    case 'e621':
+      API = new E621(domain as string, booruType, {
+        requestedEndpoints,
+        requestedQueryIdentifiers,
+      })
       break
 
     default:
-      throw new GenericAPIError('No known booru type', null, 422)
+      throw new GenericAPIError('No known booru type', undefined, 422)
   }
 
-  // ENDPOINT
+  /*
+   *  ENDPOINT
+   */
+
+  // Default values
+  const requestedPostQueries = {
+    limit: Number(queryObj.limit ?? 20),
+    pageID: Number(queryObj.pid),
+    tags: (queryObj.tags as string) ?? '',
+    rating: queryObj.rating as string,
+    score: queryObj.score as string,
+    order: queryObj.order as string,
+  }
+
+  const requestedTagQueries = {
+    tag: queryObj.tag as string,
+    limit: Number(queryObj.limit ?? 20),
+    pageID: Number(queryObj.pid),
+    order: (queryObj.order as string) ?? 'count',
+  }
+
+  const requestedSinglePostQueries = {
+    id: Number(queryObj.id),
+  }
+
+  const requestedRandomPostQueries = {
+    limit: Number(queryObj.limit ?? 1),
+    tags: (queryObj.tags as string) ?? '',
+    rating: queryObj.rating as string,
+    score: queryObj.score as string,
+  }
+
   switch (endpoint) {
     case 'posts':
-      // Default values if not set
-      const inputPostQueries = {
-        limit: Number(queryObj.limit ?? 20),
-        pageID: Number(queryObj.pid),
-        tags: (queryObj.tags as string) ?? '',
-        rating: queryObj.rating as string,
-        score: queryObj.score as string,
-        order: queryObj.order as string,
-      }
-
-      return await API.getPosts(inputPostQueries)
+      return await API.getPosts(requestedPostQueries)
 
     case 'tags':
-      // Default values if not set
-      const inputTagQueries = {
-        tag: queryObj.tag as string,
-        limit: Number(queryObj.limit ?? 20),
-        pageID: Number(queryObj.pid),
-        order: (queryObj.order as string) ?? 'count',
-      }
-
-      return await API.getTags(inputTagQueries)
+      return await API.getTags(requestedTagQueries)
 
     case 'single-post':
-      const processedSinglePostQueries = {
-        id: Number(queryObj.id),
-      }
-
-      return await API.getSinglePost(processedSinglePostQueries)
+      return await API.getSinglePost(requestedSinglePostQueries)
 
     case 'random-post':
-      const processedRandomPostQueries = {
-        limit: Number(queryObj.limit ?? 1),
-        tags: (queryObj.tags as string) ?? '',
-        rating: queryObj.rating as string,
-        score: queryObj.score as string,
-      }
-
-      return await API.getRandomPost(processedRandomPostQueries)
+      return await API.getRandomPost(requestedRandomPostQueries)
 
     default:
       throw new GenericAPIError('No endpoint specified', undefined, 422)
