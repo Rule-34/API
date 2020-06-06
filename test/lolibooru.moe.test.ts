@@ -12,14 +12,15 @@ import domains from '../src/external/booru-complete-list.json'
 
 // Types
 import {
-  TestDomain,
   genericQueries,
   GenericPostsTester,
   GenericRandomPostTester,
   GenericRandomTagsTester,
 } from './genericBooruTester'
 
-const configDomain: TestDomain = domains.filter(
+import { BooruObj } from '../src/external/util/BooruUtils'
+
+const configDomain: BooruObj = domains.filter(
   (booru) => booru['domain'] === 'lolibooru.moe'
 )[0]
 

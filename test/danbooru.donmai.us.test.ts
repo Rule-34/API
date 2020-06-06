@@ -12,7 +12,6 @@ import domains from '../src/external/booru-list.json'
 
 // Types
 import {
-  TestDomain,
   genericQueries,
   GenericPostsTester,
   GenericRandomPostTester,
@@ -20,7 +19,9 @@ import {
   GenericRandomTagsTester,
 } from './genericBooruTester'
 
-const configDomain: TestDomain = domains.filter(
+import { BooruObj } from '../src/external/util/BooruUtils'
+
+const configDomain: BooruObj = domains.filter(
   (booru) => booru['domain'] === 'danbooru.donmai.us'
 )[0]
 

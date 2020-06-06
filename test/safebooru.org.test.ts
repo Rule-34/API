@@ -12,7 +12,6 @@ import domains from '../src/external/booru-list.json'
 
 // Types
 import {
-  TestDomain,
   genericQueries,
   GenericPostsTester,
   GenericSinglePostTester,
@@ -20,7 +19,9 @@ import {
 } from './genericBooruTester'
 import { Booru } from '../src/types/types'
 
-const configDomain: TestDomain = domains.filter(
+import { BooruObj } from '../src/external/util/BooruUtils'
+
+const configDomain: BooruObj = domains.filter(
   (booru) => booru['domain'] === 'safebooru.org'
 )[0]
 

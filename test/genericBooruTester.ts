@@ -4,11 +4,7 @@ import request from 'supertest'
 
 // Types
 import { Booru } from '../src/types/types'
-
-export type TestDomain = {
-  domain: string
-  type: string
-}
+import { BooruObj } from '../src/external/util/BooruUtils'
 
 export type TestQueries = {
   // Post
@@ -36,7 +32,7 @@ export const genericQueries: TestQueries = {
 export class GenericPostsTester {
   expressConfiguration: Express
 
-  domainObj: TestDomain
+  domainObj: BooruObj
   queryObj: TestQueries
 
   URLToFetch!: string
@@ -44,7 +40,7 @@ export class GenericPostsTester {
 
   constructor(
     expressConfiguration: Express,
-    domainObj: TestDomain,
+    domainObj: BooruObj,
     queryObj: TestQueries
   ) {
     this.expressConfiguration = expressConfiguration
