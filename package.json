@@ -1,10 +1,10 @@
 {
-  "name": "rule-34-api-auth",
+  "name": "rule-34-api",
   "version": "0.1.0",
-  "description": "An Auth API",
+  "description": "My API",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AlejandroAkbal/Rule-34-API-Auth"
+    "url": "https://github.com/AlejandroAkbal/Rule-34-API"
   },
   "author": "Alejandro Akbal",
   "main": "dist/server.js",
