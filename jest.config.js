@@ -15,9 +15,5 @@ module.exports = {
 
   testEnvironment: 'node',
 
-  // Replicate module aliases from package.json
-  moduleNameMapper: {
-    '@/(.*)': '<rootDir>/src/$1',
-    'ext/(.*)': '<rootDir>/external/$1',
-  },
+  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths),
 }
