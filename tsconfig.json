@@ -21,9 +21,9 @@
     "outDir": "dist",
 
     "paths": {
-      "*": ["node_modules/*", "src/types/*"],
-      "@/*": ["src/*"]
+      "@src/*": ["src/*"]
     }
   },
+
   "include": ["src/**/*"]
 }

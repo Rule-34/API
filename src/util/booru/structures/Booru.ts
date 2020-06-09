@@ -1,12 +1,12 @@
 // Types
-import { Booru } from '@/types/types'
+import { Booru } from '@src/types/types'
 
 // Utilities
-import FetchUtil from '@/util/FetchUtil'
-import XMLToJson from '@/util/XMLToJson'
+import FetchUtil from '@src/util/FetchUtil'
+import XMLToJson from '@src/util/XMLToJson'
 
 // Classes
-import { EmptyDataError, GenericAPIError } from '@/util/classes'
+import { EmptyDataError, GenericAPIError } from '@src/util/classes'
 
 // Init
 import Debug from 'debug'

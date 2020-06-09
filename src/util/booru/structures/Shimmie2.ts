@@ -1,8 +1,8 @@
 // Types
-import { Booru } from '@/types/types'
+import { Booru } from '@src/types/types'
 
 // Utilities
-import { EmptyDataError } from '@/util/classes'
+import { EmptyDataError } from '@src/util/classes'
 
 // Classes
 import { GenericBooru } from './Booru'

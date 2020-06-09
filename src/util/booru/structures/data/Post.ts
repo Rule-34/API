@@ -1,5 +1,5 @@
 // Definitions
-import { Booru } from '@/types/types'
+import { Booru } from '@src/types/types'
 
 abstract class GenericBooruPost {
   rawData: Booru.Structures.Data.Raw.Post

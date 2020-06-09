@@ -1,5 +1,5 @@
 // Types
-import { Booru } from '@/types/types'
+import { Booru } from '@src/types/types'
 
 // Classes
 import { GenericBooru } from './Booru'

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 
-import { GenericAPIError } from '@/util/classes'
+import { GenericAPIError } from '@src/util/classes'
 
 // Init
 import Debug from 'debug'
