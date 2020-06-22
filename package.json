@@ -27,7 +27,7 @@
     "express": "^4.17.1",
     "express-async-handler": "^1.1.4",
     "express-rate-limit": "^5.1.3",
-    "express-validator": "^6.5.0",
+    "express-validator": "^6.6.0",
     "he": "^1.2.0",
     "helmet": "^3.22.0",
     "morgan": "^1.10.0",
