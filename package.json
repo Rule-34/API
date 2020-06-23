@@ -11,9 +11,11 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
-    "watch": "nodemon",
     "build": "npm run build-ts && npm run lint",
     "build-ts": "tsc",
+    "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
+    "watch-ts": "tsc -w",
+    "watch-node": "nodemon dist/server.js",
     "test": "jest --forceExit --coverage --verbose",
     "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix"
   },
@@ -46,6 +48,7 @@
     "@types/supertest": "^2.0.9",
     "@typescript-eslint/eslint-plugin": "^3.4.0",
     "@typescript-eslint/parser": "^3.4.0",
+    "concurrently": "^5.2.0",
     "eslint": "^7.3.1",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",
