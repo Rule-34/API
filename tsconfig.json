@@ -1,25 +1,26 @@
 {
   "compilerOptions": {
     "moduleResolution": "node",
+
     "module": "CommonJS",
+    "target": "ESNext",
 
-    "lib": ["ESNext"],
+    "lib": ["DOM", "ESNext"],
+    // "types": ["node", "jest"],
 
-    "target": "ES2019",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "noImplicitAny": true,
 
     "strict": true,
-    "removeComments": true,
+    "noImplicitAny": true,
 
     "sourceMap": true,
+    "removeComments": true,
     "inlineSources": true,
 
     "baseUrl": ".",
-    "outDir": "dist",
-
+    "outDir": "dist"
   },
 
   "include": ["src/**/*"]
