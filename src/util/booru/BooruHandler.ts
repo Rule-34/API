@@ -2,11 +2,13 @@
 import { Request } from 'express'
 import { Booru, Miscellaneous } from '../../types/types'
 
-import { Gelbooru } from './structures/Gelbooru'
-import { Shimmie2 } from './structures/Shimmie2'
-import { Danbooru } from './structures/Danbooru'
-import { Danbooru2 } from './structures/Danbooru2'
-import { E621 } from './structures/E621'
+import {
+  Gelbooru,
+  Shimmie2,
+  Danbooru,
+  Danbooru2,
+  E621,
+} from '@alejandroakbal/universal-booru-wrapper'
 
 import { GenericAPIError } from '../../util/error'
 
