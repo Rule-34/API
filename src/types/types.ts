@@ -141,7 +141,7 @@ export declare namespace Booru {
   }
 }
 
-export namespace Miscellaneous {
+export declare namespace Miscellaneous {
   interface DataBetweenFunctions {
     data?: any
     mode?: string
