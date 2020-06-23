@@ -87,7 +87,7 @@ export async function BooruHandler(
   }
 
   const parsedSinglePostQueries: IBooruQueryValues['singlePost'] = {
-    id: Number(queryObj.id) || undefined,
+    id: Number(queryObj.id),
   }
 
   const parsedRandomPostsQueries: IBooruQueryValues['randomPosts'] = {
