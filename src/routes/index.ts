@@ -11,7 +11,7 @@ import {
   singlePostValidation,
   tagsValidation,
   queryValidate,
-} from '@src/middleware/query-validation'
+} from '../middleware/query-validation'
 
 router
   .use(['*/posts', '*/random-post'], postsValidation(), queryValidate)

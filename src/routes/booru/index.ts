@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express'
 import asyncHandler from 'express-async-handler'
 
 // Util
-import { BooruHandler } from '@src/util/booru/BooruHandler'
+import { BooruHandler } from '../../util/booru/BooruHandler'
 
 const router = Router()
 

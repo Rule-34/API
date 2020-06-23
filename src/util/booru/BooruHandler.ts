@@ -1,6 +1,6 @@
 // Types
 import { Request } from 'express'
-import { Booru, Miscellaneous } from '@src/types/types'
+import { Booru, Miscellaneous } from '../../types/types'
 
 import { Gelbooru } from './structures/Gelbooru'
 import { Shimmie2 } from './structures/Shimmie2'
@@ -8,7 +8,7 @@ import { Danbooru } from './structures/Danbooru'
 import { Danbooru2 } from './structures/Danbooru2'
 import { E621 } from './structures/E621'
 
-import { GenericAPIError } from '@src/util/classes'
+import { GenericAPIError } from '../../util/error'
 
 export async function BooruHandler(
   { booruType, endpoint }: Miscellaneous.DataBetweenFunctions,
