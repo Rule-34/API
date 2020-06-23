@@ -1,4 +1,4 @@
-export namespace Booru {
+export declare namespace Booru {
   namespace Structures {
     namespace Data {
       namespace Raw {
