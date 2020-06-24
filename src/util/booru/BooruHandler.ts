@@ -31,8 +31,8 @@ export async function BooruHandler(
   if (config) {
     const parsedConfig = JSON.parse(config as string)
 
-    endpoints = { ...parsedConfig.requestedEndpoints, ...endpoints }
-    queryIdentifiers = parsedConfig.requestedQueryIdentifiers
+    endpoints = { ...parsedConfig.endpoints, ...endpoints }
+    queryIdentifiers = parsedConfig.queryIdentifiers
     options = parsedConfig.options
   }
 
