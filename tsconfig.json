@@ -3,7 +3,7 @@
     "moduleResolution": "node",
 
     "module": "CommonJS",
-    "target": "ESNext",
+    "target": "ES2019",
 
     "lib": ["DOM", "ESNext"],
     // "types": ["node", "jest"],
