@@ -95,7 +95,7 @@ export async function BooruHandler(
     pageID: Number(queryObj.pid) || undefined,
     tags: queryObj.tags as string,
     rating: queryObj.rating as IBooruQueryValues['randomPosts']['rating'],
-    order: queryObj.score as string,
+    order: queryObj.order as string,
     score: queryObj.score as string,
   }
 
