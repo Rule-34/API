@@ -42,24 +42,24 @@ export async function BooruHandler(
   let API
   switch (booruType) {
     case 'gelbooru':
-      API = new Gelbooru(endpoints, queryIdentifiers, options)
+      API = new Gelbooru(endpoints, queryIdentifiers, undefined, options)
       break
 
     case 'shimmie2':
-      API = new Shimmie2(endpoints, queryIdentifiers, options)
+      API = new Shimmie2(endpoints, queryIdentifiers, undefined, options)
       break
 
     // Moebooru and MyImouto are danbooru
     case 'danbooru':
-      API = new Danbooru(endpoints, queryIdentifiers, options)
+      API = new Danbooru(endpoints, queryIdentifiers, undefined, options)
       break
 
     case 'danbooru2':
-      API = new Danbooru2(endpoints, queryIdentifiers, options)
+      API = new Danbooru2(endpoints, queryIdentifiers, undefined, options)
       break
 
     case 'e621':
-      API = new E621(endpoints, queryIdentifiers, options)
+      API = new E621(endpoints, queryIdentifiers, undefined, options)
       break
 
     default:
