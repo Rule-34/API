@@ -69,47 +69,46 @@ export async function BooruHandler(
   /*
    *  ENDPOINT
    */
-
-  const parsedPostQueries: IBooruQueryValues['posts'] = {
-    limit: Number(queryObj.limit) || 20,
-    pageID: Number(queryObj.pid) || undefined,
-    tags: queryObj.tags as string,
-    rating: queryObj.rating as 'safe' | 'questionable' | 'explicit',
-    score: queryObj.score as string,
-    order: queryObj.order as string,
-  }
-
-  const parsedTagQueries: IBooruQueryValues['tags'] = {
-    tag: queryObj.tag as string,
-    limit: Number(queryObj.limit) || 20,
-    pageID: Number(queryObj.pid) || undefined,
-    order: (queryObj.order as string) ?? 'count',
-  }
-
-  const parsedSinglePostQueries: IBooruQueryValues['singlePost'] = {
-    id: Number(queryObj.id),
-  }
-
-  const parsedRandomPostsQueries: IBooruQueryValues['randomPosts'] = {
-    limit: Number(queryObj.limit) || 1,
-    pageID: Number(queryObj.pid) || undefined,
-    tags: queryObj.tags as string,
-    rating: queryObj.rating as IBooruQueryValues['randomPosts']['rating'],
-    order: queryObj.order as string,
-    score: queryObj.score as string,
-  }
-
   switch (endpoint) {
     case 'posts':
+      const parsedPostQueries: IBooruQueryValues['posts'] = {
+        limit: Number(queryObj.limit) || 20,
+        pageID: Number(queryObj.pid) || undefined,
+        tags: queryObj.tags as string,
+        rating: queryObj.rating as 'safe' | 'questionable' | 'explicit',
+        score: queryObj.score as string,
+        order: queryObj.order as string,
+      }
+
       return await API.getPosts(parsedPostQueries)
 
     case 'tags':
+      const parsedTagQueries: IBooruQueryValues['tags'] = {
+        tag: queryObj.tag as string,
+        limit: Number(queryObj.limit) || 20,
+        pageID: Number(queryObj.pid) || undefined,
+        order: (queryObj.order as string) ?? 'count',
+      }
+
       return await API.getTags(parsedTagQueries)
 
     case 'single-post':
+      const parsedSinglePostQueries: IBooruQueryValues['singlePost'] = {
+        id: Number(queryObj.id),
+      }
+
       return await API.getSinglePost(parsedSinglePostQueries)
 
     case 'random-post':
+      const parsedRandomPostsQueries: IBooruQueryValues['randomPosts'] = {
+        limit: Number(queryObj.limit) || 1,
+        pageID: Number(queryObj.pid) || undefined,
+        tags: queryObj.tags as string,
+        rating: queryObj.rating as IBooruQueryValues['randomPosts']['rating'],
+        order: queryObj.order as string,
+        score: queryObj.score as string,
+      }
+
       return await API.getRandomPosts(parsedRandomPostsQueries)
 
     default:
