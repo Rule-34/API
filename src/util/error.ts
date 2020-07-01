@@ -14,9 +14,3 @@ export class GenericAPIError extends Error {
     this.name = this.constructor.name
   }
 }
-
-export class EmptyDataError extends GenericAPIError {
-  constructor(status = 204) {
-    super(undefined, undefined, status)
-  }
-}
