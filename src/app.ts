@@ -20,6 +20,7 @@ const app = express()
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
+    ignoreErrors: ['No data received'],
   })
 
   app.use(Sentry.Handlers.requestHandler() as express.RequestHandler)
