@@ -7,7 +7,6 @@
     "url": "https://github.com/AlejandroAkbal/Rule-34-API"
   },
   "author": "Alejandro Akbal",
-  "license": "ISC",
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
