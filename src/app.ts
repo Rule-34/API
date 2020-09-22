@@ -1,28 +1,28 @@
 import express from 'express'
 import * as Sentry from '@sentry/node'
-
-// Middleware
 import bodyParser from 'body-parser'
 import compression from 'compression'
 import morgan from 'morgan'
 import cors from 'cors'
 import helmet from 'helmet'
+import dotenv from 'dotenv'
 
-// Own middleware
 import errorHandler from './middleware/error'
-
-// Routes
 import baseRouter from './routes'
+import { isDevEnv, isProdEnv } from './util/environment'
 
+// Load env config
+dotenv.config()
+
+// Construct the express app
 const app = express()
 
-// Sentry Error Analytics
-if (process.env.NODE_ENV === 'production') {
+// Enable Sentry Error Analytics in production
+if (isProdEnv()) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     ignoreErrors: ['No data received'],
   })
-
   app.use(Sentry.Handlers.requestHandler() as express.RequestHandler)
 }
 
@@ -36,48 +36,34 @@ app.use(bodyParser.json())
 app.use(compression({ threshold: 0 }))
 app.use(helmet())
 
-// Middleware for development
-switch (process.env.NODE_ENV) {
-  case 'development':
-    // CORS
-    app.use(
-      cors({
-        origin: '*',
-        methods: ['GET'],
-      })
-    )
+// Cors
+app.use(
+  cors({
+    // Allow all origins in development
+    origin: isDevEnv() ? '*' : 'https://r34.app',
+    methods: ['GET'],
+  })
+)
 
-    // Logging
-    app.use(morgan('dev'))
-    break
-
-  default:
-    // CORS
-    app.use(
-      cors({
-        origin: 'https://r34.app',
-        methods: ['GET'],
-      })
-    )
-
-    // Logging
-    app.use(
-      morgan('dev', {
-        skip: function (req, res) {
+// Logging
+app.use(
+  // Skip everything but errors in production
+  isDevEnv()
+    ? morgan('dev')
+    : morgan('dev', {
+        skip: function (_req, res) {
           return res.statusCode < 400
         },
       })
-    )
-
-    break
-}
+)
 
 // Routes
 app.use(baseRouter)
 
 // Sentry Error Analytics
-if (process.env.NODE_ENV === 'production')
+if (isProdEnv()) {
   app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler)
+}
 
 //  Error handler
 app.use(errorHandler)

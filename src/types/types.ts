@@ -3,17 +3,17 @@ export declare namespace Booru {
     namespace Data {
       namespace Raw {
         interface Post {
-          /**
+          /*
            * ID
            */
           id: number
 
-          /**
+          /*
            * Score
            */
           score: number | { total: number }
 
-          /**
+          /*
            * Media
            */
 
@@ -45,20 +45,20 @@ export declare namespace Booru {
           preview_height: number
           preview_width: number
 
-          /**
+          /*
            * Tags
            */
           tags: string | string[]
           tag_string: string
 
-          /**
+          /*
            * Source
            */
           sources: Array<string>
           source: string
           source_url: string
 
-          /**
+          /*
            * Rating
            */
           rating: string
