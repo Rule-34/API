@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { query, validationResult, ValidationChain } from 'express-validator'
 
-import { GenericAPIError } from '../../util/error'
+import { GenericAPIError } from '../util/error'
 
 // #region Validation Chains
 

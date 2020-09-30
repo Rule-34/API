@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
 import Debug from 'debug'
 
-import { GenericAPIError } from '../../util/error'
-import { isDevEnv } from 'src/util/environment'
+import { GenericAPIError } from '../util/error'
+import { isDevEnv } from '../util/environment'
 
 const debug = Debug(`Server:middleware Error Handler`)
 

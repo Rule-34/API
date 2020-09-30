@@ -5,7 +5,7 @@ import {
   singlePostValidation,
   tagsValidation,
   queryValidate,
-} from '../middleware/query-validation'
+} from '../middleware/queryValidation'
 import booruRoute from './booru'
 
 export default Router()

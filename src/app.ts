@@ -7,7 +7,7 @@ import cors from 'cors'
 import helmet from 'helmet'
 import dotenv from 'dotenv'
 
-import errorHandler from './middleware/error'
+import errorHandler from './middleware/errorHandler'
 import baseRouter from './routes'
 import { isDevEnv, isProdEnv } from './util/environment'
 
