@@ -1,21 +1,21 @@
-import { Request, Response, NextFunction } from 'express'
+import { Request, Response } from 'express'
+import Debug from 'debug'
 
 import { GenericAPIError } from '../../util/error'
+import { isDevEnv } from 'src/util/environment'
 
-// Init
-import Debug from 'debug'
 const debug = Debug(`Server:middleware Error Handler`)
 
 export default (
   err: Error | GenericAPIError,
-  req: Request,
-  res: Response,
-  next: NextFunction
+  _req: Request,
+  res: Response
 ): void => {
-  const { message, stack } = err
-  const { messageArray, status = 500 } = err as GenericAPIError
+  const { message, stack, messageArray, status = 500 } = err as GenericAPIError
 
-  if (status >= 400) debug(stack)
+  if (status >= 400) {
+    debug(stack)
+  }
 
   res.status(status).json({
     error: {
@@ -23,7 +23,7 @@ export default (
       message,
       errors: messageArray,
 
-      stack: process.env.NODE_ENV === 'development' ? stack : undefined,
+      stack: isDevEnv() ? stack : undefined,
     },
   })
 }
