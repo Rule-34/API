@@ -6,7 +6,7 @@ import {
   tagsValidation,
   queryValidate,
 } from '../middleware/query-validation'
-import booru from './booru'
+import booruRoute from './booru'
 
 export default Router()
   // Middleware
@@ -14,10 +14,10 @@ export default Router()
   .use('*/single-post', singlePostValidation(), queryValidate)
   .use('*/tags', tagsValidation(), queryValidate)
 
+  // Sub routers
+  .use(`/booru`, booruRoute)
+
   // Static routes
   .get(`/`, function (_req: Request, res: Response) {
     res.json({ status: 'UP' })
   })
-
-  // Sub routers
-  .use(`/booru`, booru)

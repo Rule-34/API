@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express'
 import asyncHandler from 'express-async-handler'
 
-import { BooruHandler } from '../../util/booru/BooruHandler'
+import { BooruHandler } from '../util/booru/BooruHandler'
 
 export default Router()
   // Routes
