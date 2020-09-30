@@ -18,7 +18,7 @@ dotenv.config()
 const app = express()
 
 // Enable Sentry Error Analytics in production
-if (isProdEnv()) {
+if (isProdEnv) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     ignoreErrors: ['No data received'],
@@ -40,7 +40,7 @@ app.use(helmet())
 app.use(
   cors({
     // Allow all origins in development
-    origin: isDevEnv() ? '*' : 'https://r34.app',
+    origin: isDevEnv ? '*' : 'https://r34.app',
     methods: ['GET'],
   })
 )
@@ -48,7 +48,7 @@ app.use(
 // Logging
 app.use(
   // Skip everything but errors in production
-  isDevEnv()
+  isDevEnv
     ? morgan('dev')
     : morgan('dev', {
         skip: function (_req, res) {
@@ -61,7 +61,7 @@ app.use(
 app.use(baseRouter)
 
 // Sentry Error Analytics
-if (isProdEnv()) {
+if (isProdEnv) {
   app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler)
 }
 

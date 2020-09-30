@@ -23,7 +23,7 @@ export default (
       message,
       errors: messageArray,
 
-      stack: isDevEnv() ? stack : undefined,
+      stack: isDevEnv ? stack : undefined,
     },
   })
 }
