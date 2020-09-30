@@ -21,7 +21,7 @@ import Endpoints from './Endpoints'
 
 //#region Helper Functions
 
-function getApiConstructorByType(booruType: BooruTypes) {
+function getAPIConstructorByType(booruType: BooruTypes) {
   switch (booruType) {
     case BooruTypes.GELBOORU:
       return Gelbooru
@@ -65,11 +65,16 @@ export async function BooruHandler(
     options = parsedConfig.options
   }
 
-  // Select api depending on Booru type
-  const Api = getApiConstructorByType(booruType as BooruTypes)
-  const api = new Api(endpoints, queryIdentifiers, undefined, options)
+  // Select API depending on Booru type
+  const APIConstructor = getAPIConstructorByType(booruType as BooruTypes)
+  const API = new APIConstructor(
+    endpoints,
+    queryIdentifiers,
+    undefined,
+    options
+  )
 
-  // Call api method based on endpoint
+  // Call API method based on endpoint
   switch (endpoint) {
     case Endpoints.POSTS:
       const parsedPostQueries: IBooruQueryValues['posts'] = {
@@ -81,7 +86,7 @@ export async function BooruHandler(
         order: queryObj.order as string,
       }
 
-      return await api.getPosts(parsedPostQueries)
+      return await API.getPosts(parsedPostQueries)
 
     case Endpoints.TAGS:
       const parsedTagQueries: IBooruQueryValues['tags'] = {
@@ -91,14 +96,14 @@ export async function BooruHandler(
         order: (queryObj.order as string) ?? 'count',
       }
 
-      return await api.getTags(parsedTagQueries)
+      return await API.getTags(parsedTagQueries)
 
     case Endpoints.SINGLE_POST:
       const parsedSinglePostQueries: IBooruQueryValues['singlePost'] = {
         id: Number(queryObj.id),
       }
 
-      return await api.getSinglePost(parsedSinglePostQueries)
+      return await API.getSinglePost(parsedSinglePostQueries)
 
     case Endpoints.RANDOM_POST:
       const parsedRandomPostsQueries: IBooruQueryValues['randomPosts'] = {
@@ -110,7 +115,7 @@ export async function BooruHandler(
         score: queryObj.score as string,
       }
 
-      return await api.getRandomPosts(parsedRandomPostsQueries)
+      return await API.getRandomPosts(parsedRandomPostsQueries)
 
     default:
       throw new GenericAPIError('No endpoint specified', undefined, 422)
