@@ -1,9 +1,11 @@
 import { Request } from 'express'
+
 import {
   IBooruQueryIdentifiers,
   IBooruQueryValues,
   IBooruOptions,
 } from '@alejandroakbal/universal-booru-wrapper/dist/structures/GenericBooru'
+
 import {
   Gelbooru,
   Shimmie2,
@@ -14,27 +16,27 @@ import {
 
 import { Booru, Miscellaneous } from '../../types/types'
 import { GenericAPIError } from '../../util/error'
-import BooruType from './BooruType'
-import Endpoint from './Endpoint'
+import BooruTypes from './BooruTypes'
+import Endpoints from './Endpoints'
 
 //#region Helper Functions
 
-function getApiConstructorByType(booruType: BooruType) {
+function getApiConstructorByType(booruType: BooruTypes) {
   switch (booruType) {
-    case BooruType.GELBOORU:
+    case BooruTypes.GELBOORU:
       return Gelbooru
 
-    case BooruType.SHIMMIE2:
+    case BooruTypes.SHIMMIE2:
       return Shimmie2
 
     // Moebooru and MyImouto are danbooru
-    case BooruType.DANBOORU:
+    case BooruTypes.DANBOORU:
       return Danbooru
 
-    case BooruType.DANBOORU2:
+    case BooruTypes.DANBOORU2:
       return Danbooru2
 
-    case BooruType.E621:
+    case BooruTypes.E621:
       return E621
 
     default:
@@ -64,12 +66,12 @@ export async function BooruHandler(
   }
 
   // Select api depending on Booru type
-  const Api = getApiConstructorByType(booruType as BooruType)
+  const Api = getApiConstructorByType(booruType as BooruTypes)
   const api = new Api(endpoints, queryIdentifiers, undefined, options)
 
   // Call api method based on endpoint
   switch (endpoint) {
-    case Endpoint.POSTS:
+    case Endpoints.POSTS:
       const parsedPostQueries: IBooruQueryValues['posts'] = {
         limit: Number(queryObj.limit) || 20,
         pageID: Number(queryObj.pid) || undefined,
@@ -81,7 +83,7 @@ export async function BooruHandler(
 
       return await api.getPosts(parsedPostQueries)
 
-    case Endpoint.TAGS:
+    case Endpoints.TAGS:
       const parsedTagQueries: IBooruQueryValues['tags'] = {
         tag: queryObj.tag as string,
         limit: Number(queryObj.limit) || 20,
@@ -91,14 +93,14 @@ export async function BooruHandler(
 
       return await api.getTags(parsedTagQueries)
 
-    case Endpoint.SINGLE_POST:
+    case Endpoints.SINGLE_POST:
       const parsedSinglePostQueries: IBooruQueryValues['singlePost'] = {
         id: Number(queryObj.id),
       }
 
       return await api.getSinglePost(parsedSinglePostQueries)
 
-    case Endpoint.RANDOM_POST:
+    case Endpoints.RANDOM_POST:
       const parsedRandomPostsQueries: IBooruQueryValues['randomPosts'] = {
         limit: Number(queryObj.limit) || 1,
         pageID: Number(queryObj.pid) || undefined,
