@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { Request, Response, NextFunction } from 'express'
 import Debug from 'debug'
 
 import { GenericAPIError } from '../../util/error'
@@ -9,7 +9,8 @@ const debug = Debug(`Server:middleware Error Handler`)
 export default (
   err: Error | GenericAPIError,
   _req: Request,
-  res: Response
+  res: Response,
+  _next: NextFunction
 ): void => {
   const { message, stack, messageArray, status = 500 } = err as GenericAPIError
 
