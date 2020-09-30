@@ -1,5 +1,20 @@
 # Rule 34 JSON API - Documentation
 
+## Installation
+
+You will need to log in to the github npm registry to use my UBW package
+
+```sh
+# https://docs.github.com/en/free-pro-team@latest/packages/using-github-packages-with-your-projects-ecosystem/configuring-npm-for-use-with-github-packages#installing-a-package
+npm login --registry=https://npm.pkg.github.com
+```
+
+And update the git submodules
+
+```sh
+git submodule update --remote --merge --recursive --init
+```
+
 _This info is mostly outdated as the API has seen major changes, will update on the future_
 
 ## Common usage
