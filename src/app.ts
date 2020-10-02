@@ -5,14 +5,10 @@ import compression from 'compression'
 import morgan from 'morgan'
 import cors from 'cors'
 import helmet from 'helmet'
-import dotenv from 'dotenv'
 
 import errorHandler from './middleware/errorHandler'
 import baseRouter from './routes'
 import { isDevEnv, isProdEnv } from './util/environment'
-
-// Load env config
-dotenv.config()
 
 // Construct the express app
 const app = express()

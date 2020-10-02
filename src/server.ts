@@ -1,3 +1,8 @@
+import dotenv from 'dotenv'
+
+// Load env config
+dotenv.config()
+
 import app from './app'
 
 // Start Express server
