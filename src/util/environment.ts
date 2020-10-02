@@ -1,3 +1,5 @@
-export const isProdEnv = process.env.NODE_ENV === 'production'
+export const nodeEnv = process.env.NODE_ENV
 
-export const isDevEnv = process.env.NODE_ENV === 'development'
+export const isProdEnv = nodeEnv === 'production'
+
+export const isDevEnv = nodeEnv === 'development'
