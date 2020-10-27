@@ -1,7 +1,10 @@
 {
   "name": "rule-34-api",
-  "version": "0.1.0",
   "description": "My API",
+  "version": "0.1.0",
+  "engines": {
+    "node": "12.x"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/AlejandroAkbal/Rule-34-API"
