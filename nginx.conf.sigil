@@ -14,6 +14,13 @@
 
     # --- End of cache
 
+    # --- Rate limit
+        # https://www.nginx.com/blog/rate-limiting-nginx/
+        #
+        limit_req_zone $binary_remote_addr zone=dokku_nginx_rate_limit:5m rate=1r/s;
+
+    # --- End of rate limit
+
 # --- End of custom configuration
 
 {{ if eq $scheme "http" }}
@@ -60,6 +67,11 @@ server {
         # --- End of cache
 
         
+        # Rate limit
+            limit_req zone=dokku_nginx_rate_limit burst=5 delay=2;
+
+        # --- End of rate limit
+    
     # --- End of custom configuration
 
     proxy_pass  http://{{ $.APP }}-{{ $upstream_port }};
@@ -145,6 +157,11 @@ server {
         # --- End of cache
 
         
+        # Rate limit
+            limit_req zone=dokku_nginx_rate_limit burst=5 delay=2;
+
+        # --- End of rate limit
+    
     # --- End of custom configuration
 
     proxy_pass  http://{{ $.APP }}-{{ $upstream_port }};
