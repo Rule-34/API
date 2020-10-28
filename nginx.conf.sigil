@@ -6,20 +6,15 @@
 
 # --- Custom configuration
 
-    # --- Cache
-        # https://docs.nginx.com/nginx/admin-guide/content-cache/content-caching/
-        # https://www.nginx.com/blog/nginx-caching-guide/
-        #
-        proxy_cache_path /tmp/dokku_nginx_cache levels=1:2 keys_zone=dokku_nginx_cache:5m max_size=100m inactive=30m use_temp_path=off;
+# --- Cache
+# https://www.nginx.com/blog/nginx-caching-guide/
+#
+proxy_cache_path /tmp/dokku_nginx_cache levels=1:2 keys_zone=dokku_nginx_cache:5m max_size=100m inactive=30m use_temp_path=off;
 
-    # --- End of cache
-
-    # --- Rate limit
-        # https://www.nginx.com/blog/rate-limiting-nginx/
-        #
-        limit_req_zone $binary_remote_addr zone=dokku_nginx_rate_limit:5m rate=1r/s;
-
-    # --- End of rate limit
+# --- Rate limit
+# https://www.nginx.com/blog/rate-limiting-nginx/
+#
+limit_req_zone $binary_remote_addr zone=dokku_nginx_rate_limit:5m rate=1r/s;
 
 # --- End of custom configuration
 
@@ -44,33 +39,28 @@ server {
 
     # --- Custom configuration
         
-        # Cache
-            proxy_cache dokku_nginx_cache;
-                
-            add_header X-Cache-Status $upstream_cache_status;
-
-            proxy_cache_min_uses 2;
-
-            proxy_cache_lock on;
-
-            # Cache responses for 3 minutes as content is dynamic
-            proxy_ignore_headers Cache-Control;
-            proxy_cache_valid any 3m; 
-
-            proxy_cache_revalidate on;
-            proxy_buffering on;
-
-            proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
-            
-            proxy_cache_background_update on;
-
-        # --- End of cache
-
+    # Cache
+    proxy_cache dokku_nginx_cache;
         
-        # Rate limit
-            limit_req zone=dokku_nginx_rate_limit burst=5 delay=2;
+    add_header X-Cache-Status $upstream_cache_status;
 
-        # --- End of rate limit
+    proxy_cache_min_uses 2;
+
+    proxy_cache_lock on;
+
+    # Cache responses for 3 minutes as content is dynamic
+    proxy_ignore_headers Cache-Control;
+    proxy_cache_valid any 3m; 
+
+    proxy_cache_revalidate on;
+    proxy_buffering on;
+
+    proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
+    
+    proxy_cache_background_update on;
+    
+    # Rate limit
+    limit_req zone=dokku_nginx_rate_limit burst=5 delay=2;
     
     # --- End of custom configuration
 
@@ -133,34 +123,29 @@ server {
     gzip_comp_level  6;
 
     # --- Custom configuration
-    
-        # Cache
-            proxy_cache dokku_nginx_cache;
-                
-            add_header X-Cache-Status $upstream_cache_status;
-
-            proxy_cache_min_uses 2;
-
-            proxy_cache_lock on;
-
-            # Cache responses for 3 minutes as content is dynamic
-            proxy_ignore_headers Cache-Control;
-            proxy_cache_valid any 3m; 
-
-            proxy_cache_revalidate on;
-            proxy_buffering on;
-
-            proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
-            
-            proxy_cache_background_update on;
-
-        # --- End of cache
-
         
-        # Rate limit
-            limit_req zone=dokku_nginx_rate_limit burst=5 delay=2;
+    # Cache
+    proxy_cache dokku_nginx_cache;
+        
+    add_header X-Cache-Status $upstream_cache_status;
 
-        # --- End of rate limit
+    proxy_cache_min_uses 2;
+
+    proxy_cache_lock on;
+
+    # Cache responses for 3 minutes as content is dynamic
+    proxy_ignore_headers Cache-Control;
+    proxy_cache_valid any 3m; 
+
+    proxy_cache_revalidate on;
+    proxy_buffering on;
+
+    proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
+    
+    proxy_cache_background_update on;
+    
+    # Rate limit
+    limit_req zone=dokku_nginx_rate_limit burst=5 delay=2;
     
     # --- End of custom configuration
 
