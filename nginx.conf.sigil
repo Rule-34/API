@@ -4,6 +4,8 @@
 {{ $listen_port := index $port_map_list 1 }}
 {{ $upstream_port := index $port_map_list 2 }}
 
+{{ if eq $scheme "http" }}
+
 # --- Custom configuration
 
 # --- Cache
@@ -18,7 +20,6 @@ limit_req_zone $binary_remote_addr zone=dokku_nginx_rate_limit:5m rate=1r/s;
 
 # --- End of custom configuration
 
-{{ if eq $scheme "http" }}
 server {
   listen      [{{ $.NGINX_BIND_ADDRESS_IP6 }}]:{{ $listen_port }};
   listen      {{ if $.NGINX_BIND_ADDRESS_IP4 }}{{ $.NGINX_BIND_ADDRESS_IP4 }}:{{end}}{{ $listen_port }};
