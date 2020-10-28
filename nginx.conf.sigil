@@ -4,6 +4,18 @@
 {{ $listen_port := index $port_map_list 1 }}
 {{ $upstream_port := index $port_map_list 2 }}
 
+# --- Custom configuration
+
+    # --- Cache
+        # https://docs.nginx.com/nginx/admin-guide/content-cache/content-caching/
+        # https://www.nginx.com/blog/nginx-caching-guide/
+        #
+        proxy_cache_path /tmp/dokku_nginx_cache levels=1:2 keys_zone=dokku_nginx_cache:5m max_size=100m inactive=30m use_temp_path=off;
+
+    # --- End of cache
+
+# --- End of custom configuration
+
 {{ if eq $scheme "http" }}
 server {
   listen      [{{ $.NGINX_BIND_ADDRESS_IP6 }}]:{{ $listen_port }};
@@ -22,6 +34,33 @@ server {
     gzip_types    text/css text/javascript text/xml text/plain text/x-component application/javascript application/x-javascript application/json application/xml  application/rss+xml font/truetype application/x-font-ttf font/opentype application/vnd.ms-fontobject image/svg+xml;
     gzip_vary on;
     gzip_comp_level  6;
+
+    # --- Custom configuration
+        
+        # Cache
+            proxy_cache dokku_nginx_cache;
+                
+            add_header X-Cache-Status $upstream_cache_status;
+
+            proxy_cache_min_uses 2;
+
+            proxy_cache_lock on;
+
+            # Cache responses for 3 minutes as content is dynamic
+            proxy_ignore_headers Cache-Control;
+            proxy_cache_valid any 3m; 
+
+            proxy_cache_revalidate on;
+            proxy_buffering on;
+
+            proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
+            
+            proxy_cache_background_update on;
+
+        # --- End of cache
+
+        
+    # --- End of custom configuration
 
     proxy_pass  http://{{ $.APP }}-{{ $upstream_port }};
     proxy_http_version 1.1;
@@ -80,6 +119,33 @@ server {
     gzip_types    text/css text/javascript text/xml text/plain text/x-component application/javascript application/x-javascript application/json application/xml  application/rss+xml font/truetype application/x-font-ttf font/opentype application/vnd.ms-fontobject image/svg+xml;
     gzip_vary on;
     gzip_comp_level  6;
+
+    # --- Custom configuration
+    
+        # Cache
+            proxy_cache dokku_nginx_cache;
+                
+            add_header X-Cache-Status $upstream_cache_status;
+
+            proxy_cache_min_uses 2;
+
+            proxy_cache_lock on;
+
+            # Cache responses for 3 minutes as content is dynamic
+            proxy_ignore_headers Cache-Control;
+            proxy_cache_valid any 3m; 
+
+            proxy_cache_revalidate on;
+            proxy_buffering on;
+
+            proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
+            
+            proxy_cache_background_update on;
+
+        # --- End of cache
+
+        
+    # --- End of custom configuration
 
     proxy_pass  http://{{ $.APP }}-{{ $upstream_port }};
     {{ if eq $.HTTP2_PUSH_SUPPORTED "true" }}http2_push_preload on; {{ end }}
