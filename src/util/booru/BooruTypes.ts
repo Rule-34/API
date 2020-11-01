@@ -1,6 +1,6 @@
 enum BooruType {
   GELBOORU = 'gelbooru',
-  SHIMMIE2 = 'shimmie2',
+  PAHEAL = 'paheal',
   DANBOORU = 'danbooru',
   DANBOORU2 = 'danbooru2',
   E621 = 'e621',

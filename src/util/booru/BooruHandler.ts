@@ -8,7 +8,7 @@ import {
 
 import {
   Gelbooru,
-  Shimmie2,
+  Paheal,
   Danbooru,
   Danbooru2,
   E621,
@@ -26,8 +26,8 @@ function getAPIConstructorByType(booruType: BooruTypes) {
     case BooruTypes.GELBOORU:
       return Gelbooru
 
-    case BooruTypes.SHIMMIE2:
-      return Shimmie2
+    case BooruTypes.PAHEAL:
+      return Paheal
 
     // Moebooru and MyImouto are danbooru
     case BooruTypes.DANBOORU:
