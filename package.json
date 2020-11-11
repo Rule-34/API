@@ -22,7 +22,7 @@
     "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix"
   },
   "dependencies": {
-    "@alejandroakbal/universal-booru-wrapper": "0.1.8",
+    "@alejandroakbal/universal-booru-wrapper": "0.1.9",
     "@sentry/node": "^5.27.3",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
