@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator'
 
-export class BooruRequestParams {
+export class BooruEndpointParamsDTO {
   @IsString()
   booruType: 'gelbooru'
 
