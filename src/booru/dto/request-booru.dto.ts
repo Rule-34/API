@@ -1,15 +1,10 @@
 import { IsDefined, IsIn, IsNotEmpty, IsString } from 'class-validator'
+import { BooruTypes } from '../types/BooruTypes'
 
 export class BooruEndpointParamsDTO {
   @IsDefined()
   @IsNotEmpty()
   @IsString()
-  @IsIn(['gelbooru'])
-  readonly booruType: string
-
-  @IsDefined()
-  @IsNotEmpty()
-  @IsString()
-  @IsIn(['posts', 'tags', 'singlePost', 'randomPost'])
-  readonly booruEndpoint: string
+  @IsIn(Object.values(BooruTypes))
+  readonly booruType: BooruTypes
 }
