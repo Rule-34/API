@@ -21,7 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@alejandroakbal/universal-booru-wrapper": "^0.1.10",
+    "@alejandroakbal/universal-booru-wrapper": "^0.2.0",
     "@nestjs/common": "^7.5.5",
     "@nestjs/core": "^7.5.5",
     "@nestjs/platform-express": "^7.5.5",
