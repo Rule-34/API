@@ -15,6 +15,8 @@ async function bootstrap() {
 
   app.register(helmet)
 
+  app.enableCors({ origin: /r34\.app$/ })
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true, // Transform to DTO type
