@@ -8,6 +8,8 @@ import {
 } from '@alejandroakbal/universal-booru-wrapper'
 import { Controller, Get, Param, Query } from '@nestjs/common'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
+import { booruOptionsDTO } from './dto/booru-queries.dto'
+
 function getAPIClassByType(booruType: BooruTypesStringEnum) {
   switch (booruType) {
     case BooruTypesStringEnum.GELBOORU:
@@ -33,15 +35,13 @@ export class BooruController {
   @Get(':booruType/posts')
   GetPosts(
     @Param() params: BooruEndpointParamsDTO,
+    @Query() queries: booruOptionsDTO
   ) {
     const ApiClass = getAPIClassByType(params.booruType)
 
-    console.log(queries)
-
-    // const Api = new ApiClass({ base: 'gelbooru.com' })
+    const Api = new ApiClass({ base: queries.baseEndpoint })
 
     // return Api.getPosts()
-
-    return queries
+    return { params, queries }
   }
 }
