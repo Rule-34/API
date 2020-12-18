@@ -1,7 +1,12 @@
 import { Controller, Get, Param, Query } from '@nestjs/common'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
-import { booruOptionsDTO } from './dto/booru-queries.dto'
+import { booruPostQueriesDTO } from './dto/booru-queries.dto'
 import { BooruService } from './booru.service'
+import {
+  IBooruQueryValues,
+  IBooruEndpoints,
+  IBooruOptions,
+} from '@alejandroakbal/universal-booru-wrapper'
 
 @Controller('booru')
 export class BooruController {
@@ -16,13 +21,23 @@ export class BooruController {
     @Param()
     params: BooruEndpointParamsDTO,
     @Query()
-    queries: booruOptionsDTO
+    queries: booruPostQueriesDTO
   ) {
     const booruClass = this.booruService.getApiClassByType(params.booruType)
 
-    const Api = new booruClass({ base: queries.baseEndpoint })
+    const booruEndpoints = { base: queries.baseEndpoint }
+    const booruOptions = { HTTPScheme: queries.HTTPScheme }
 
-    // return Api.getPosts()
-    return { params, queries }
+    const Api = new booruClass(
+      booruEndpoints,
+      undefined,
+      undefined,
+      booruOptions
+    )
+
+    const postQueryValues: IBooruQueryValues['posts'] = { tags: queries.tags }
+
+    return Api.getPosts(postQueryValues)
+    // return { params, queries }
   }
 }
