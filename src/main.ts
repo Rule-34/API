@@ -13,6 +13,8 @@ async function bootstrap() {
     new FastifyAdapter()
   )
 
+  // app.setGlobalPrefix('v1')
+
   app.register(helmet)
 
   app.enableCors({ origin: /r34\.app$/ })
@@ -20,8 +22,10 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true, // Transform to DTO type
+      // transformOptions: { enableImplicitConversion: true },
+
       whitelist: true, // Remove unnecessary properties
-      forbidNonWhitelisted: true,
+      // forbidNonWhitelisted: true, // Sends "property <property> should not exist." error
     })
   )
 

@@ -13,8 +13,10 @@ export class BooruController {
 
   @Get(':booruType/posts')
   GetPosts(
-    @Param() params: BooruEndpointParamsDTO,
-    @Query() queries: booruOptionsDTO
+    @Param()
+    params: BooruEndpointParamsDTO,
+    @Query()
+    queries: booruOptionsDTO
   ) {
     const booruClass = this.booruService.getApiClassByType(params.booruType)
 
