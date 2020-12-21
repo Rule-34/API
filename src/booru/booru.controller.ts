@@ -1,7 +1,8 @@
-import { Controller, Get, Param, Query } from '@nestjs/common'
+import { Controller, Get, Param, Query, UseInterceptors } from '@nestjs/common'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import { booruPostQueriesDTO } from './dto/booru-queries.dto'
 import { BooruService } from './booru.service'
+import { BooruErrorsInterceptor } from './filters/booru-exception.interceptor'
 import {
   IBooruQueryValues,
   IBooruEndpoints,
@@ -9,6 +10,7 @@ import {
 } from '@alejandroakbal/universal-booru-wrapper'
 
 @Controller('booru')
+@UseInterceptors(BooruErrorsInterceptor)
 export class BooruController {
   constructor(private readonly booruService: BooruService) {}
 
