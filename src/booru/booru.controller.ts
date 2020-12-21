@@ -10,11 +10,7 @@ import {
 
 @Controller('booru')
 export class BooruController {
-  private booruService: BooruService
-
-  constructor(booruService: BooruService) {
-    this.booruService = booruService
-  }
+  constructor(private readonly booruService: BooruService) {}
 
   @Get(':booruType/posts')
   GetPosts(
