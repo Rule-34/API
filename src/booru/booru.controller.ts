@@ -34,8 +34,12 @@ export class BooruController {
     )
 
     const postQueryValues: IBooruQueryValues['posts'] = {
-      tags: queries.tags,
       limit: queries.limit,
+      pageID: queries.pageID,
+      tags: queries.tags,
+      rating: queries.rating,
+      score: queries.score,
+      order: queries.order,
     }
 
     return Api.getPosts(postQueryValues)

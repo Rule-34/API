@@ -37,6 +37,20 @@ abstract class booruOptionsDTO {
 }
 
 export class booruPostQueriesDTO extends booruOptionsDTO {
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  @Transform((value) => parseInt(value))
+  @IsOptional()
+  readonly limit: IBooruQueryValues['posts']['limit']
+
+  @IsInt()
+  @Min(0)
+  @Max(1000)
+  @Transform((value) => parseInt(value))
+  @IsOptional()
+  readonly pageID: IBooruQueryValues['posts']['pageID']
+
   @IsArray()
   @ArrayNotEmpty()
   @ArrayNotContains([''])
@@ -44,10 +58,19 @@ export class booruPostQueriesDTO extends booruOptionsDTO {
   @IsOptional()
   readonly tags: IBooruQueryValues['posts']['tags']
 
-  @IsInt()
-  @Min(1)
-  @Max(100)
-  @Transform((value) => parseInt(value))
+  @IsString()
+  @IsNotEmpty()
+  @IsIn(['safe', 'questionable', 'explicit'])
   @IsOptional()
-  readonly limit: IBooruQueryValues['posts']['limit']
+  readonly rating: IBooruQueryValues['posts']['rating']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly score: IBooruQueryValues['posts']['score']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly order: IBooruQueryValues['posts']['order']
 }
