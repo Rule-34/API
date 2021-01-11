@@ -17,36 +17,27 @@ import {
 import { Transform } from 'class-transformer'
 
 abstract class booruOptionsDTO {
-  // Endpoints
   @IsFQDN()
   @IsNotEmpty()
   readonly baseEndpoint: IBooruEndpoints['base']
 
-  @IsOptional()
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   readonly tagsEndpoint: IBooruEndpoints['tags']
 
-  // Options
-  @IsOptional()
   @IsString()
   @IsNotEmpty()
   @IsIn(['http', 'https'])
+  @IsOptional()
   readonly HTTPScheme: IBooruOptions['HTTPScheme']
 }
 
 export class booruPostQueriesDTO extends booruOptionsDTO {
-  // Query Identifiers
-  // @IsOptional()
-  // @IsJSON()
-  // @IsNotEmpty()
-  // readonly tagsQueryIdentifiers: IBooruQueryIdentifiers['tags']
-
-  // Query Values
-  @IsOptional()
   @IsArray()
   @ArrayNotEmpty()
   @ArrayNotContains([''])
-  @Transform((tagsString: string) => tagsString.trim().split(','))
+  @Transform((value: string) => value.trim().split(','))
+  @IsOptional()
   readonly tags: IBooruQueryValues['posts']['tags']
 }
