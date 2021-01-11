@@ -10,9 +10,12 @@ import {
   IsArray,
   IsFQDN,
   IsIn,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
+  Max,
+  Min,
 } from 'class-validator'
 import { Transform } from 'class-transformer'
 
@@ -40,4 +43,11 @@ export class booruPostQueriesDTO extends booruOptionsDTO {
   @Transform((value: string) => value.trim().split(','))
   @IsOptional()
   readonly tags: IBooruQueryValues['posts']['tags']
+
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  @Transform((value) => parseInt(value))
+  @IsOptional()
+  readonly limit: IBooruQueryValues['posts']['limit']
 }

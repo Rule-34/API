@@ -33,9 +33,11 @@ export class BooruController {
       booruOptions
     )
 
-    const postQueryValues: IBooruQueryValues['posts'] = { tags: queries.tags }
+    const postQueryValues: IBooruQueryValues['posts'] = {
+      tags: queries.tags,
+      limit: queries.limit,
+    }
 
     return Api.getPosts(postQueryValues)
-    // return { params, queries }
   }
 }
