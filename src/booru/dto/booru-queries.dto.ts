@@ -74,3 +74,12 @@ export class booruPostQueriesDTO extends booruOptionsDTO {
   @IsOptional()
   readonly order: IBooruQueryValues['posts']['order']
 }
+
+export class booruSinglePostQueriesDTO extends booruOptionsDTO {
+  @IsInt()
+  @Min(0)
+  @Max(99999)
+  @Transform((value) => parseInt(value))
+  @IsOptional()
+  readonly id: IBooruQueryValues['singlePost']['id']
+}
