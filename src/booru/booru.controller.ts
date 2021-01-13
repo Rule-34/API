@@ -4,6 +4,7 @@ import {
   booruPostsQueriesDTO,
   booruRandomPostsQueriesDTO,
   booruSinglePostQueriesDTO,
+  booruTagsQueriesDTO,
 } from './dto/booru-queries.dto'
 import { BooruService } from './booru.service'
 import { BooruErrorsInterceptor } from './filters/booru-exception.interceptor'
@@ -100,5 +101,35 @@ export class BooruController {
     }
 
     return Api.getSinglePost(postQueryValues)
+  }
+
+  @Get(':booruType/tags')
+  GetTags(
+    @Param()
+    params: BooruEndpointParamsDTO,
+    @Query()
+    queries: booruTagsQueriesDTO
+  ) {
+    const booruClass = this.booruService.getApiClassByType(params.booruType)
+
+    const booruEndpoints = { base: queries.baseEndpoint }
+    const booruOptions = { HTTPScheme: queries.HTTPScheme }
+
+    const Api = new booruClass(
+      booruEndpoints,
+      undefined,
+      undefined,
+      booruOptions
+    )
+
+    const postQueryValues: IBooruQueryValues['tags'] = {
+      tag: queries.tag,
+      tagEnding: queries.tagEnding,
+      limit: queries.limit,
+      pageID: queries.pageID,
+      order: queries.order,
+    }
+
+    return Api.getTags(postQueryValues)
   }
 }

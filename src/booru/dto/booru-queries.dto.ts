@@ -85,3 +85,33 @@ export class booruSinglePostQueriesDTO extends booruOptionsDTO {
   @IsOptional()
   readonly id: IBooruQueryValues['singlePost']['id']
 }
+
+export class booruTagsQueriesDTO extends booruOptionsDTO {
+  @IsString()
+  @IsNotEmpty()
+  readonly tag: IBooruQueryValues['tags']['tag']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly tagEnding: IBooruQueryValues['tags']['tagEnding']
+
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  @Transform((value) => parseInt(value))
+  @IsOptional()
+  readonly limit: IBooruQueryValues['tags']['limit']
+
+  @IsInt()
+  @Min(0)
+  @Max(1000)
+  @Transform((value) => parseInt(value))
+  @IsOptional()
+  readonly pageID: IBooruQueryValues['tags']['pageID']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly order: IBooruQueryValues['tags']['order']
+}
