@@ -2,6 +2,7 @@ import { Controller, Get, Param, Query, UseInterceptors } from '@nestjs/common'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import {
   booruPostsQueriesDTO,
+  booruRandomPostsQueriesDTO,
   booruSinglePostQueriesDTO,
 } from './dto/booru-queries.dto'
 import { BooruService } from './booru.service'
@@ -42,6 +43,37 @@ export class BooruController {
     }
 
     return Api.getPosts(postQueryValues)
+  }
+
+  @Get(':booruType/random-posts')
+  GetRandomPosts(
+    @Param()
+    params: BooruEndpointParamsDTO,
+    @Query()
+    queries: booruRandomPostsQueriesDTO
+  ) {
+    const booruClass = this.booruService.getApiClassByType(params.booruType)
+
+    const booruEndpoints = { base: queries.baseEndpoint }
+    const booruOptions = { HTTPScheme: queries.HTTPScheme }
+
+    const Api = new booruClass(
+      booruEndpoints,
+      undefined,
+      undefined,
+      booruOptions
+    )
+
+    const postQueryValues: IBooruQueryValues['randomPosts'] = {
+      limit: queries.limit,
+      pageID: queries.pageID,
+      tags: queries.tags,
+      rating: queries.rating,
+      score: queries.score,
+      order: queries.order,
+    }
+
+    return Api.getRandomPosts(postQueryValues)
   }
 
   @Get(':booruType/single-post')

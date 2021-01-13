@@ -75,6 +75,8 @@ export class booruPostsQueriesDTO extends booruOptionsDTO {
   readonly order: IBooruQueryValues['posts']['order']
 }
 
+export class booruRandomPostsQueriesDTO extends booruPostsQueriesDTO {}
+
 export class booruSinglePostQueriesDTO extends booruOptionsDTO {
   @IsInt()
   @Min(0)
