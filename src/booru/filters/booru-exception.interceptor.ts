@@ -3,11 +3,16 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
+  MethodNotAllowedException,
 } from '@nestjs/common'
 import { Observable, throwError } from 'rxjs'
 import { catchError } from 'rxjs/operators'
 
-import { EmptyDataError } from '@alejandroakbal/universal-booru-wrapper'
+import {
+  EmptyDataError,
+  EndpointError,
+} from '@alejandroakbal/universal-booru-wrapper'
+
 import { NoContentException } from 'src/exceptions/no-content.exception'
 
 @Injectable()
@@ -16,7 +21,10 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     return next.handle().pipe(
       catchError((error) => {
         if (error instanceof EmptyDataError) {
-          return throwError(new NoContentException())
+          return throwError(new NoContentException(error.message))
+          //
+        } else if (error instanceof EndpointError) {
+          return throwError(new MethodNotAllowedException(error.message))
         }
 
         return throwError(error)
