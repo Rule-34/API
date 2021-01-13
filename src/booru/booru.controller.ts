@@ -1,16 +1,12 @@
 import { Controller, Get, Param, Query, UseInterceptors } from '@nestjs/common'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import {
-  booruPostQueriesDTO,
+  booruPostsQueriesDTO,
   booruSinglePostQueriesDTO,
 } from './dto/booru-queries.dto'
 import { BooruService } from './booru.service'
 import { BooruErrorsInterceptor } from './filters/booru-exception.interceptor'
-import {
-  IBooruQueryValues,
-  IBooruEndpoints,
-  IBooruOptions,
-} from '@alejandroakbal/universal-booru-wrapper'
+import { IBooruQueryValues } from '@alejandroakbal/universal-booru-wrapper'
 
 @Controller('booru')
 @UseInterceptors(BooruErrorsInterceptor)
@@ -22,7 +18,7 @@ export class BooruController {
     @Param()
     params: BooruEndpointParamsDTO,
     @Query()
-    queries: booruPostQueriesDTO
+    queries: booruPostsQueriesDTO
   ) {
     const booruClass = this.booruService.getApiClassByType(params.booruType)
 

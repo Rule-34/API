@@ -36,7 +36,7 @@ abstract class booruOptionsDTO {
   readonly HTTPScheme: IBooruOptions['HTTPScheme']
 }
 
-export class booruPostQueriesDTO extends booruOptionsDTO {
+export class booruPostsQueriesDTO extends booruOptionsDTO {
   @IsInt()
   @Min(1)
   @Max(100)
