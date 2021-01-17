@@ -1,4 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module } from '@nestjs/common'
+import { GumroadAuthenticationController } from './gumroad-authentication.controller'
 
-@Module({})
+@Module({
+  controllers: [GumroadAuthenticationController],
+})
 export class GumroadAuthenticationModule {}
