@@ -35,6 +35,6 @@ export class GumroadAuthenticationService {
 
     return this.httpService
       .request(requestConfig)
-      .pipe(map((response) => response.data))
+      .pipe(map((response) => response.data)) // Pipe it because Axios saves the data inside the `data` attribute
   }
 }
