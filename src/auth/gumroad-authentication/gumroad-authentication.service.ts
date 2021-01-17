@@ -1,7 +1,11 @@
-import { HttpService, Injectable } from '@nestjs/common'
-import { AxiosRequestConfig, AxiosResponse } from 'axios'
-import { Observable } from 'rxjs'
-import { map } from 'rxjs/operators'
+import {
+  HttpException,
+  HttpService,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
+import { AxiosRequestConfig } from 'axios'
+import { catchError, map } from 'rxjs/operators'
 
 @Injectable()
 export class GumroadAuthenticationService {
@@ -10,11 +14,7 @@ export class GumroadAuthenticationService {
 
   constructor(private httpService: HttpService) {}
 
-  verifyLicense(
-    productPermalink,
-    licenseKey,
-    incrementUsesCount
-  ): Observable<AxiosResponse<any>> {
+  async verifyLicense(productPermalink, licenseKey, incrementUsesCount) {
     const requestConfig: AxiosRequestConfig = {
       method: 'POST',
 
@@ -35,9 +35,13 @@ export class GumroadAuthenticationService {
 
     const response = this.httpService.request(requestConfig)
 
-    // Pipe it because Axios saves the data inside the `data` attribute
-    const responseData = response.pipe(map((response) => response.data))
+    const responseData = await response
+      .toPromise()
+      //
+      .catch((error) => {
+        throw new HttpException(error.response.data, error.response.status)
+      })
 
-    return responseData
+    return responseData.data
   }
 }
