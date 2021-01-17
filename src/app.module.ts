@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common'
-import { AppController } from './app.controller'
 import { BooruModule } from './booru/booru.module'
-import { GumroadAuthenticationModule } from './gumroad-authentication/gumroad-authentication.module'
+import { AuthModule } from './auth/auth.module'
+import { AppController } from './app.controller'
 
 @Module({
-  imports: [BooruModule, GumroadAuthenticationModule],
+  imports: [BooruModule, AuthModule],
   controllers: [AppController],
 })
 export class AppModule {}
