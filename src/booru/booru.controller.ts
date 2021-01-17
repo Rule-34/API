@@ -7,7 +7,7 @@ import {
   booruTagsQueriesDTO,
 } from './dto/booru-queries.dto'
 import { BooruService } from './booru.service'
-import { BooruErrorsInterceptor } from './filters/booru-exception.interceptor'
+import { BooruErrorsInterceptor } from './interceptors/booru-exception.interceptor'
 import { IBooruQueryValues } from '@alejandroakbal/universal-booru-wrapper'
 
 @Controller('booru')
