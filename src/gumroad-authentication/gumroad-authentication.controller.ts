@@ -8,7 +8,7 @@ export class GumroadAuthenticationController {
     private readonly gumroadAuthenticationService: GumroadAuthenticationService
   ) {}
 
-  @Post('/')
+  @Post('/verify-license')
   VerifyLicense(
     @Body()
     body: GumroadBodyDTO
