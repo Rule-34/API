@@ -25,7 +25,7 @@ async function bootstrap() {
       // transformOptions: { enableImplicitConversion: true },
 
       whitelist: true, // Remove unnecessary properties
-      // forbidNonWhitelisted: true, // Sends "property <property> should not exist." error
+      forbidNonWhitelisted: true, // Sends "property <property> should not exist." error
     })
   )
 
