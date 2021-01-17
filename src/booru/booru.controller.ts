@@ -1,4 +1,11 @@
-import { Controller, Get, Param, Query, UseInterceptors } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Header,
+  Param,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import {
   booruPostsQueriesDTO,
@@ -16,6 +23,7 @@ export class BooruController {
   constructor(private readonly booruService: BooruService) {}
 
   @Get(':booruType/posts')
+  @Header('Cache-Control', 'public, max-age=250')
   GetPosts(
     @Param()
     params: BooruEndpointParamsDTO,
@@ -47,6 +55,7 @@ export class BooruController {
   }
 
   @Get(':booruType/random-posts')
+  @Header('Cache-Control', 'no-cache')
   GetRandomPosts(
     @Param()
     params: BooruEndpointParamsDTO,
@@ -78,6 +87,7 @@ export class BooruController {
   }
 
   @Get(':booruType/single-post')
+  @Header('Cache-Control', 'public, max-age=604800, immutable')
   GetSinglePost(
     @Param()
     params: BooruEndpointParamsDTO,
@@ -104,6 +114,7 @@ export class BooruController {
   }
 
   @Get(':booruType/tags')
+  @Header('Cache-Control', 'public, max-age=3600')
   GetTags(
     @Param()
     params: BooruEndpointParamsDTO,

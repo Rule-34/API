@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common'
+import { Body, Controller, Header, Post } from '@nestjs/common'
 import { GumroadBodyDTO } from './dto/gumroad-body.dto'
 import { GumroadAuthenticationService } from './gumroad-authentication.service'
 
@@ -9,6 +9,7 @@ export class GumroadAuthenticationController {
   ) {}
 
   @Post('/verify-license')
+  @Header('Cache-Control', 'public, max-age=3600')
   VerifyLicense(
     @Body()
     body: GumroadBodyDTO
