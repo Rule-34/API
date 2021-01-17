@@ -9,7 +9,7 @@ describe('GumroadAuthenticationService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [HttpModule, ConfigModule, ConfigService],
+      imports: [HttpModule, ConfigModule.forRoot(), ConfigService],
       providers: [GumroadAuthenticationService],
     }).compile()
 
@@ -24,6 +24,22 @@ describe('GumroadAuthenticationService', () => {
     expect(service).toBeDefined()
   })
 
+  it('should verify a correct license', async () => {
+    const productPermalink = configService.get<string>(
+      'TEST_GUMROAD_AUTH_PRODUCT_PERMALINK'
+    )
+    const licenseKey = configService.get<string>(
+      'TEST_GUMROAD_AUTH_LICENSE_KEY'
+    )
+
+    const data = await service.verifyLicense(
+      productPermalink,
+      licenseKey,
+      false
+    )
+
+    expect(data.success).toBe(true)
+  })
 
   it('should throw HttpException on incorrect license', async () => {
     const productPermalink = 'RandomString'
