@@ -13,7 +13,7 @@ import {
   EndpointError,
 } from '@alejandroakbal/universal-booru-wrapper'
 
-import { NoContentException } from 'src/exceptions/no-content.exception'
+import { NoContentException } from 'src/common/exceptions/no-content.exception'
 
 @Injectable()
 export class BooruErrorsInterceptor implements NestInterceptor {
