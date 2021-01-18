@@ -50,7 +50,6 @@ server {
     proxy_cache_lock on;
 
     proxy_cache_revalidate on;
-    proxy_buffering on;
 
     proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
     
