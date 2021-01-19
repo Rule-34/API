@@ -30,17 +30,7 @@ export class BooruController {
     @Query()
     queries: booruPostsQueriesDTO
   ) {
-    const booruClass = this.booruService.getApiClassByType(params.booruType)
-
-    const booruEndpoints = { base: queries.baseEndpoint }
-    const booruOptions = { HTTPScheme: queries.HTTPScheme }
-
-    const Api = new booruClass(
-      booruEndpoints,
-      undefined,
-      undefined,
-      booruOptions
-    )
+    const Api = this.booruService.buildApiClass(params, queries)
 
     const postQueryValues: IBooruQueryValues['posts'] = {
       limit: queries.limit,
@@ -62,17 +52,7 @@ export class BooruController {
     @Query()
     queries: booruRandomPostsQueriesDTO
   ) {
-    const booruClass = this.booruService.getApiClassByType(params.booruType)
-
-    const booruEndpoints = { base: queries.baseEndpoint }
-    const booruOptions = { HTTPScheme: queries.HTTPScheme }
-
-    const Api = new booruClass(
-      booruEndpoints,
-      undefined,
-      undefined,
-      booruOptions
-    )
+    const Api = this.booruService.buildApiClass(params, queries)
 
     const postQueryValues: IBooruQueryValues['randomPosts'] = {
       limit: queries.limit,
@@ -94,17 +74,7 @@ export class BooruController {
     @Query()
     queries: booruSinglePostQueriesDTO
   ) {
-    const booruClass = this.booruService.getApiClassByType(params.booruType)
-
-    const booruEndpoints = { base: queries.baseEndpoint }
-    const booruOptions = { HTTPScheme: queries.HTTPScheme }
-
-    const Api = new booruClass(
-      booruEndpoints,
-      undefined,
-      undefined,
-      booruOptions
-    )
+    const Api = this.booruService.buildApiClass(params, queries)
 
     const postQueryValues: IBooruQueryValues['singlePost'] = {
       id: queries.id,
@@ -121,17 +91,7 @@ export class BooruController {
     @Query()
     queries: booruTagsQueriesDTO
   ) {
-    const booruClass = this.booruService.getApiClassByType(params.booruType)
-
-    const booruEndpoints = { base: queries.baseEndpoint }
-    const booruOptions = { HTTPScheme: queries.HTTPScheme }
-
-    const Api = new booruClass(
-      booruEndpoints,
-      undefined,
-      undefined,
-      booruOptions
-    )
+    const Api = this.booruService.buildApiClass(params, queries)
 
     const postQueryValues: IBooruQueryValues['tags'] = {
       tag: queries.tag,

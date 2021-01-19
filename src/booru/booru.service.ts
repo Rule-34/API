@@ -1,16 +1,20 @@
 import { Injectable } from '@nestjs/common'
 import {
   BooruTypesStringEnum,
+  Gelbooru,
+  Paheal,
   Danbooru,
   Danbooru2,
   E621,
-  Gelbooru,
-  Paheal,
+  IBooruEndpoints,
+  IBooruOptions,
 } from '@alejandroakbal/universal-booru-wrapper'
+import { booruQueriesDTO } from './dto/booru-queries.dto'
+import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 
 @Injectable()
 export class BooruService {
-  public getApiClassByType(booruType: BooruTypesStringEnum) {
+  private getApiClassByType(booruType: BooruTypesStringEnum) {
     switch (booruType) {
       case BooruTypesStringEnum.GELBOORU:
         return Gelbooru
@@ -28,5 +32,39 @@ export class BooruService {
       case BooruTypesStringEnum.E621:
         return E621
     }
+  }
+
+  public buildApiClass(
+    params: BooruEndpointParamsDTO,
+    queries: booruQueriesDTO
+  ) {
+    const booruClass = this.getApiClassByType(params.booruType)
+
+    const endpoints: IBooruEndpoints = {
+      base: queries.baseEndpoint,
+      posts: queries.postsEndpoint,
+      randomPosts: queries.randomPostsEndpoint,
+      singlePost: queries.singlePostEndpoint,
+      tags: queries.tagsEndpoint,
+    }
+
+    // No default QueryValues are needed
+
+    const defaultQueryIdentifiers = {
+      tags: {
+        tag: queries.defaultQueryIdentifiersTagsTag,
+      },
+    }
+
+    const options: IBooruOptions = { HTTPScheme: queries.httpScheme }
+
+    const Api = new booruClass(
+      endpoints,
+      defaultQueryIdentifiers,
+      undefined,
+      options
+    )
+
+    return Api
   }
 }
