@@ -54,6 +54,7 @@ export class BooruService {
     const defaultQueryIdentifiers = {
       tags: {
         tag: queries.defaultQueryIdentifiersTagsTag,
+        tagEnding: queries.defaultQueryIdentifiersTagsTagEnding,
       },
     }
 

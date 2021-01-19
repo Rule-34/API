@@ -50,6 +50,10 @@ abstract class booruDefaultQueryIdentifiersDTO extends booruEndpointsDTO {
   @IsNotEmpty()
   @IsOptional()
   readonly defaultQueryIdentifiersTagsTag: IBooruQueryIdentifiers['tags']['tag']
+
+  @IsString()
+  @IsOptional()
+  readonly defaultQueryIdentifiersTagsTagEnding: IBooruQueryIdentifiers['tags']['tagEnding']
 }
 
 abstract class booruOptionsDTO extends booruDefaultQueryIdentifiersDTO {
