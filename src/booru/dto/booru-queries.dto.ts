@@ -19,7 +19,7 @@ import {
 } from 'class-validator'
 import { Transform } from 'class-transformer'
 
-abstract class booruOptionsDTO {
+abstract class booruEndpointsDTO {
   @IsFQDN()
   @IsNotEmpty()
   readonly baseEndpoint: IBooruEndpoints['base']
@@ -27,16 +27,40 @@ abstract class booruOptionsDTO {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly tagsEndpoint: IBooruEndpoints['tags']
+  readonly postsEndpoint: IBooruEndpoints['posts']
 
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly randomPostsEndpoint: IBooruEndpoints['randomPosts']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly singlePostEndpoint: IBooruEndpoints['singlePost']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly tagsEndpoint: IBooruEndpoints['tags']
+}
+
+abstract class booruDefaultQueryIdentifiersDTO extends booruEndpointsDTO {
+}
+
+abstract class booruOptionsDTO extends booruDefaultQueryIdentifiersDTO {
   @IsString()
   @IsNotEmpty()
   @IsIn(['http', 'https'])
   @IsOptional()
-  readonly HTTPScheme: IBooruOptions['HTTPScheme']
+  readonly httpScheme: IBooruOptions['HTTPScheme']
 }
 
-export class booruPostsQueriesDTO extends booruOptionsDTO {
+// Final class that extends all others
+export abstract class booruQueriesDTO extends booruOptionsDTO {}
+
+// ----- Classes with QueryValues ----- //
+export class booruPostsQueriesDTO extends booruQueriesDTO {
   @IsInt()
   @Min(1)
   @Max(100)
@@ -77,7 +101,7 @@ export class booruPostsQueriesDTO extends booruOptionsDTO {
 
 export class booruRandomPostsQueriesDTO extends booruPostsQueriesDTO {}
 
-export class booruSinglePostQueriesDTO extends booruOptionsDTO {
+export class booruSinglePostQueriesDTO extends booruQueriesDTO {
   @IsInt()
   @Min(0)
   @Max(99999)
@@ -86,7 +110,7 @@ export class booruSinglePostQueriesDTO extends booruOptionsDTO {
   readonly id: IBooruQueryValues['singlePost']['id']
 }
 
-export class booruTagsQueriesDTO extends booruOptionsDTO {
+export class booruTagsQueriesDTO extends booruQueriesDTO {
   @IsString()
   @IsNotEmpty()
   readonly tag: IBooruQueryValues['tags']['tag']
