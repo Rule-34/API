@@ -8,6 +8,7 @@ import {
   E621,
   IBooruEndpoints,
   IBooruOptions,
+  BooruTypes,
 } from '@alejandroakbal/universal-booru-wrapper'
 import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
@@ -37,7 +38,7 @@ export class BooruService {
   public buildApiClass(
     params: BooruEndpointParamsDTO,
     queries: booruQueriesDTO
-  ) {
+  ): BooruTypes {
     const booruClass = this.getApiClassByType(params.booruType)
 
     const endpoints: IBooruEndpoints = {
