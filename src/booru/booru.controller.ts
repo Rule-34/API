@@ -6,6 +6,7 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common'
+import { IBooruQueryValues } from '@alejandroakbal/universal-booru-wrapper'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import {
   booruPostsQueriesDTO,
@@ -15,7 +16,6 @@ import {
 } from './dto/booru-queries.dto'
 import { BooruService } from './booru.service'
 import { BooruErrorsInterceptor } from './interceptors/booru-exception.interceptor'
-import { IBooruQueryValues } from '@alejandroakbal/universal-booru-wrapper'
 
 @Controller('booru')
 @UseInterceptors(BooruErrorsInterceptor)
