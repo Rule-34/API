@@ -7,13 +7,11 @@ import {
 } from '@nestjs/common'
 import { Observable, throwError } from 'rxjs'
 import { catchError } from 'rxjs/operators'
-
 import {
   EmptyDataError,
   EndpointError,
 } from '@alejandroakbal/universal-booru-wrapper'
-
-import { NoContentException } from 'src/common/exceptions/no-content.exception'
+import { NoContentException } from '../../common/exceptions/no-content.exception'
 
 @Injectable()
 export class BooruErrorsInterceptor implements NestInterceptor {
