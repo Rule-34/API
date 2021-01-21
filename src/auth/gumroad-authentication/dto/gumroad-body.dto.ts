@@ -24,7 +24,7 @@ export class GumroadBodyDTO {
   @IsBoolean()
   @IsNotEmpty()
   @IsOptional()
-  @Transform((value) => {
+  @Transform(({ value }) => {
     switch (value) {
       case 'true':
         return true

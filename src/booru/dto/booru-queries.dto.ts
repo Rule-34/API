@@ -72,21 +72,21 @@ export class booruPostsQueriesDTO extends booruQueriesDTO {
   @IsInt()
   @Min(1)
   @Max(100)
-  @Transform((value) => parseInt(value))
+  @Transform(({ value }) => parseInt(value))
   @IsOptional()
   readonly limit: IBooruQueryValues['posts']['limit']
 
   @IsInt()
   @Min(0)
   @Max(1000)
-  @Transform((value) => parseInt(value))
+  @Transform(({ value }) => parseInt(value))
   @IsOptional()
   readonly pageID: IBooruQueryValues['posts']['pageID']
 
   @IsArray()
   @ArrayNotEmpty()
   @ArrayNotContains([''])
-  @Transform((value: string) => value.trim().split(','))
+  @Transform(({ value }) => value.trim().split(','))
   @IsOptional()
   readonly tags: IBooruQueryValues['posts']['tags']
 
@@ -113,7 +113,7 @@ export class booruSinglePostQueriesDTO extends booruQueriesDTO {
   @IsInt()
   @Min(0)
   @Max(99999)
-  @Transform((value) => parseInt(value))
+  @Transform(({ value }) => parseInt(value))
   @IsOptional()
   readonly id: IBooruQueryValues['singlePost']['id']
 }
@@ -131,14 +131,14 @@ export class booruTagsQueriesDTO extends booruQueriesDTO {
   @IsInt()
   @Min(1)
   @Max(100)
-  @Transform((value) => parseInt(value))
+  @Transform(({ value }) => parseInt(value))
   @IsOptional()
   readonly limit: IBooruQueryValues['tags']['limit']
 
   @IsInt()
   @Min(0)
   @Max(1000)
-  @Transform((value) => parseInt(value))
+  @Transform(({ value }) => parseInt(value))
   @IsOptional()
   readonly pageID: IBooruQueryValues['tags']['pageID']
 
