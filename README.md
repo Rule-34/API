@@ -1,5 +1,9 @@
 # Rule 34 API
 
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+![Uptime Robot status](https://img.shields.io/uptimerobot/status/m784854441-d8df27ac1ccd7c2d97e65fc9?style=flat-square)
+![GitHub Repo stars](https://img.shields.io/github/stars/Rule-34/API?style=social)
+
 A JSON API that acts as a wrapper for most Booru sites.
 
 **_This API was created for, and is used on the [Rule 34 App](https://r34.app)._**
