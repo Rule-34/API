@@ -1,47 +1,43 @@
-# Rule 34 JSON API
+# Rule 34 API
 
-## What is this
+A JSON API that acts as a wrapper for most Booru sites.
 
-A JSON API that acts as a wrapper for most Booru sites, taking the different structures of their API and returning a normalized JSON response that always has the same structure
-
-> This API was created for and is used on the [Rule 34 App](https://r34.app/)
-
-## Development
-
-Read [DOCUMENTATION.md](DOCUMENTATION.md)
+**_This API was created for, and is used on the [Rule 34 App](https://r34.app)._**
 
 ## Information
 
 ### Goals
 
-It is being developed with the following goals
+Developed with the following goals:
 
-- Provide an universal JSON response independent of the site
-- Have support for most boorus
-- Be easy to use
-- Be as fast as possible
-- Using only necessary data transfers
+- Provide a universal JSON response independent of the site.
+- Support most Booru types.
+- Be fast.
 
-### Support
+### Booru support
 
-The following booru types are supported and their API is fully working
+Thanks to `Universal Booru Manager` (UBW), _a utility package created by me_, the API supports the following Booru types:
 
-- Gelbooru (New)
-- Shimmie 2
+- Gelbooru 0.2
+- Paheal
 - Danbooru
 - Danbooru 2
 - E621
 
-> Public APIs are used for getting the data from the boorus
+### Booru standards
 
-### Speed
+This API respects all the Boorus that it communicates with.
 
-Thanks to [camaro](https://www.npmjs.com/package/camaro) we transform XML to JSON as fast as possible, as its using C++ underneath to do the transformation
+- Cache every request so that the original Booru site has less load.
+- Use correct HTTP headers for better CDN cache.
 
-If the site API is already using JSON, we clean and transform the data into an universal and minimal reponse
+## Development
 
-Then when we get a client request, the information is processed and cached, making sequential requests very fast :')
+If you are interested on modifying the API:
 
-### Credit
+- Read [DOCUMENTATION.md](DOCUMENTATION.md).
 
-> This API was inspired by [Kurozenzen's API](https://github.com/kurozenzen/r34-json-api)
+## Credit
+
+- Inspired by [Kurozenzen's API](https://github.com/kurozenzen/r34-json-api).
+- With help from @tuananh.
