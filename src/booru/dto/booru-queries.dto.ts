@@ -54,6 +54,8 @@ abstract class booruDefaultQueryIdentifiersDTO extends booruEndpointsDTO {
   @IsString()
   @IsOptional()
   readonly defaultQueryIdentifiersTagsTagEnding: IBooruQueryIdentifiers['tags']['tagEnding']
+
+  // TODO: add more query identifiers
 }
 
 abstract class booruOptionsDTO extends booruDefaultQueryIdentifiersDTO {
@@ -107,6 +109,7 @@ export class booruPostsQueriesDTO extends booruQueriesDTO {
   readonly order: IBooruQueryValues['posts']['order']
 }
 
+// Same as PostsQueries since they are practically the same
 export class booruRandomPostsQueriesDTO extends booruPostsQueriesDTO {}
 
 export class booruSinglePostQueriesDTO extends booruQueriesDTO {
