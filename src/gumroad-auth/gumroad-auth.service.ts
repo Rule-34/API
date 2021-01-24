@@ -1,5 +1,6 @@
 import { HttpException, HttpService, Injectable } from '@nestjs/common'
 import { AxiosRequestConfig } from 'axios'
+import { GumroadBodyDTO } from './dto/gumroad-body.dto'
 
 @Injectable()
 export class GumroadAuthService {
@@ -8,7 +9,11 @@ export class GumroadAuthService {
 
   constructor(private httpService: HttpService) {}
 
-  async verifyLicense(productPermalink, licenseKey, incrementUsesCount) {
+  async verifyLicense(
+    productPermalink: GumroadBodyDTO['product_permalink'],
+    licenseKey: GumroadBodyDTO['license_key'],
+    incrementUsesCount: GumroadBodyDTO['increment_uses_count'] = true
+  ) {
     const requestConfig: AxiosRequestConfig = {
       method: 'POST',
 
