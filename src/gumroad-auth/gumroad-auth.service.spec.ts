@@ -1,21 +1,19 @@
 import { HttpException, HttpModule } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
-import { GumroadAuthenticationService } from './gumroad-authentication.service'
+import { GumroadAuthService } from './gumroad-auth.service'
 
 describe('GumroadAuthenticationService', () => {
-  let service: GumroadAuthenticationService
+  let service: GumroadAuthService
   let configService: ConfigService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [HttpModule, ConfigModule.forRoot(), ConfigService],
-      providers: [GumroadAuthenticationService],
+      providers: [GumroadAuthService],
     }).compile()
 
-    service = module.get<GumroadAuthenticationService>(
-      GumroadAuthenticationService
-    )
+    service = module.get<GumroadAuthService>(GumroadAuthService)
 
     configService = module.get<ConfigService>(ConfigService)
   })

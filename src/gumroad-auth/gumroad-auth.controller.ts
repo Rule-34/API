@@ -1,12 +1,10 @@
 import { Body, Controller, Header, Post } from '@nestjs/common'
 import { GumroadBodyDTO } from './dto/gumroad-body.dto'
-import { GumroadAuthenticationService } from './gumroad-authentication.service'
+import { GumroadAuthService } from './gumroad-auth.service'
 
 @Controller('auth/gumroad')
-export class GumroadAuthenticationController {
-  constructor(
-    private readonly gumroadAuthenticationService: GumroadAuthenticationService
-  ) {}
+export class GumroadAuthController {
+  constructor(private readonly gumroadAuthService: GumroadAuthService) {}
 
   @Post('/verify-license')
   @Header('Cache-Control', 'public, max-age=3600')
@@ -16,7 +14,7 @@ export class GumroadAuthenticationController {
   ) {
     const { product_permalink, license_key, increment_uses_count } = body
 
-    return this.gumroadAuthenticationService.verifyLicense(
+    return this.gumroadAuthService.verifyLicense(
       product_permalink,
       license_key,
       increment_uses_count

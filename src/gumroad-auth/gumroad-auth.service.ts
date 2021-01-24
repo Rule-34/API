@@ -1,14 +1,8 @@
-import {
-  HttpException,
-  HttpService,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common'
+import { HttpException, HttpService, Injectable } from '@nestjs/common'
 import { AxiosRequestConfig } from 'axios'
-import { catchError, map } from 'rxjs/operators'
 
 @Injectable()
-export class GumroadAuthenticationService {
+export class GumroadAuthService {
   protected readonly gumroadLicenseVerificationEndpoint =
     'https://api.gumroad.com/v2/licenses/verify'
 
