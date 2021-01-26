@@ -49,4 +49,60 @@ describe('UsersService', () => {
     })
   })
 
+  describe('extractDetailsFromGumroadResponse', () => {
+    const validGumroadResponse: GumroadResponse = {
+      success: true,
+      uses: 0,
+      purchase: {
+        permalink: '',
+        product_permalink: '',
+        email: 'email@example.com',
+        sale_timestamp: '',
+        license_key: '',
+        recurrence: '',
+        refunded: false,
+        disputed: false,
+        dispute_won: false,
+        id: '',
+        created_at: new Date(),
+        subscription_cancelled_at: null,
+        subscription_failed_at: null,
+      },
+    }
+
+    const validReturn = {
+      success: true,
+      is_subscription_valid: true,
+      user_data: {
+        email: 'email@example.com',
+      },
+    }
+
+    it('should correctly output valid subscription', async () => {
+      const testGumroadResponse: GumroadResponse = validGumroadResponse
+
+      const expectedReturn = validReturn
+
+      expect(
+        service.extractDetailsFromGumroadResponse(testGumroadResponse)
+      ).toStrictEqual(expectedReturn)
+    })
+
+    it('should correctly output invalid subscription', async () => {
+      const testGumroadResponse: GumroadResponse = validGumroadResponse
+
+      // Past Date
+      testGumroadResponse.purchase.subscription_cancelled_at = new Date(
+        '2020-11-17T02:27:36Z'
+      )
+
+      const expectedReturn = validReturn
+
+      expectedReturn.is_subscription_valid = false
+
+      expect(
+        service.extractDetailsFromGumroadResponse(testGumroadResponse)
+      ).toStrictEqual(expectedReturn)
+    })
+  })
 })
