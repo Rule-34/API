@@ -1,19 +1,19 @@
 import { HttpException, HttpService, Injectable } from '@nestjs/common'
-import { AxiosRequestConfig } from 'axios'
-import { GumroadBodyDTO } from './dto/gumroad-body.dto'
+import { AxiosResponse, AxiosRequestConfig } from 'axios'
+import { GumroadRequest, GumroadResponse } from './interfaces/gumroad.interface'
 
 @Injectable()
-export class GumroadAuthService {
+export class UsersService {
   protected readonly gumroadLicenseVerificationEndpoint =
     'https://api.gumroad.com/v2/licenses/verify'
 
-  constructor(private httpService: HttpService) {}
+  constructor(private readonly httpService: HttpService) {}
 
-  async verifyLicense(
-    productPermalink: GumroadBodyDTO['product_permalink'],
-    licenseKey: GumroadBodyDTO['license_key'],
-    incrementUsesCount: GumroadBodyDTO['increment_uses_count'] = true
-  ) {
+  public async verifyGumroadLicense(
+    productPermalink: GumroadRequest['product_permalink'],
+    licenseKey: GumroadRequest['license_key'],
+    incrementUsesCount: GumroadRequest['increment_uses_count'] = true
+  ): Promise<GumroadResponse> {
     const requestConfig: AxiosRequestConfig = {
       method: 'POST',
 
@@ -34,13 +34,14 @@ export class GumroadAuthService {
 
     const response = this.httpService.request(requestConfig)
 
-    const responseData = await response
+    const responseData: AxiosResponse<GumroadResponse> = await response
       .toPromise()
-      //
+
       .catch((error) => {
         throw new HttpException(error.response.data, error.response.status)
       })
 
     return responseData.data
   }
+
 }
