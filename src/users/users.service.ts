@@ -44,4 +44,30 @@ export class UsersService {
     return responseData.data
   }
 
+  public extractDetailsFromGumroadResponse(gumroadResponse: GumroadResponse) {
+    const now = new Date(Date.now())
+
+    let isSubscriptionCancelled = false
+
+    if (gumroadResponse.purchase.subscription_cancelled_at) {
+      const cancelledAtDate = new Date(
+        gumroadResponse.purchase.subscription_cancelled_at
+      )
+
+      isSubscriptionCancelled = now > cancelledAtDate
+    }
+
+    const isSubscriptionValid =
+      gumroadResponse.success === true &&
+      isSubscriptionCancelled === false &&
+      gumroadResponse.purchase.subscription_failed_at === null
+
+    const details = {
+      success: gumroadResponse.success,
+      is_subscription_valid: isSubscriptionValid,
+      user_data: { email: gumroadResponse.purchase.email },
+    }
+
+    return details
+  }
 }
