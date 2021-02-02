@@ -1,7 +1,8 @@
-import { HttpException, HttpModule } from '@nestjs/common'
+import { UnauthorizedException, HttpModule } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
 import { GumroadAPIResponse } from './interfaces/gumroad.interface'
+import { UserData } from './interfaces/users.interface'
 import { UsersService } from './users.service'
 
 describe('UsersService', () => {
@@ -39,17 +40,17 @@ describe('UsersService', () => {
       expect(data.success).toBe(true)
     })
 
-    it('should throw HttpException on incorrect license', async () => {
+    it('should throw UnauthorizedException on incorrect license', async () => {
       const productPermalink = 'RandomString'
       const licenseKey = 'This-is-totally-invented'
 
       await expect(
         service.verifyGumroadLicense(productPermalink, licenseKey, false)
-      ).rejects.toThrowError(HttpException)
+      ).rejects.toThrowError(UnauthorizedException)
     })
   })
 
-  describe('extractDetailsFromGumroadResponse', () => {
+  describe('createUserDataFromGumroadResponse', () => {
     const validGumroadResponse: GumroadAPIResponse = {
       success: true,
       uses: 0,
@@ -57,7 +58,7 @@ describe('UsersService', () => {
         permalink: '',
         product_permalink: '',
         email: 'email@example.com',
-        sale_timestamp: '',
+        sale_timestamp: '2020-06-28T09:24:55Z',
         license_key: '',
         recurrence: '',
         refunded: false,
@@ -70,12 +71,12 @@ describe('UsersService', () => {
       },
     }
 
-    const validReturn = {
+    const validReturn: UserData = {
       success: true,
       is_subscription_valid: true,
-      user_data: {
-        email: 'email@example.com',
-      },
+      license_uses: 0,
+      sale_timestamp: '2020-06-28T09:24:55Z',
+      email: 'email@example.com',
     }
 
     it('should correctly output valid subscription', async () => {
