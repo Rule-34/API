@@ -1,6 +1,9 @@
-import { HttpException, HttpService, Injectable } from '@nestjs/common'
+import { HttpService, Injectable, UnauthorizedException } from '@nestjs/common'
 import { AxiosResponse, AxiosRequestConfig } from 'axios'
-import { GumroadRequest, GumroadResponse } from './interfaces/gumroad.interface'
+import {
+  GumroadAPIRequest,
+  GumroadAPIResponse,
+} from './interfaces/gumroad.interface'
 
 @Injectable()
 export class UsersService {
@@ -38,7 +41,7 @@ export class UsersService {
       .toPromise()
 
       .catch((error) => {
-        throw new HttpException(error.response.data, error.response.status)
+        throw new UnauthorizedException(undefined, error.response.data.message)
       })
 
     return responseData.data
