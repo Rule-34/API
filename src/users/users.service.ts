@@ -51,6 +51,22 @@ export class UsersService {
   public createUserDataFromGumroadResponse(
     gumroadResponse: GumroadAPIResponse
   ) {
+    const isSubscriptionValid = this.checkIfSubscriptionIsValid(gumroadResponse)
+
+    const details: UserData = {
+      success: gumroadResponse.success,
+      is_subscription_valid: isSubscriptionValid,
+      license_uses: gumroadResponse.uses,
+      sale_timestamp: gumroadResponse.purchase.sale_timestamp,
+      email: gumroadResponse.purchase.email,
+    }
+
+    return details
+  }
+
+  private checkIfSubscriptionIsValid(
+    gumroadResponse: GumroadAPIResponse
+  ): boolean {
     const now = new Date(Date.now())
 
     let isSubscriptionCancelled = false
@@ -68,12 +84,6 @@ export class UsersService {
       isSubscriptionCancelled === false &&
       gumroadResponse.purchase.subscription_failed_at === null
 
-    const details = {
-      success: gumroadResponse.success,
-      is_subscription_valid: isSubscriptionValid,
-      user_data: { email: gumroadResponse.purchase.email },
-    }
-
-    return details
+    return isSubscriptionValid
   }
 }
