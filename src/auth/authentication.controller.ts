@@ -1,4 +1,14 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common'
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Get,
+  UseGuards,
+  Request,
+} from '@nestjs/common'
+import { UserData } from 'src/users/interfaces/users.interface'
 import { GumroadBodyDTO } from '../users/dto/gumroad-body.dto'
 import { AuthenticationService } from './authentication.service'
 import { JwtAuthenticationGuard } from './guards/jwt-authentication.guard'
@@ -17,6 +27,17 @@ export class AuthenticationController {
 
     const data = await this.authenticationService.findLicense(license_key)
 
-    return data
+    const jsonWebToken = this.authenticationService.encodeJsonWebToken(data)
+
+    // return data
+    return jsonWebToken
+  }
+
+  @UseGuards(JwtAuthenticationGuard)
+  @Get('auth/profile')
+  test(@Request() req) {
+    const userData = req.user as UserData
+
+    return userData
   }
 }
