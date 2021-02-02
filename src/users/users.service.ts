@@ -4,6 +4,7 @@ import {
   GumroadAPIRequest,
   GumroadAPIResponse,
 } from './interfaces/gumroad.interface'
+import { UserData } from './interfaces/users.interface'
 
 @Injectable()
 export class UsersService {
