@@ -84,7 +84,7 @@ describe('UsersService', () => {
       const expectedReturn = validReturn
 
       expect(
-        service.extractDetailsFromGumroadResponse(testGumroadResponse)
+        service.createUserDataFromGumroadResponse(testGumroadResponse)
       ).toStrictEqual(expectedReturn)
     })
 
@@ -101,7 +101,7 @@ describe('UsersService', () => {
       expectedReturn.is_subscription_valid = false
 
       expect(
-        service.extractDetailsFromGumroadResponse(testGumroadResponse)
+        service.createUserDataFromGumroadResponse(testGumroadResponse)
       ).toStrictEqual(expectedReturn)
     })
   })
