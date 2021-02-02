@@ -1,7 +1,7 @@
 import { HttpException, HttpModule } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
-import { GumroadResponse } from './interfaces/gumroad.interface'
+import { GumroadAPIResponse } from './interfaces/gumroad.interface'
 import { UsersService } from './users.service'
 
 describe('UsersService', () => {
@@ -50,7 +50,7 @@ describe('UsersService', () => {
   })
 
   describe('extractDetailsFromGumroadResponse', () => {
-    const validGumroadResponse: GumroadResponse = {
+    const validGumroadResponse: GumroadAPIResponse = {
       success: true,
       uses: 0,
       purchase: {
@@ -79,7 +79,7 @@ describe('UsersService', () => {
     }
 
     it('should correctly output valid subscription', async () => {
-      const testGumroadResponse: GumroadResponse = validGumroadResponse
+      const testGumroadResponse: GumroadAPIResponse = validGumroadResponse
 
       const expectedReturn = validReturn
 
@@ -89,7 +89,7 @@ describe('UsersService', () => {
     })
 
     it('should correctly output invalid subscription', async () => {
-      const testGumroadResponse: GumroadResponse = validGumroadResponse
+      const testGumroadResponse: GumroadAPIResponse = validGumroadResponse
 
       // Past Date
       testGumroadResponse.purchase.subscription_cancelled_at = new Date(

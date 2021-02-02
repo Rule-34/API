@@ -10,10 +10,10 @@ export class UsersService {
   constructor(private readonly httpService: HttpService) {}
 
   public async verifyGumroadLicense(
-    productPermalink: GumroadRequest['product_permalink'],
-    licenseKey: GumroadRequest['license_key'],
-    incrementUsesCount: GumroadRequest['increment_uses_count'] = true
-  ): Promise<GumroadResponse> {
+    productPermalink: GumroadAPIRequest['product_permalink'],
+    licenseKey: GumroadAPIRequest['license_key'],
+    incrementUsesCount: GumroadAPIRequest['increment_uses_count'] = true
+  ): Promise<GumroadAPIResponse> {
     const requestConfig: AxiosRequestConfig = {
       method: 'POST',
 
@@ -34,7 +34,7 @@ export class UsersService {
 
     const response = this.httpService.request(requestConfig)
 
-    const responseData: AxiosResponse<GumroadResponse> = await response
+    const responseData: AxiosResponse<GumroadAPIResponse> = await response
       .toPromise()
 
       .catch((error) => {
@@ -44,7 +44,9 @@ export class UsersService {
     return responseData.data
   }
 
-  public extractDetailsFromGumroadResponse(gumroadResponse: GumroadResponse) {
+  public createUserDataFromGumroadResponse(
+    gumroadResponse: GumroadAPIResponse
+  ) {
     const now = new Date(Date.now())
 
     let isSubscriptionCancelled = false

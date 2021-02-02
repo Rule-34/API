@@ -7,7 +7,7 @@ import {
   MinLength,
 } from 'class-validator'
 import { Transform } from 'class-transformer'
-import { GumroadRequest } from '../interfaces/gumroad.interface'
+import { GumroadAPIRequest } from '../interfaces/gumroad.interface'
 
 export class GumroadBodyDTO {
   // @IsString()
@@ -20,7 +20,7 @@ export class GumroadBodyDTO {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(50)
-  readonly license_key: GumroadRequest['license_key']
+  readonly license_key: GumroadAPIRequest['license_key']
 
   // @IsBoolean()
   // @IsNotEmpty()

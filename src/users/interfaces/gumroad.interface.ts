@@ -1,16 +1,16 @@
-export interface GumroadRequest {
+export interface GumroadAPIRequest {
   product_permalink: string
   license_key: string
   increment_uses_count: boolean
 }
 
-export interface GumroadResponse {
+export interface GumroadAPIResponse {
   success: boolean
   uses: number
-  purchase: Purchase
+  purchase: GumroadPurchase
 }
 
-interface Purchase {
+interface GumroadPurchase {
   permalink: string
   product_permalink: string
   email: string

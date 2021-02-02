@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { UsersService } from '../users/users.service'
-import { GumroadRequest } from '../users/interfaces/gumroad.interface'
+import { GumroadAPIRequest } from '../users/interfaces/gumroad.interface'
 
 @Injectable()
 export class AuthenticationService {
@@ -10,7 +10,7 @@ export class AuthenticationService {
     private readonly usersService: UsersService
   ) {}
 
-  async findLicense(license: GumroadRequest['license_key']) {
+  async findLicense(license: GumroadAPIRequest['license_key']) {
     const productPermalink = this.configService.get<string>(
       'GUMROAD_PRODUCT_PERMALINK'
     )
