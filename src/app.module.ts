@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { BooruModule } from './booru/booru.module'
-import { AuthenticationModule } from './auth/authentication.module'
+import { AuthenticationModule } from './authentication/authentication.module'
 import { AppController } from './app.controller'
 
 @Module({

@@ -19,7 +19,7 @@ import {
 import { BooruService } from './booru.service'
 import { BooruErrorsInterceptor } from './interceptors/booru-exception.interceptor'
 import { UserData } from '../users/interfaces/users.interface'
-import { JwtBooruAuthenticationGuard } from '../auth/guards/jwt-authentication.guard'
+import { JwtBooruAuthenticationGuard } from '../authentication/guards/jwt-authentication.guard'
 
 @Controller('booru')
 @UseInterceptors(BooruErrorsInterceptor)
