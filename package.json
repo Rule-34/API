@@ -2,9 +2,9 @@
   "name": "rule-34-api",
   "version": "0.0.1",
   "description": "",
-  "author": "",
+  "author": "Alejandro Akbal",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "Attribution-NonCommercial-ShareAlike 4.0 International",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
