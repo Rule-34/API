@@ -21,14 +21,19 @@ describe('UsersService', () => {
   })
 
   it('should be defined', () => {
+    expect.assertions(1)
+
     expect(service).toBeDefined()
   })
 
   describe('verifyGumroadLicense', () => {
     it('should verify a correct license', async () => {
+      expect.assertions(1)
+
       const productPermalink = configService.get<string>(
         'TEST_GUMROAD_PRODUCT_PERMALINK'
       )
+
       const licenseKey = configService.get<string>('TEST_GUMROAD_LICENSE_KEY')
 
       const data = await service.verifyGumroadLicense(
@@ -41,6 +46,8 @@ describe('UsersService', () => {
     })
 
     it('should throw UnauthorizedException on incorrect license', async () => {
+      expect.assertions(1)
+
       const productPermalink = 'RandomString'
       const licenseKey = 'This-is-totally-invented'
 
@@ -80,6 +87,8 @@ describe('UsersService', () => {
     }
 
     it('should correctly output valid subscription', async () => {
+      expect.assertions(1)
+
       const testGumroadResponse: GumroadAPIResponse = validGumroadResponse
 
       const expectedReturn = validReturn
@@ -90,6 +99,8 @@ describe('UsersService', () => {
     })
 
     it('should correctly output invalid subscription', async () => {
+      expect.assertions(1)
+
       const testGumroadResponse: GumroadAPIResponse = validGumroadResponse
 
       // Past Date
