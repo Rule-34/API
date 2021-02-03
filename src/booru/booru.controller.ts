@@ -40,7 +40,7 @@ export class BooruController {
     const userData = request.user as UserData
 
     if (!userData) {
-      this.booruService.checkIfItsFromDefaultBooruList(queries)
+      this.booruService.checkIfItsFromDefaultBooruList(queries.baseEndpoint)
     }
 
     const Api = this.booruService.buildApiClass(params, queries)
@@ -71,7 +71,7 @@ export class BooruController {
     const userData = request.user as UserData
 
     if (!userData) {
-      this.booruService.checkIfItsFromDefaultBooruList(queries)
+      this.booruService.checkIfItsFromDefaultBooruList(queries.baseEndpoint)
     }
 
     const Api = this.booruService.buildApiClass(params, queries)
@@ -102,7 +102,7 @@ export class BooruController {
     const userData = request.user as UserData
 
     if (!userData) {
-      this.booruService.checkIfItsFromDefaultBooruList(queries)
+      this.booruService.checkIfItsFromDefaultBooruList(queries.baseEndpoint)
     }
 
     const Api = this.booruService.buildApiClass(params, queries)
@@ -128,7 +128,7 @@ export class BooruController {
     const userData = request.user as UserData
 
     if (!userData) {
-      this.booruService.checkIfItsFromDefaultBooruList(queries)
+      this.booruService.checkIfItsFromDefaultBooruList(queries.baseEndpoint)
     }
 
     const Api = this.booruService.buildApiClass(params, queries)

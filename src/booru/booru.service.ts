@@ -14,6 +14,7 @@ import {
 import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import {
+  BooruObj,
   defaultBooruList,
   findBoorusWithValueByKey,
 } from '../external/r34_shared/src/util/BooruUtils'
@@ -75,12 +76,8 @@ export class BooruService {
     return Api
   }
 
-  public checkIfItsFromDefaultBooruList(queries: booruQueriesDTO) {
-    const booru = findBoorusWithValueByKey(
-      queries.baseEndpoint,
-      'domain',
-      defaultBooruList
-    )
+  public checkIfItsFromDefaultBooruList(domain: BooruObj['domain']) {
+    const booru = findBoorusWithValueByKey(domain, 'domain', defaultBooruList)
 
     if (!booru || !booru.length) {
       throw new UnauthorizedException()
