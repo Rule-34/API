@@ -18,14 +18,17 @@ export class BooruErrorsInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       catchError((error) => {
-        if (error instanceof EmptyDataError) {
-          return throwError(new NoContentException(error.message))
-          //
-        } else if (error instanceof EndpointError) {
-          return throwError(new MethodNotAllowedException(error.message))
-        }
+        // Throw better errors
+        switch (error.constructor) {
+          case EmptyDataError:
+            return throwError(new NoContentException(error.message))
 
-        return throwError(error)
+          case EndpointError:
+            return throwError(new MethodNotAllowedException(error.message))
+
+          default:
+            return throwError(error)
+        }
       })
     )
   }
