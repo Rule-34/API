@@ -4,6 +4,9 @@
     "target": "es2017",
     "incremental": true,
     "declaration": true,
+
+    "resolveJsonModule": true,
+
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
