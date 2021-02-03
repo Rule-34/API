@@ -30,7 +30,6 @@ export class AuthenticationController {
 
     const jsonWebToken = this.authenticationService.encodeJsonWebToken(data)
 
-    // return data
     return jsonWebToken
   }
 
