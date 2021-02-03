@@ -9,6 +9,7 @@ import {
   IBooruEndpoints,
   IBooruOptions,
   BooruTypes,
+  IBooruQueryIdentifiers,
 } from '@alejandroakbal/universal-booru-wrapper'
 import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
@@ -53,14 +54,14 @@ export class BooruService {
       tags: queries.tagsEndpoint,
     }
 
-    // No default QueryValues are needed
-
-    const defaultQueryIdentifiers = {
+    const defaultQueryIdentifiers: IBooruQueryIdentifiers = {
       tags: {
         tag: queries.defaultQueryIdentifiersTagsTag,
         tagEnding: queries.defaultQueryIdentifiersTagsTagEnding,
       },
     }
+
+    // No default QueryValues are needed
 
     const options: IBooruOptions = { HTTPScheme: queries.httpScheme }
 
