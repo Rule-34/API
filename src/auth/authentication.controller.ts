@@ -1,17 +1,18 @@
 import {
-  Controller,
-  Post,
   Body,
+  Controller,
+  Get,
   HttpCode,
   HttpStatus,
-  Get,
-  UseGuards,
+  Post,
   Request,
+  UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common'
 import { UserData } from 'src/users/interfaces/users.interface'
 import { GumroadBodyDTO } from '../users/dto/gumroad-body.dto'
 import { AuthenticationService } from './authentication.service'
-import { JwtAuthenticationGuard } from './guards/jwt-authentication.guard'
+import { JwtBooruAuthenticationGuard } from './guards/jwt-authentication.guard'
 
 @Controller()
 export class AuthenticationController {
@@ -33,10 +34,14 @@ export class AuthenticationController {
     return jsonWebToken
   }
 
-  @UseGuards(JwtAuthenticationGuard)
   @Get('auth/profile')
-  test(@Request() req) {
+  @UseGuards(JwtBooruAuthenticationGuard)
+  profile(@Request() req) {
     const userData = req.user as UserData
+
+    if (!userData) {
+      throw new UnauthorizedException()
+    }
 
     return userData
   }
