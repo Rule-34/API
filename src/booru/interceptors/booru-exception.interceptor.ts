@@ -21,10 +21,12 @@ export class BooruErrorsInterceptor implements NestInterceptor {
         // Throw better errors
         switch (error.constructor) {
           case EmptyDataError:
-            return throwError(new NoContentException(error.message))
+            return throwError(new NoContentException(undefined, error.message))
 
           case EndpointError:
-            return throwError(new MethodNotAllowedException(error.message))
+            return throwError(
+              new MethodNotAllowedException(undefined, error.message)
+            )
 
           default:
             return throwError(error)

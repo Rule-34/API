@@ -1,10 +1,7 @@
-import { HttpException, HttpStatus } from '@nestjs/common'
+import { NotFoundException } from '@nestjs/common'
 
-export class NoContentException extends HttpException {
-  constructor(description = 'No content') {
-    super(
-      HttpException.createBody(description, undefined, HttpStatus.NOT_FOUND),
-      HttpStatus.NOT_FOUND
-    )
+export class NoContentException extends NotFoundException {
+  constructor(objectOrError?: any, description = 'No content.') {
+    super(objectOrError, description)
   }
 }
