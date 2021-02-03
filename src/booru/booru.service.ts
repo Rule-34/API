@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, UnauthorizedException } from '@nestjs/common'
 import {
   BooruTypesStringEnum,
   Gelbooru,
@@ -12,6 +12,10 @@ import {
 } from '@alejandroakbal/universal-booru-wrapper'
 import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
+import {
+  defaultBooruList,
+  findBoorusWithValueByKey,
+} from '../external/r34_shared/util/BooruUtils'
 
 @Injectable()
 export class BooruService {
@@ -68,5 +72,17 @@ export class BooruService {
     )
 
     return Api
+  }
+
+  public checkIfItsFromDefaultBooruList(queries: booruQueriesDTO) {
+    const booru = findBoorusWithValueByKey(
+      queries.baseEndpoint,
+      'domain',
+      defaultBooruList
+    )
+
+    if (!booru || !booru.length) {
+      throw new UnauthorizedException()
+    }
   }
 }

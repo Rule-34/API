@@ -4,6 +4,8 @@ import {
   Header,
   Param,
   Query,
+  Request,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common'
 import { IBooruQueryValues } from '@alejandroakbal/universal-booru-wrapper'
@@ -16,6 +18,8 @@ import {
 } from './dto/booru-queries.dto'
 import { BooruService } from './booru.service'
 import { BooruErrorsInterceptor } from './interceptors/booru-exception.interceptor'
+import { UserData } from '../users/interfaces/users.interface'
+import { JwtBooruAuthenticationGuard } from '../auth/guards/jwt-authentication.guard'
 
 @Controller('booru')
 @UseInterceptors(BooruErrorsInterceptor)
@@ -24,12 +28,21 @@ export class BooruController {
 
   @Get(':booruType/posts')
   @Header('Cache-Control', 'public, max-age=250')
+  @UseGuards(JwtBooruAuthenticationGuard)
   GetPosts(
+    @Request()
+    request,
     @Param()
     params: BooruEndpointParamsDTO,
     @Query()
     queries: booruPostsQueriesDTO
   ) {
+    const userData = request.user as UserData
+
+    if (!userData) {
+      this.booruService.checkIfItsFromDefaultBooruList(queries)
+    }
+
     const Api = this.booruService.buildApiClass(params, queries)
 
     const postQueryValues: IBooruQueryValues['posts'] = {
@@ -46,12 +59,21 @@ export class BooruController {
 
   @Get(':booruType/random-posts')
   @Header('Cache-Control', 'no-cache')
+  @UseGuards(JwtBooruAuthenticationGuard)
   GetRandomPosts(
+    @Request()
+    request,
     @Param()
     params: BooruEndpointParamsDTO,
     @Query()
     queries: booruRandomPostsQueriesDTO
   ) {
+    const userData = request.user as UserData
+
+    if (!userData) {
+      this.booruService.checkIfItsFromDefaultBooruList(queries)
+    }
+
     const Api = this.booruService.buildApiClass(params, queries)
 
     const postQueryValues: IBooruQueryValues['randomPosts'] = {
@@ -68,12 +90,21 @@ export class BooruController {
 
   @Get(':booruType/single-post')
   @Header('Cache-Control', 'public, max-age=604800, immutable')
+  @UseGuards(JwtBooruAuthenticationGuard)
   GetSinglePost(
+    @Request()
+    request,
     @Param()
     params: BooruEndpointParamsDTO,
     @Query()
     queries: booruSinglePostQueriesDTO
   ) {
+    const userData = request.user as UserData
+
+    if (!userData) {
+      this.booruService.checkIfItsFromDefaultBooruList(queries)
+    }
+
     const Api = this.booruService.buildApiClass(params, queries)
 
     const postQueryValues: IBooruQueryValues['singlePost'] = {
@@ -85,12 +116,21 @@ export class BooruController {
 
   @Get(':booruType/tags')
   @Header('Cache-Control', 'public, max-age=3600')
+  @UseGuards(JwtBooruAuthenticationGuard)
   GetTags(
+    @Request()
+    request,
     @Param()
     params: BooruEndpointParamsDTO,
     @Query()
     queries: booruTagsQueriesDTO
   ) {
+    const userData = request.user as UserData
+
+    if (!userData) {
+      this.booruService.checkIfItsFromDefaultBooruList(queries)
+    }
+
     const Api = this.booruService.buildApiClass(params, queries)
 
     const postQueryValues: IBooruQueryValues['tags'] = {
