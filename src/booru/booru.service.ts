@@ -15,7 +15,7 @@ import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import {
   defaultBooruList,
   findBoorusWithValueByKey,
-} from '../external/r34_shared/util/BooruUtils'
+} from '../external/r34_shared/src/util/BooruUtils'
 
 @Injectable()
 export class BooruService {
