@@ -1,17 +1,20 @@
 import { ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
-import { AppModule } from './app.module'
+import { ConfigService } from '@nestjs/config'
 import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify'
 import helmet from 'fastify-helmet'
+import { AppModule } from './app.module'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter()
   )
+
+  const configService: ConfigService = app.get(ConfigService)
 
   // app.setGlobalPrefix('v1')
 
@@ -29,6 +32,7 @@ async function bootstrap() {
     })
   )
 
-  await app.listen(3000)
+  await app.listen(configService.get<string>('PORT'))
 }
+
 bootstrap()
