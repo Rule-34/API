@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Get,
   HttpCode,
@@ -10,9 +9,9 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { UserData } from 'src/users/interfaces/users.interface'
-import { GumroadBodyDTO } from '../users/dto/gumroad-body.dto'
 import { AuthenticationService } from './authentication.service'
-import { JwtBooruAuthenticationGuard } from './guards/jwt-authentication.guard'
+import { JwtBooruAuthenticationGuard } from './guards/jwt.guard'
+import { LocalAuthenticationGuard } from './guards/local.guard'
 
 @Controller()
 export class AuthenticationController {
@@ -20,23 +19,26 @@ export class AuthenticationController {
 
   @Post('auth/login')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(LocalAuthenticationGuard)
   async login(
-    @Body()
-    body: GumroadBodyDTO
+    @Request()
+    req
   ) {
-    const { license_key } = body
+    // Set by LocalAuthenticationGuard on a successful validation
+    const userData: UserData = req.user
 
-    const data = await this.authenticationService.findLicense(license_key)
-
-    const jsonWebToken = this.authenticationService.encodeJsonWebToken(data)
+    const jsonWebToken = this.authenticationService.encodeJsonWebToken(userData)
 
     return jsonWebToken
   }
 
   @Get('auth/profile')
   @UseGuards(JwtBooruAuthenticationGuard)
-  profile(@Request() req) {
-    const userData = req.user as UserData
+  profile(
+    @Request()
+    req
+  ) {
+    const userData: UserData = req.user
 
     if (!userData) {
       throw new UnauthorizedException()
