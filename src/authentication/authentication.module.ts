@@ -10,6 +10,7 @@ import { UsersModule } from '../users/users.module'
 
 @Module({
   imports: [
+    UsersModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -21,7 +22,6 @@ import { UsersModule } from '../users/users.module'
         },
       }),
     }),
-    UsersModule,
   ],
   providers: [
     AuthenticationService,
