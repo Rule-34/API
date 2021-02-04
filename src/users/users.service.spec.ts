@@ -79,7 +79,6 @@ describe('UsersService', () => {
     }
 
     const validReturn: UserData = {
-      success: true,
       is_subscription_valid: true,
       license_uses: 0,
       sale_timestamp: '2020-06-28T09:24:55Z',

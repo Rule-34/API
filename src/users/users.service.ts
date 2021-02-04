@@ -54,7 +54,6 @@ export class UsersService {
     const isSubscriptionValid = this.checkIfSubscriptionIsValid(gumroadResponse)
 
     const details: UserData = {
-      success: gumroadResponse.success,
       is_subscription_valid: isSubscriptionValid,
       license_uses: gumroadResponse.uses,
       sale_timestamp: gumroadResponse.purchase.sale_timestamp,
