@@ -45,7 +45,84 @@ abstract class booruEndpointsDTO {
   readonly tagsEndpoint: IBooruEndpoints['tags']
 }
 
-abstract class booruDefaultQueryIdentifiersDTO extends booruEndpointsDTO {
+abstract class booruOptionsDTO extends booruEndpointsDTO {
+  @IsString()
+  @IsNotEmpty()
+  @IsIn(['http', 'https'])
+  @IsOptional()
+  readonly httpScheme: IBooruOptions['HTTPScheme']
+}
+
+abstract class booruDefaultQueryIdentifiersPostsDTO extends booruOptionsDTO {
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly defaultQueryIdentifiersPostsLimit: IBooruQueryIdentifiers['posts']['limit']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly defaultQueryIdentifiersPostsPageID: IBooruQueryIdentifiers['posts']['pageID']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly defaultQueryIdentifiersPostsTags: IBooruQueryIdentifiers['posts']['tags']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly defaultQueryIdentifiersPostsRating: IBooruQueryIdentifiers['posts']['rating']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly defaultQueryIdentifiersPostsScore: IBooruQueryIdentifiers['posts']['score']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly defaultQueryIdentifiersPostsOrder: IBooruQueryIdentifiers['posts']['order']
+}
+abstract class booruDefaultQueryIdentifiersRandomPostsDTO extends booruDefaultQueryIdentifiersPostsDTO {
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly defaultQueryIdentifiersRandomPostsLimit: IBooruQueryIdentifiers['randomPosts']['limit']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly defaultQueryIdentifiersRandomPostsPageID: IBooruQueryIdentifiers['randomPosts']['pageID']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly defaultQueryIdentifiersRandomPostsTags: IBooruQueryIdentifiers['randomPosts']['tags']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly defaultQueryIdentifiersRandomPostsRating: IBooruQueryIdentifiers['randomPosts']['rating']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly defaultQueryIdentifiersRandomPostsScore: IBooruQueryIdentifiers['randomPosts']['score']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly defaultQueryIdentifiersRandomPostsOrder: IBooruQueryIdentifiers['randomPosts']['order']
+}
+abstract class booruDefaultQueryIdentifiersSinglePostDTO extends booruDefaultQueryIdentifiersRandomPostsDTO {
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly defaultQueryIdentifiersSinglePostID: IBooruQueryIdentifiers['singlePost']['id']
+}
+
+abstract class booruDefaultQueryIdentifiersTagsDTO extends booruDefaultQueryIdentifiersSinglePostDTO {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
@@ -55,22 +132,29 @@ abstract class booruDefaultQueryIdentifiersDTO extends booruEndpointsDTO {
   @IsOptional()
   readonly defaultQueryIdentifiersTagsTagEnding: IBooruQueryIdentifiers['tags']['tagEnding']
 
-  // TODO: add more query identifiers
-}
-
-abstract class booruOptionsDTO extends booruDefaultQueryIdentifiersDTO {
   @IsString()
   @IsNotEmpty()
-  @IsIn(['http', 'https'])
   @IsOptional()
-  readonly httpScheme: IBooruOptions['HTTPScheme']
+  readonly defaultQueryIdentifiersTagsLimit: IBooruQueryIdentifiers['tags']['limit']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly defaultQueryIdentifiersTagsPageID: IBooruQueryIdentifiers['tags']['pageID']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly defaultQueryIdentifiersTagsOrder: IBooruQueryIdentifiers['tags']['order']
 }
 
-// Final class that extends all others
-export abstract class booruQueriesDTO extends booruOptionsDTO {}
+/**
+ * Final class that extends all others
+ */
+export abstract class booruQueriesDTO extends booruDefaultQueryIdentifiersTagsDTO {}
 
 // ----- Classes with QueryValues ----- //
-export class booruPostsQueriesDTO extends booruQueriesDTO {
+export class booruQueryValuesPostsDTO extends booruQueriesDTO {
   @IsInt()
   @Min(1)
   @Max(100)
@@ -110,18 +194,18 @@ export class booruPostsQueriesDTO extends booruQueriesDTO {
 }
 
 // Same as PostsQueries since they are practically the same
-export class booruRandomPostsQueriesDTO extends booruPostsQueriesDTO {}
+export class booruQueryValuesRandomPostsDTO extends booruQueryValuesPostsDTO {}
 
-export class booruSinglePostQueriesDTO extends booruQueriesDTO {
+export class booruQueryValuesSinglePostDTO extends booruQueriesDTO {
   @IsInt()
   @Min(0)
   @Max(99999)
   @Transform(({ value }) => parseInt(value))
   @IsOptional()
-  readonly id: IBooruQueryValues['singlePost']['id']
+  readonly ID: IBooruQueryValues['singlePost']['id']
 }
 
-export class booruTagsQueriesDTO extends booruQueriesDTO {
+export class booruQueryValuesTagsDTO extends booruQueriesDTO {
   @IsString()
   @IsNotEmpty()
   readonly tag: IBooruQueryValues['tags']['tag']

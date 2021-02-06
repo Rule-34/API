@@ -56,9 +56,34 @@ export class BooruService {
     }
 
     const defaultQueryIdentifiers: IBooruQueryIdentifiers = {
+      posts: {
+        limit: queries.defaultQueryIdentifiersPostsLimit,
+        pageID: queries.defaultQueryIdentifiersPostsPageID,
+        tags: queries.defaultQueryIdentifiersPostsTags,
+        rating: queries.defaultQueryIdentifiersPostsRating,
+        score: queries.defaultQueryIdentifiersPostsScore,
+        order: queries.defaultQueryIdentifiersPostsOrder,
+      },
+
+      randomPosts: {
+        limit: queries.defaultQueryIdentifiersRandomPostsLimit,
+        pageID: queries.defaultQueryIdentifiersRandomPostsPageID,
+        tags: queries.defaultQueryIdentifiersRandomPostsTags,
+        rating: queries.defaultQueryIdentifiersRandomPostsRating,
+        score: queries.defaultQueryIdentifiersRandomPostsScore,
+        order: queries.defaultQueryIdentifiersRandomPostsOrder,
+      },
+
+      singlePost: {
+        id: queries.defaultQueryIdentifiersSinglePostID,
+      },
+
       tags: {
         tag: queries.defaultQueryIdentifiersTagsTag,
         tagEnding: queries.defaultQueryIdentifiersTagsTagEnding,
+        limit: queries.defaultQueryIdentifiersTagsLimit,
+        pageID: queries.defaultQueryIdentifiersTagsPageID,
+        order: queries.defaultQueryIdentifiersTagsOrder,
       },
     }
 

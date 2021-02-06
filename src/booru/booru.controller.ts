@@ -11,10 +11,10 @@ import {
 import { IBooruQueryValues } from '@alejandroakbal/universal-booru-wrapper'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import {
-  booruPostsQueriesDTO,
-  booruRandomPostsQueriesDTO,
-  booruSinglePostQueriesDTO,
-  booruTagsQueriesDTO,
+  booruQueryValuesPostsDTO,
+  booruQueryValuesRandomPostsDTO,
+  booruQueryValuesSinglePostDTO,
+  booruQueryValuesTagsDTO,
 } from './dto/booru-queries.dto'
 import { BooruService } from './booru.service'
 import { BooruErrorsInterceptor } from './interceptors/booru-exception.interceptor'
@@ -35,7 +35,7 @@ export class BooruController {
     @Param()
     params: BooruEndpointParamsDTO,
     @Query()
-    queries: booruPostsQueriesDTO
+    queries: booruQueryValuesPostsDTO
   ) {
     const userData = request.user as UserData
 
@@ -66,7 +66,7 @@ export class BooruController {
     @Param()
     params: BooruEndpointParamsDTO,
     @Query()
-    queries: booruRandomPostsQueriesDTO
+    queries: booruQueryValuesRandomPostsDTO
   ) {
     const userData = request.user as UserData
 
@@ -97,7 +97,7 @@ export class BooruController {
     @Param()
     params: BooruEndpointParamsDTO,
     @Query()
-    queries: booruSinglePostQueriesDTO
+    queries: booruQueryValuesSinglePostDTO
   ) {
     const userData = request.user as UserData
 
@@ -108,7 +108,7 @@ export class BooruController {
     const Api = this.booruService.buildApiClass(params, queries)
 
     const postQueryValues: IBooruQueryValues['singlePost'] = {
-      id: queries.id,
+      id: queries.ID,
     }
 
     return Api.getSinglePost(postQueryValues)
@@ -123,7 +123,7 @@ export class BooruController {
     @Param()
     params: BooruEndpointParamsDTO,
     @Query()
-    queries: booruTagsQueriesDTO
+    queries: booruQueryValuesTagsDTO
   ) {
     const userData = request.user as UserData
 
