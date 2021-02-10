@@ -1,0 +1,5 @@
+WAIT=2
+TIMEOUT=30 
+ATTEMPTS=5
+
+/

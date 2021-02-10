@@ -1,3 +1,3 @@
-[submodule "external/r34-shared"]
-	path = src/external
-	url = https://github.com/AlejandroAkbal/Rule-34-Shared-Resources
+[submodule "src/external/r34_shared"]
+	path = src/external/r34_shared
+	url = https://github.com/Rule-34/Shared-Resources

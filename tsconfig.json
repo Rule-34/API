@@ -1,27 +1,19 @@
 {
   "compilerOptions": {
-    "moduleResolution": "node",
-
-    "module": "CommonJS",
-    "target": "ES2019",
-
-    "lib": ["DOM", "ESNext"],
-    // "types": ["node", "jest"],
+    "module": "commonjs",
+    "target": "es2017",
+    "incremental": true,
+    "declaration": true,
 
     "resolveJsonModule": true,
-    "esModuleInterop": true,
+
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
 
-    "strict": true,
-    "noImplicitAny": true,
-
     "sourceMap": true,
-    "removeComments": true,
-    "inlineSources": true,
-
-    "baseUrl": ".",
-    "outDir": "dist"
-  },
-
-  "include": ["src/**/*"]
+    "outDir": "./dist",
+    "baseUrl": "./"
+  }
 }

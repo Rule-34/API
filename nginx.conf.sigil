@@ -16,7 +16,7 @@ proxy_cache_path /tmp/dokku_nginx_cache levels=1:2 keys_zone=dokku_nginx_cache:5
 # --- Rate limit
 # https://www.nginx.com/blog/rate-limiting-nginx/
 #
-limit_req_zone $binary_remote_addr zone=dokku_nginx_rate_limit:5m rate=1r/s;
+limit_req_zone $binary_remote_addr zone=dokku_nginx_rate_limit:5m rate=30r/m;
 
 # --- End of custom configuration
 
@@ -47,21 +47,15 @@ server {
 
     proxy_cache_min_uses 2;
 
-    proxy_cache_lock on;
-
-    # Cache responses for 3 minutes as content is dynamic
-    proxy_ignore_headers Cache-Control;
-    proxy_cache_valid any 3m; 
-
     proxy_cache_revalidate on;
-    proxy_buffering on;
 
+    proxy_cache_lock on;
     proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
-    
     proxy_cache_background_update on;
     
+    
     # Rate limit
-    limit_req zone=dokku_nginx_rate_limit burst=5 delay=2;
+    limit_req zone=dokku_nginx_rate_limit burst=45;
     
     # --- End of custom configuration
 
