@@ -6,6 +6,7 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify'
 import helmet from 'fastify-helmet'
+import * as Sentry from '@sentry/node'
 import { AppModule } from './app.module'
 
 async function bootstrap() {
@@ -16,7 +17,11 @@ async function bootstrap() {
 
   const configService: ConfigService = app.get(ConfigService)
 
-  // app.setGlobalPrefix('v1')
+  // Sentry
+  Sentry.init({
+    enabled: configService.get<boolean>('SENTRY_ENABLED') || false,
+    dsn: configService.get<string>('SENTRY_DSN') || '',
+  })
 
   app.register(helmet)
 
