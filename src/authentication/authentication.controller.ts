@@ -12,6 +12,8 @@ import { UserData } from 'src/users/interfaces/users.interface'
 import { AuthenticationService } from './authentication.service'
 import { JwtBooruAuthenticationGuard } from './guards/jwt.guard'
 import { LocalAuthenticationGuard } from './guards/local.guard'
+import { JwtGuard } from './guards/jwt.guard'
+import { JwtRefreshGuard } from './guards/jwt-refresh.guard'
 
 @Controller()
 export class AuthenticationController {
@@ -35,10 +37,21 @@ export class AuthenticationController {
   @Get('auth/profile')
   @UseGuards(JwtBooruAuthenticationGuard)
   profile(
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtRefreshGuard)
+  async refresh(
     @Request()
     req
   ) {
     const userData: UserData = req.user
+    // Got from the JWT
+    const userData: RequestWithUserData = req.user
+
+    const token = this.authenticationService.signToken(userData.data)
+
+    return token
+  }
 
     if (!userData) {
       throw new UnauthorizedException()

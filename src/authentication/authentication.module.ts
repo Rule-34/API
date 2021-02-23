@@ -27,6 +27,7 @@ import { UsersModule } from '../users/users.module'
     AuthenticationService,
     LocalAuthenticationStrategy,
     JwtAuthenticationStrategy,
+    JwtRefreshTokenStrategy,
   ],
   controllers: [AuthenticationController],
 })
