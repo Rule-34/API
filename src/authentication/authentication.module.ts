@@ -9,20 +9,7 @@ import { UsersModule } from '../users/users.module'
 import { JwtRefreshTokenStrategy } from './strategies/jwt-refresh-token.strategy'
 
 @Module({
-  imports: [
-    UsersModule,
-    PassportModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRATION_TIME'),
-        },
-      }),
-    }),
-  ],
+  imports: [UsersModule, PassportModule, JwtModule.register({})],
   providers: [
     AuthenticationService,
     LocalStrategy,

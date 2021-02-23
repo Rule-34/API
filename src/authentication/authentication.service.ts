@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
+import { JwtSignOptions } from '@nestjs/jwt/dist/interfaces/jwt-module-options.interface'
 import { UsersService } from '../users/users.service'
 import { GumroadAPIRequest } from '../users/interfaces/gumroad.interface'
 import { InvalidSubscriptionException } from '../users/exceptions/invalid-subscription.exception'
@@ -37,14 +38,17 @@ export class AuthenticationService {
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
-    const signedData = this.jwtService.sign(data)
   signToken(data: string | object) {
+    const options: JwtSignOptions = {
+      secret: this.configService.get<string>('JWT_SECRET'),
+      expiresIn: this.configService.get<string>('JWT_EXPIRATION_TIME'),
+    }
 
-    return { access_token: signedData }
+    const token = this.jwtService.sign({ data }, options)
+
+    return { access_token: token }
   }
 
-  // decodeJsonWebToken(token: string) {
-  //   const decodedData = this.jwtService.verify(token)
   // eslint-disable-next-line @typescript-eslint/ban-types
   signRefreshToken(data: string | object) {
     const options: JwtSignOptions = {
@@ -54,8 +58,6 @@ export class AuthenticationService {
 
     const token = this.jwtService.sign({ data }, options)
 
-  //   return decodedData
-  // }
     return { refresh_token: token }
   }
 }
