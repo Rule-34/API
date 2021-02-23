@@ -45,7 +45,17 @@ export class AuthenticationService {
 
   // decodeJsonWebToken(token: string) {
   //   const decodedData = this.jwtService.verify(token)
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  signRefreshToken(data: string | object) {
+    const options: JwtSignOptions = {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION_TIME'),
+    }
+
+    const token = this.jwtService.sign({ data }, options)
 
   //   return decodedData
   // }
+    return { refresh_token: token }
+  }
 }
