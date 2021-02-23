@@ -14,11 +14,11 @@ import { LocalGuard } from './guards/local.guard'
 import { JwtGuard } from './guards/jwt.guard'
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard'
 
-@Controller()
+@Controller('auth')
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
-  @Post('auth/login')
+  @Post('log-in')
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalGuard)
   async login(
@@ -33,7 +33,6 @@ export class AuthenticationController {
     return jsonWebToken
   }
 
-  @Get('auth/profile')
   @UseGuards(JwtBooruAuthenticationGuard)
   profile(
   @Post('refresh')
@@ -55,6 +54,7 @@ export class AuthenticationController {
     if (!userData) {
       throw new UnauthorizedException()
     }
+  @Get('profile')
 
     return userData
   }
