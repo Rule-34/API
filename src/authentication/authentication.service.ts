@@ -14,7 +14,7 @@ export class AuthenticationService {
     private readonly jwtService: JwtService
   ) {}
 
-  async findLicense(license: GumroadAPIRequest['license_key']) {
+  async loginWithLicense(license: GumroadAPIRequest['license_key']) {
     const productPermalink = this.configService.get<string>(
       'GUMROAD_PRODUCT_PERMALINK'
     )
@@ -28,6 +28,7 @@ export class AuthenticationService {
       gumroadResponse
     )
 
+    // Validation
     if (!userData.is_subscription_valid) {
       throw new InvalidSubscriptionException()
     }
@@ -36,8 +37,8 @@ export class AuthenticationService {
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
-  encodeJsonWebToken(data: string | object) {
     const signedData = this.jwtService.sign(data)
+  signToken(data: string | object) {
 
     return { access_token: signedData }
   }

@@ -2,7 +2,7 @@ import { ExecutionContext, Injectable } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 
 @Injectable()
-export class JwtBooruAuthenticationGuard extends AuthGuard('jwt') {
+export class JwtBooruGuard extends AuthGuard('jwt') {
   async canActivate(context: ExecutionContext) {
     // Always return true so the request gets added to req.user, we have to manually check if it is not valid.
     try {
@@ -16,4 +16,4 @@ export class JwtBooruAuthenticationGuard extends AuthGuard('jwt') {
 }
 
 // Correct way
-export class JwtAuthenticationGuard extends AuthGuard('jwt') {}
+export class JwtGuard extends AuthGuard('jwt') {}

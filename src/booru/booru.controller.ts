@@ -19,7 +19,7 @@ import {
 import { BooruService } from './booru.service'
 import { BooruErrorsInterceptor } from './interceptors/booru-exception.interceptor'
 import { UserData } from '../users/interfaces/users.interface'
-import { JwtBooruAuthenticationGuard } from '../authentication/guards/jwt.guard'
+import { JwtBooruGuard } from '../authentication/guards/jwt.guard'
 
 @Controller('booru')
 @UseInterceptors(BooruErrorsInterceptor)
@@ -28,7 +28,7 @@ export class BooruController {
 
   @Get(':booruType/posts')
   @Header('Cache-Control', 'public, max-age=250')
-  @UseGuards(JwtBooruAuthenticationGuard)
+  @UseGuards(JwtBooruGuard)
   GetPosts(
     @Request()
     request,
@@ -39,6 +39,7 @@ export class BooruController {
   ) {
     const userData = request.user as UserData
 
+    // Manually check because `JwtBooruAuthenticationGuard` is intentionally flawed
     if (!userData) {
       this.booruService.checkIfItsFromDefaultBooruList(queries.baseEndpoint)
     }
@@ -59,7 +60,7 @@ export class BooruController {
 
   @Get(':booruType/random-posts')
   @Header('Cache-Control', 'no-cache')
-  @UseGuards(JwtBooruAuthenticationGuard)
+  @UseGuards(JwtBooruGuard)
   GetRandomPosts(
     @Request()
     request,
@@ -70,6 +71,7 @@ export class BooruController {
   ) {
     const userData = request.user as UserData
 
+    // Manually check because `JwtBooruAuthenticationGuard` is intentionally flawed
     if (!userData) {
       this.booruService.checkIfItsFromDefaultBooruList(queries.baseEndpoint)
     }
@@ -90,7 +92,7 @@ export class BooruController {
 
   @Get(':booruType/single-post')
   @Header('Cache-Control', 'public, max-age=604800, immutable')
-  @UseGuards(JwtBooruAuthenticationGuard)
+  @UseGuards(JwtBooruGuard)
   GetSinglePost(
     @Request()
     request,
@@ -101,6 +103,7 @@ export class BooruController {
   ) {
     const userData = request.user as UserData
 
+    // Manually check because `JwtBooruAuthenticationGuard` is intentionally flawed
     if (!userData) {
       this.booruService.checkIfItsFromDefaultBooruList(queries.baseEndpoint)
     }
@@ -116,7 +119,7 @@ export class BooruController {
 
   @Get(':booruType/tags')
   @Header('Cache-Control', 'public, max-age=3600')
-  @UseGuards(JwtBooruAuthenticationGuard)
+  @UseGuards(JwtBooruGuard)
   GetTags(
     @Request()
     request,
@@ -127,6 +130,7 @@ export class BooruController {
   ) {
     const userData = request.user as UserData
 
+    // Manually check because `JwtBooruAuthenticationGuard` is intentionally flawed
     if (!userData) {
       this.booruService.checkIfItsFromDefaultBooruList(queries.baseEndpoint)
     }

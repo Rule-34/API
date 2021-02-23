@@ -10,8 +10,7 @@ import {
 } from '@nestjs/common'
 import { UserData } from 'src/users/interfaces/users.interface'
 import { AuthenticationService } from './authentication.service'
-import { JwtBooruAuthenticationGuard } from './guards/jwt.guard'
-import { LocalAuthenticationGuard } from './guards/local.guard'
+import { LocalGuard } from './guards/local.guard'
 import { JwtGuard } from './guards/jwt.guard'
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard'
 
@@ -21,7 +20,7 @@ export class AuthenticationController {
 
   @Post('auth/login')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(LocalAuthenticationGuard)
+  @UseGuards(LocalGuard)
   async login(
     @Request()
     req
