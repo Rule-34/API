@@ -59,6 +59,6 @@ export class AuthenticationController {
     // Got from the JWT
     const userData: RequestWithUserData = req.user
 
-    return userData
+    return userData.data
   }
 }
