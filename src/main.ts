@@ -1,4 +1,5 @@
 import { ValidationPipe } from '@nestjs/common'
+import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface'
 import { NestFactory } from '@nestjs/core'
 import { ConfigService } from '@nestjs/config'
 import {
@@ -25,7 +26,14 @@ async function bootstrap() {
 
   app.register(helmet)
 
-  app.enableCors({ origin: /r34\.app$/ })
+  const corsOptions: CorsOptions = {
+    origin:
+      configService.get<string>('NODE_ENV') === 'production'
+        ? /r34\.app$/
+        : '*',
+  }
+
+  app.enableCors()
 
   app.useGlobalPipes(
     new ValidationPipe({
