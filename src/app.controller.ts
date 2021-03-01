@@ -1,9 +1,14 @@
 import { Controller, Get } from '@nestjs/common'
 
-@Controller()
+@Controller('/')
 export class AppController {
-  @Get('/')
-  GetStatus() {
+  @Get()
+  GetStatusAsJson() {
     return { status: 'OK' }
+  }
+
+  @Get('status')
+  GetStatusAsText() {
+    return 'OK'
   }
 }
