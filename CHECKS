@@ -1,0 +1,5 @@
+WAIT=2
+TIMEOUT=10
+ATTEMPTS=5
+
+/ `{`"status":"OK"`}`
