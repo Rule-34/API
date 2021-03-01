@@ -1,10 +1,11 @@
 {
   "name": "rule-34-api",
   "version": "0.0.1",
-  "description": "",
   "author": "Alejandro Akbal",
   "private": true,
-  "license": "Attribution-NonCommercial-ShareAlike 4.0 International",
+  "engines": {
+    "node": "12.x"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
