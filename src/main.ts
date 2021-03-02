@@ -30,12 +30,12 @@ async function bootstrap() {
 
   const corsOptions: CorsOptions = {
     origin:
-      configService.get<string>('NODE_ENV') === 'development'
+      configService.get<string>('NODE_ENV') === 'development2'
         ? '*'
         : /r34\.app$/,
   }
 
-  app.enableCors()
+  app.enableCors(corsOptions)
 
   app.useGlobalPipes(
     new ValidationPipe({
