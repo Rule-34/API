@@ -30,7 +30,7 @@ async function bootstrap() {
 
   const corsOptions: CorsOptions = {
     origin:
-      configService.get<string>('NODE_ENV') === 'development2'
+      configService.get<string>('NODE_ENV') === 'development'
         ? '*'
         : /r34\.app$/,
   }
