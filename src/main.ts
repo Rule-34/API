@@ -21,7 +21,9 @@ async function bootstrap() {
   // Sentry
   Sentry.init({
     enabled: configService.get<boolean>('SENTRY_ENABLED') || false,
-    dsn: configService.get<string>('SENTRY_DSN') || '',
+    dsn: configService.get<string>('SENTRY_DSN'),
+
+    // ignoreErrors: ['NoContentException', 'MethodNotAllowedException'],
   })
 
   app.register(helmet)

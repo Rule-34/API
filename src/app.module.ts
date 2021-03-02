@@ -19,16 +19,15 @@ import { AppController } from './app.controller'
   providers: [
     {
       provide: APP_INTERCEPTOR,
-      useValue: new RavenInterceptor(),
-      // useValue: new RavenInterceptor({
-      //   filters: [
-      //     // Filter exceptions of type HttpException. Ignore those that have status code of less than 500
-      //     {
-      //       type: HttpException,
-      //       filter: (exception: HttpException) => 500 > exception.getStatus(),
-      //     },
-      //   ],
-      // }),
+      useValue: new RavenInterceptor({
+        filters: [
+          // Filter exceptions of type HttpException. Ignore those that have status code of less than 500
+          {
+            type: HttpException,
+            filter: (exception: HttpException) => 500 > exception.getStatus(),
+          },
+        ],
+      }),
     },
   ],
 })
