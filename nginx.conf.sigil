@@ -120,7 +120,7 @@ server {
     
     
     # Rate limit
-    limit_req zone=dokku_nginx_rate_limit burst=45;
+    limit_req zone=dokku_nginx_rate_limit burst=45 delay=15;
     
     # --- End of custom configuration
 
