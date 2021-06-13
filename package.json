@@ -20,7 +20,10 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:watch": "jest --watch",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:cov": "jest --coverage"
+    "test:cov": "jest --coverage",
+    "deploy": "npm run deploy:create-tar && npm run deploy:deploy-tar",
+    "deploy:deploy-tar": "npx caprover deploy -d -t ./deploy.tar",
+    "deploy:create-tar": "git archive HEAD > deploy.tar && tar -rf deploy.tar .git"
   },
   "dependencies": {
     "@alejandroakbal/universal-booru-wrapper": "^0.2.7",
