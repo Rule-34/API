@@ -27,6 +27,8 @@ WORKDIR /usr/src/app
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 
+ARG PORT
+
 ARG GITHUB_TOKEN
 
 COPY . .
@@ -36,5 +38,7 @@ COPY --from=build /usr/src/app/dist ./dist
 RUN npm ci --only=production
 
 USER node
+
+EXPOSE ${PORT}
 
 CMD ["npm", "run", "start:prod"]
