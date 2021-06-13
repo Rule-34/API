@@ -35,5 +35,6 @@ COPY --from=build /usr/src/app/dist ./dist
 
 RUN npm ci --only=production
 
+USER node
 
 CMD ["npm", "run", "start:prod"]
