@@ -8,6 +8,7 @@ ARG GITHUB_TOKEN
 
 COPY . .
 
+# System dependencies
 RUN apk --no-cache add git
 
 # Download git submodules
@@ -27,6 +28,7 @@ WORKDIR /usr/src/app
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 
+ARG PORT=80
 ARG PORT
 
 ARG GITHUB_TOKEN
