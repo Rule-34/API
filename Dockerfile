@@ -24,6 +24,9 @@ FROM node:15-alpine as production
 
 WORKDIR /usr/src/app
 
+# System dependencies
+RUN apk --no-cache add curl
+
 # Environment variables
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
@@ -42,5 +45,7 @@ RUN npm ci --only=production
 USER node
 
 EXPOSE ${PORT}
+
+HEALTHCHECK --interval=1m --timeout=15s --start-period=10s --retries=3 CMD curl --fail http://localhost:${PORT}/ || exit 1
 
 CMD ["npm", "run", "start:prod"]
