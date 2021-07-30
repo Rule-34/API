@@ -41,11 +41,14 @@ describe('AuthenticationController', () => {
     expect(controller).toBeDefined()
   })
 
-  describe('auth/profile', () => {
-    it('should fail with no Bearer token', () => {
-      expect.assertions(1)
+  // TODO: Recreate this test
+  // It doesnt currently work because this is a Unit test and it should be run as a E2E test.
 
-      expect(() => controller.profile({})).toThrowError(UnauthorizedException)
-    })
-  })
+  // describe('auth/profile', () => {
+  //   it('should fail with no Bearer token', () => {
+  //     expect.assertions(1)
+  //
+  //     expect(() => controller.profile({})).toThrowError(UnauthorizedException)
+  //   })
+  // })
 })
