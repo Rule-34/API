@@ -11,12 +11,12 @@
 # --- Cache
 # https://www.nginx.com/blog/nginx-caching-guide/
 #
-proxy_cache_path /tmp/dokku_nginx_cache levels=1:2 keys_zone=dokku_nginx_cache:5m max_size=100m inactive=30m use_temp_path=off;
+proxy_cache_path /tmp/dokku_nginx_cache levels=1:2 keys_zone=dokku_nginx_cache:5m max_size=100m inactive=60m use_temp_path=off;
 
 # --- Rate limit
 # https://www.nginx.com/blog/rate-limiting-nginx/
 #
-limit_req_zone $binary_remote_addr zone=dokku_nginx_rate_limit:5m rate=30r/m;
+limit_req_zone $binary_remote_addr zone=dokku_nginx_rate_limit:5m rate=20r/m;
 
 # --- End of custom configuration
 
@@ -123,7 +123,7 @@ server {
     
     
     # Rate limit
-    limit_req zone=dokku_nginx_rate_limit burst=45 delay=15;
+    limit_req zone=dokku_nginx_rate_limit burst=35 delay=10;
     
     # --- End of custom configuration
 
