@@ -2,10 +2,11 @@ import { Injectable, UnauthorizedException } from '@nestjs/common'
 import {
   BooruTypesStringEnum,
   Gelbooru,
-  Paheal,
   Danbooru,
   Danbooru2,
-  E621,
+  Rule34Xxx,
+  Rule34PahealNet,
+  E621Net,
   IBooruEndpoints,
   IBooruOptions,
   BooruTypes,
@@ -26,9 +27,6 @@ export class BooruService {
       case BooruTypesStringEnum.GELBOORU:
         return Gelbooru
 
-      case BooruTypesStringEnum.PAHEAL:
-        return Paheal
-
       // Moebooru and MyImouto are danbooru
       case BooruTypesStringEnum.DANBOORU:
         return Danbooru
@@ -36,8 +34,14 @@ export class BooruService {
       case BooruTypesStringEnum.DANBOORU2:
         return Danbooru2
 
-      case BooruTypesStringEnum.E621:
-        return E621
+      case BooruTypesStringEnum.RULE_34_XXX:
+        return Rule34Xxx
+
+      case BooruTypesStringEnum.RULE34_PAHEAL_NET:
+        return Rule34PahealNet
+
+      case BooruTypesStringEnum.E621_NET:
+        return E621Net
     }
   }
 
