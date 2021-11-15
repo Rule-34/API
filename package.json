@@ -23,7 +23,7 @@
     "test:cov": "jest --coverage"
   },
   "dependencies": {
-    "@alejandroakbal/universal-booru-wrapper": "^0.2.8",
+    "@alejandroakbal/universal-booru-wrapper": "^0.2.9",
     "@nestjs/common": "^7.6.18",
     "@nestjs/config": "^0.6.3",
     "@nestjs/core": "^7.6.18",
@@ -31,7 +31,7 @@
     "@nestjs/passport": "^7.1.6",
     "@nestjs/platform-express": "^7.6.18",
     "@nestjs/platform-fastify": "^7.6.18",
-    "@sentry/node": "^6.13.3",
+    "@sentry/node": "^6.14.3",
     "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
     "fastify-helmet": "^5.3.2",
@@ -48,7 +48,7 @@
     "@nestjs/testing": "^7.6.18",
     "@types/express": "^4.17.13",
     "@types/jest": "^26.0.24",
-    "@types/node": "^14.17.27",
+    "@types/node": "^14.17.33",
     "@types/passport-jwt": "^3.0.6",
     "@types/passport-local": "^1.0.34",
     "@types/supertest": "^2.0.11",
