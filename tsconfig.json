@@ -5,6 +5,8 @@
     "incremental": true,
     "declaration": true,
 
+    "allowJs": true,
+
     "resolveJsonModule": true,
 
     "removeComments": true,
