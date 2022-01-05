@@ -4,13 +4,14 @@ import {
   Gelbooru,
   Danbooru,
   Danbooru2,
+  GelbooruCom,
   Rule34Xxx,
   Rule34PahealNet,
   E621Net,
   IBooruEndpoints,
   IBooruOptions,
   BooruTypes,
-  IBooruQueryIdentifiers,
+  IBooruQueryIdentifiers
 } from '@alejandroakbal/universal-booru-wrapper'
 import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
@@ -26,6 +27,9 @@ export class BooruService {
     switch (booruType) {
       case BooruTypesStringEnum.GELBOORU:
         return Gelbooru
+
+      case BooruTypesStringEnum.GELBOORU_COM:
+        return GelbooruCom
 
       // Moebooru and MyImouto are danbooru
       case BooruTypesStringEnum.DANBOORU:
