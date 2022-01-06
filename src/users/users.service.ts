@@ -1,10 +1,11 @@
-import { HttpService, Injectable, UnauthorizedException } from '@nestjs/common'
-import { AxiosResponse, AxiosRequestConfig } from 'axios'
+import { Injectable, UnauthorizedException } from '@nestjs/common'
+import { AxiosRequestConfig, AxiosResponse } from 'axios'
 import {
   GumroadAPIRequest,
   GumroadAPIResponse,
 } from './interfaces/gumroad.interface'
 import { UserData } from './interfaces/users.interface'
+import { HttpService } from '@nestjs/axios'
 
 @Injectable()
 export class UsersService {

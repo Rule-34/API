@@ -1,4 +1,5 @@
-import { UnauthorizedException, HttpModule } from '@nestjs/common'
+import { UnauthorizedException } from '@nestjs/common'
+import { HttpModule } from '@nestjs/axios'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
 import { GumroadAPIResponse } from './interfaces/gumroad.interface'
