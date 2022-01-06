@@ -23,7 +23,7 @@
     "test:cov": "jest --coverage"
   },
   "dependencies": {
-    "@alejandroakbal/universal-booru-wrapper": "^0.3.0",
+    "@alejandroakbal/universal-booru-wrapper": "^0.3.1",
     "@nestjs/common": "^7.6.18",
     "@nestjs/config": "^0.6.3",
     "@nestjs/core": "^7.6.18",
