@@ -4,7 +4,7 @@
   "author": "Alejandro Akbal",
   "private": true,
   "engines": {
-    "node": "15"
+    "node": "16"
   },
   "main": "dist/main.js",
   "scripts": {
