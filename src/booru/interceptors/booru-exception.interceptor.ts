@@ -1,15 +1,17 @@
 import {
-  Injectable,
-  NestInterceptor,
-  ExecutionContext,
   CallHandler,
+  ExecutionContext,
+  Injectable,
   MethodNotAllowedException,
+  NestInterceptor,
+  ServiceUnavailableException,
 } from '@nestjs/common'
 import { Observable, throwError } from 'rxjs'
 import { catchError } from 'rxjs/operators'
 import {
   EmptyDataError,
   EndpointError,
+  HttpError,
 } from '@alejandroakbal/universal-booru-wrapper'
 import { NoContentException } from '../../common/exceptions/no-content.exception'
 
@@ -21,11 +23,18 @@ export class BooruErrorsInterceptor implements NestInterceptor {
         // Throw better errors
         switch (error.constructor) {
           case EmptyDataError:
-            return throwError(new NoContentException(undefined, error.message))
+            return throwError(
+              () => new NoContentException(undefined, error.message)
+            )
 
           case EndpointError:
             return throwError(
-              new MethodNotAllowedException(undefined, error.message)
+              () => new MethodNotAllowedException(undefined, error.message)
+            )
+
+          case HttpError:
+            return throwError(
+              () => new ServiceUnavailableException(undefined, error.message)
             )
 
           default:
