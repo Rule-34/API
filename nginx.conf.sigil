@@ -20,8 +20,8 @@ proxy_cache_path /tmp/dokku_nginx_cache levels=1:2 keys_zone=dokku_nginx_cache:5
 # https://www.nginx.com/blog/rate-limiting-nginx/
 
 # Explanation
-# - Maximum 20 requests per minute
-limit_req_zone $binary_remote_addr zone=dokku_nginx_rate_limit:5m rate=20r/m;
+# - Maximum 25 requests per minute
+limit_req_zone $binary_remote_addr zone=dokku_nginx_rate_limit:5m rate=25r/m;
 
 # --- End of custom configuration
 
@@ -131,9 +131,9 @@ server {
     
     # Explanation
     # - Maximum 35 burst requests 
-    # - The first 10 requests are executed instantly. The rest are delayed.
+    # - The first 15 requests are executed instantly. The rest are delayed.
     # - Requests over the maximum are blocked.
-    limit_req zone=dokku_nginx_rate_limit burst=35 delay=10;
+    limit_req zone=dokku_nginx_rate_limit burst=35 delay=15;
     
     # --- End of custom configuration
 
