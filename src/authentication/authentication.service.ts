@@ -16,18 +16,11 @@ export class AuthenticationService {
   ) {}
 
   async loginWithLicense(license: GumroadAPIRequest['license_key']) {
-    const productPermalink = this.configService.get<string>(
-      'GUMROAD_PRODUCT_PERMALINK'
-    )
+    const productPermalink = this.configService.get<string>('GUMROAD_PRODUCT_PERMALINK')
 
-    const gumroadResponse = await this.usersService.verifyGumroadLicense(
-      productPermalink,
-      license
-    )
+    const gumroadResponse = await this.usersService.verifyGumroadLicense(productPermalink, license)
 
-    const userData = this.usersService.createUserDataFromGumroadResponse(
-      gumroadResponse
-    )
+    const userData = this.usersService.createUserDataFromGumroadResponse(gumroadResponse)
 
     // Validation
     if (!userData.is_subscription_valid) {
@@ -41,7 +34,7 @@ export class AuthenticationService {
   signToken(data: string | object) {
     const options: JwtSignOptions = {
       secret: this.configService.get<string>('JWT_SECRET'),
-      expiresIn: this.configService.get<string>('JWT_EXPIRATION_TIME'),
+      expiresIn: this.configService.get<string>('JWT_EXPIRATION_TIME')
     }
 
     const token = this.jwtService.sign({ data }, options)
@@ -53,7 +46,7 @@ export class AuthenticationService {
   signRefreshToken(data: string | object) {
     const options: JwtSignOptions = {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION_TIME'),
+      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION_TIME')
     }
 
     const token = this.jwtService.sign({ data }, options)

@@ -15,11 +15,7 @@ import {
 } from '@alejandroakbal/universal-booru-wrapper'
 import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
-import {
-  BooruObj,
-  defaultBooruList,
-  findBoorusWithValueByKey,
-} from '../external/r34_shared/src/util/BooruUtils'
+import { BooruObj, defaultBooruList, findBoorusWithValueByKey } from '../external/r34_shared/src/util/BooruUtils'
 
 @Injectable()
 export class BooruService {
@@ -49,10 +45,7 @@ export class BooruService {
     }
   }
 
-  public buildApiClass(
-    params: BooruEndpointParamsDTO,
-    queries: booruQueriesDTO
-  ): BooruTypes {
+  public buildApiClass(params: BooruEndpointParamsDTO, queries: booruQueriesDTO): BooruTypes {
     const booruClass = this.getApiClassByType(params.booruType)
 
     const endpoints: IBooruEndpoints = {
@@ -60,7 +53,7 @@ export class BooruService {
       posts: queries.postsEndpoint,
       randomPosts: queries.randomPostsEndpoint,
       singlePost: queries.singlePostEndpoint,
-      tags: queries.tagsEndpoint,
+      tags: queries.tagsEndpoint
     }
 
     const defaultQueryIdentifiers: IBooruQueryIdentifiers = {
@@ -70,7 +63,7 @@ export class BooruService {
         tags: queries.defaultQueryIdentifiersPostsTags,
         rating: queries.defaultQueryIdentifiersPostsRating,
         score: queries.defaultQueryIdentifiersPostsScore,
-        order: queries.defaultQueryIdentifiersPostsOrder,
+        order: queries.defaultQueryIdentifiersPostsOrder
       },
 
       randomPosts: {
@@ -79,11 +72,11 @@ export class BooruService {
         tags: queries.defaultQueryIdentifiersRandomPostsTags,
         rating: queries.defaultQueryIdentifiersRandomPostsRating,
         score: queries.defaultQueryIdentifiersRandomPostsScore,
-        order: queries.defaultQueryIdentifiersRandomPostsOrder,
+        order: queries.defaultQueryIdentifiersRandomPostsOrder
       },
 
       singlePost: {
-        id: queries.defaultQueryIdentifiersSinglePostID,
+        id: queries.defaultQueryIdentifiersSinglePostID
       },
 
       tags: {
@@ -91,20 +84,15 @@ export class BooruService {
         tagEnding: queries.defaultQueryIdentifiersTagsTagEnding,
         limit: queries.defaultQueryIdentifiersTagsLimit,
         pageID: queries.defaultQueryIdentifiersTagsPageID,
-        order: queries.defaultQueryIdentifiersTagsOrder,
-      },
+        order: queries.defaultQueryIdentifiersTagsOrder
+      }
     }
 
     // No default QueryValues are needed
 
     const options: IBooruOptions = { HTTPScheme: queries.httpScheme }
 
-    const Api = new booruClass(
-      endpoints,
-      defaultQueryIdentifiers,
-      undefined,
-      options
-    )
+    const Api = new booruClass(endpoints, defaultQueryIdentifiers, undefined, options)
 
     return Api
   }

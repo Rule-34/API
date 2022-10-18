@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Request,
-  UseGuards,
-} from '@nestjs/common'
+import { Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards } from '@nestjs/common'
 import { UserData } from 'src/users/interfaces/users.interface'
 import { AuthenticationService } from './authentication.service'
 import { LocalGuard } from './guards/local.guard'

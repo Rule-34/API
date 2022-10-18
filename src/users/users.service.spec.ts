@@ -13,7 +13,7 @@ describe('UsersService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [HttpModule, ConfigModule.forRoot(), ConfigService],
-      providers: [UsersService],
+      providers: [UsersService]
     }).compile()
 
     service = module.get<UsersService>(UsersService)
@@ -31,17 +31,11 @@ describe('UsersService', () => {
     it('should verify a correct license', async () => {
       expect.assertions(1)
 
-      const productPermalink = configService.get<string>(
-        'TEST_GUMROAD_PRODUCT_PERMALINK'
-      )
+      const productPermalink = configService.get<string>('TEST_GUMROAD_PRODUCT_PERMALINK')
 
       const licenseKey = configService.get<string>('TEST_GUMROAD_LICENSE_KEY')
 
-      const data = await service.verifyGumroadLicense(
-        productPermalink,
-        licenseKey,
-        false
-      )
+      const data = await service.verifyGumroadLicense(productPermalink, licenseKey, false)
 
       expect(data.success).toBe(true)
     })
@@ -52,9 +46,9 @@ describe('UsersService', () => {
       const productPermalink = 'RandomString'
       const licenseKey = 'This-is-totally-invented'
 
-      await expect(
-        service.verifyGumroadLicense(productPermalink, licenseKey, false)
-      ).rejects.toThrowError(UnauthorizedException)
+      await expect(service.verifyGumroadLicense(productPermalink, licenseKey, false)).rejects.toThrowError(
+        UnauthorizedException
+      )
     })
   })
 
@@ -75,15 +69,15 @@ describe('UsersService', () => {
         id: '',
         created_at: new Date(),
         subscription_cancelled_at: null,
-        subscription_failed_at: null,
-      },
+        subscription_failed_at: null
+      }
     }
 
     const validReturn: UserData = {
       is_subscription_valid: true,
       license_uses: 0,
       sale_timestamp: '2020-06-28T09:24:55Z',
-      email: 'email@example.com',
+      email: 'email@example.com'
     }
 
     it('should correctly output valid subscription', async () => {
@@ -93,9 +87,7 @@ describe('UsersService', () => {
 
       const expectedReturn = validReturn
 
-      expect(
-        service.createUserDataFromGumroadResponse(testGumroadResponse)
-      ).toStrictEqual(expectedReturn)
+      expect(service.createUserDataFromGumroadResponse(testGumroadResponse)).toStrictEqual(expectedReturn)
     })
 
     it('should correctly output invalid subscription', async () => {
@@ -104,17 +96,13 @@ describe('UsersService', () => {
       const testGumroadResponse: GumroadAPIResponse = validGumroadResponse
 
       // Past Date
-      testGumroadResponse.purchase.subscription_cancelled_at = new Date(
-        '2020-11-17T02:27:36Z'
-      )
+      testGumroadResponse.purchase.subscription_cancelled_at = new Date('2020-11-17T02:27:36Z')
 
       const expectedReturn = validReturn
 
       expectedReturn.is_subscription_valid = false
 
-      expect(
-        service.createUserDataFromGumroadResponse(testGumroadResponse)
-      ).toStrictEqual(expectedReturn)
+      expect(service.createUserDataFromGumroadResponse(testGumroadResponse)).toStrictEqual(expectedReturn)
     })
   })
 })

@@ -1,20 +1,11 @@
-import {
-  Controller,
-  Get,
-  Header,
-  Param,
-  Query,
-  Request,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common'
+import { Controller, Get, Header, Param, Query, Request, UseGuards, UseInterceptors } from '@nestjs/common'
 import { IBooruQueryValues } from '@alejandroakbal/universal-booru-wrapper'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import {
   booruQueryValuesPostsDTO,
   booruQueryValuesRandomPostsDTO,
   booruQueryValuesSinglePostDTO,
-  booruQueryValuesTagsDTO,
+  booruQueryValuesTagsDTO
 } from './dto/booru-queries.dto'
 import { BooruService } from './booru.service'
 import { BooruErrorsInterceptor } from './interceptors/booru-exception.interceptor'
@@ -52,7 +43,7 @@ export class BooruController {
       tags: queries.tags,
       rating: queries.rating,
       score: queries.score,
-      order: queries.order,
+      order: queries.order
     }
 
     return Api.getPosts(postQueryValues)
@@ -84,7 +75,7 @@ export class BooruController {
       tags: queries.tags,
       rating: queries.rating,
       score: queries.score,
-      order: queries.order,
+      order: queries.order
     }
 
     return Api.getRandomPosts(postQueryValues)
@@ -111,7 +102,7 @@ export class BooruController {
     const Api = this.booruService.buildApiClass(params, queries)
 
     const postQueryValues: IBooruQueryValues['singlePost'] = {
-      id: queries.ID,
+      id: queries.ID
     }
 
     return Api.getSinglePost(postQueryValues)
@@ -142,7 +133,7 @@ export class BooruController {
       tagEnding: queries.tagEnding,
       limit: queries.limit,
       pageID: queries.pageID,
-      order: queries.order,
+      order: queries.order
     }
 
     return Api.getTags(postQueryValues)

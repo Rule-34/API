@@ -4,6 +4,6 @@ import { BooruController } from './booru.controller'
 
 @Module({
   providers: [BooruService],
-  controllers: [BooruController],
+  controllers: [BooruController]
 })
 export class BooruModule {}

@@ -1,16 +1,12 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { AxiosRequestConfig, AxiosResponse } from 'axios'
-import {
-  GumroadAPIRequest,
-  GumroadAPIResponse,
-} from './interfaces/gumroad.interface'
+import { GumroadAPIRequest, GumroadAPIResponse } from './interfaces/gumroad.interface'
 import { UserData } from './interfaces/users.interface'
 import { HttpService } from '@nestjs/axios'
 
 @Injectable()
 export class UsersService {
-  protected readonly gumroadLicenseVerificationEndpoint =
-    'https://api.gumroad.com/v2/licenses/verify'
+  protected readonly gumroadLicenseVerificationEndpoint = 'https://api.gumroad.com/v2/licenses/verify'
 
   constructor(private readonly httpService: HttpService) {}
 
@@ -25,7 +21,7 @@ export class UsersService {
       url: this.gumroadLicenseVerificationEndpoint,
 
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
 
       data:
@@ -34,7 +30,7 @@ export class UsersService {
         '&license_key=' +
         licenseKey +
         '&increment_uses_count=' +
-        incrementUsesCount,
+        incrementUsesCount
     }
 
     const response = this.httpService.request(requestConfig)
@@ -49,32 +45,26 @@ export class UsersService {
     return responseData.data
   }
 
-  public createUserDataFromGumroadResponse(
-    gumroadResponse: GumroadAPIResponse
-  ) {
+  public createUserDataFromGumroadResponse(gumroadResponse: GumroadAPIResponse) {
     const isSubscriptionValid = this.checkIfSubscriptionIsValid(gumroadResponse)
 
     const details: UserData = {
       is_subscription_valid: isSubscriptionValid,
       license_uses: gumroadResponse.uses,
       sale_timestamp: gumroadResponse.purchase.sale_timestamp,
-      email: gumroadResponse.purchase.email,
+      email: gumroadResponse.purchase.email
     }
 
     return details
   }
 
-  private checkIfSubscriptionIsValid(
-    gumroadResponse: GumroadAPIResponse
-  ): boolean {
+  private checkIfSubscriptionIsValid(gumroadResponse: GumroadAPIResponse): boolean {
     const now = new Date(Date.now())
 
     let isSubscriptionCancelled = false
 
     if (gumroadResponse.purchase.subscription_cancelled_at) {
-      const cancelledAtDate = new Date(
-        gumroadResponse.purchase.subscription_cancelled_at
-      )
+      const cancelledAtDate = new Date(gumroadResponse.purchase.subscription_cancelled_at)
 
       isSubscriptionCancelled = now > cancelledAtDate
     }

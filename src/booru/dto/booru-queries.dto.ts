@@ -2,7 +2,7 @@ import {
   IBooruQueryValues,
   IBooruEndpoints,
   IBooruOptions,
-  IBooruQueryIdentifiers,
+  IBooruQueryIdentifiers
 } from '@alejandroakbal/universal-booru-wrapper'
 import {
   ArrayNotContains,
@@ -15,7 +15,7 @@ import {
   IsOptional,
   IsString,
   Max,
-  Min,
+  Min
 } from 'class-validator'
 import { Transform } from 'class-transformer'
 

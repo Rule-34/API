@@ -4,7 +4,7 @@ import { BooruService } from './booru.service'
 import {
   defaultBooruList,
   completeBooruList,
-  findBoorusWithValueByKey,
+  findBoorusWithValueByKey
 } from '../external/r34_shared/src/util/BooruUtils'
 
 describe('BooruController', () => {
@@ -12,7 +12,7 @@ describe('BooruController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [BooruService],
+      providers: [BooruService]
     }).compile()
 
     service = module.get<BooruService>(BooruService)
@@ -28,15 +28,9 @@ describe('BooruController', () => {
     it('should throw if it is NOT from the default list', () => {
       expect.assertions(1)
 
-      const testBooru = findBoorusWithValueByKey(
-        'xbooru.com',
-        'domain',
-        completeBooruList
-      )[0]
+      const testBooru = findBoorusWithValueByKey('xbooru.com', 'domain', completeBooruList)[0]
 
-      expect(() =>
-        service.checkIfItsFromDefaultBooruList(testBooru.domain)
-      ).toThrowError(UnauthorizedException)
+      expect(() => service.checkIfItsFromDefaultBooruList(testBooru.domain)).toThrowError(UnauthorizedException)
     })
 
     it('should NOT throw if it is from the default list', () => {
@@ -44,9 +38,7 @@ describe('BooruController', () => {
 
       const testBooru = defaultBooruList[0]
 
-      expect(() =>
-        service.checkIfItsFromDefaultBooruList(testBooru.domain)
-      ).not.toThrowError(UnauthorizedException)
+      expect(() => service.checkIfItsFromDefaultBooruList(testBooru.domain)).not.toThrowError(UnauthorizedException)
     })
   })
 })

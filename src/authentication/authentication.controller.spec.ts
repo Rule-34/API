@@ -21,13 +21,13 @@ describe('AuthenticationController', () => {
           useFactory: async (configService: ConfigService) => ({
             secret: configService.get<string>('JWT_SECRET'),
             signOptions: {
-              expiresIn: configService.get<string>('JWT_EXPIRATION_TIME'),
-            },
-          }),
-        }),
+              expiresIn: configService.get<string>('JWT_EXPIRATION_TIME')
+            }
+          })
+        })
       ],
       controllers: [AuthenticationController],
-      providers: [AuthenticationService],
+      providers: [AuthenticationService]
     }).compile()
 
     controller = module.get<AuthenticationController>(AuthenticationController)
