@@ -21,7 +21,7 @@ proxy_cache_path /tmp/dokku_r34-api_nginx_cache levels=1:2 keys_zone=dokku_r34-a
 
 # Explanation
 # - Maximum 25 requests per minute
-limit_req_zone $binary_remote_addr zone=dokku_nginx_rate_limit:5m rate=25r/m;
+limit_req_zone $binary_remote_addr zone=dokku_r34-api_nginx_rate_limit:5m rate=25r/m;
 
 # --- End of custom configuration
 
