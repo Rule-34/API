@@ -131,9 +131,9 @@ server {
     
     # Explanation
     # - Maximum 35 burst requests 
-    # - The first 15 requests are executed instantly. The rest are delayed.
+    # - The first 20 requests are executed instantly. The rest are delayed.
     # - Requests over the maximum are blocked.
-    limit_req zone=dokku_r34-api_nginx_rate_limit burst=35 delay=15;
+    limit_req zone=dokku_r34-api_nginx_rate_limit burst=35 delay=20;
     
     # --- End of custom configuration
 
