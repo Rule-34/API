@@ -3,7 +3,7 @@ import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.int
 import { NestFactory } from '@nestjs/core'
 import { ConfigService } from '@nestjs/config'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
-import helmet from 'fastify-helmet'
+import helmet from '@fastify/helmet'
 import * as Sentry from '@sentry/node'
 import { AppModule } from './app.module'
 
