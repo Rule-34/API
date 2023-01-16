@@ -3,6 +3,8 @@ import { AxiosRequestConfig, AxiosResponse } from 'axios'
 import { GumroadAPIRequest, GumroadAPIResponse } from './interfaces/gumroad.interface'
 import { UserData } from './interfaces/users.interface'
 import { HttpService } from '@nestjs/axios'
+import { firstValueFrom } from 'rxjs'
+import { catchError } from 'rxjs/operators'
 
 @Injectable()
 export class UsersService {
@@ -33,14 +35,16 @@ export class UsersService {
         incrementUsesCount
     }
 
-    const response = this.httpService.request(requestConfig)
+    const response = this.httpService
+      .request(requestConfig)
 
-    const responseData: AxiosResponse<GumroadAPIResponse> = await response
-      .toPromise()
+      .pipe(
+        catchError((error) => {
+          throw new UnauthorizedException(undefined, error.response.data.message)
+        })
+      )
 
-      .catch((error) => {
-        throw new UnauthorizedException(undefined, error.response.data.message)
-      })
+    const responseData: AxiosResponse<GumroadAPIResponse> = await firstValueFrom(response)
 
     return responseData.data
   }

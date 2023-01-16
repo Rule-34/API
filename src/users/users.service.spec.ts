@@ -12,7 +12,7 @@ describe('UsersService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [HttpModule, ConfigModule.forRoot(), ConfigService],
+      imports: [HttpModule, ConfigModule.forRoot()],
       providers: [UsersService]
     }).compile()
 
