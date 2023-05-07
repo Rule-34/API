@@ -2,21 +2,23 @@
   "compilerOptions": {
     "module": "commonjs",
     "moduleResolution": "Node",
-    "target": "es2017",
+    //
+    "target": "es2019",
+    //
     "incremental": true,
     "declaration": true,
-
+    //
     "allowJs": true,
-
     "resolveJsonModule": true,
     "esModuleInterop": true,
-
-    "removeComments": true,
+    "allowSyntheticDefaultImports": true,
+    //
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-
+    "removeComments": true,
+    //
     "sourceMap": true,
+    //
     "outDir": "./dist",
     "baseUrl": "./"
   }
