@@ -11,6 +11,7 @@ import { BooruService } from './booru.service'
 import { BooruErrorsInterceptor } from './interceptors/booru-exception.interceptor'
 import { UserData } from '../users/interfaces/users.interface'
 import { JwtBooruGuard } from '../authentication/guards/jwt.guard'
+import { ResponseDto } from '../lib/dto/response.dto'
 
 @Controller('booru')
 @UseInterceptors(BooruErrorsInterceptor)
@@ -20,7 +21,7 @@ export class BooruController {
   @Get(':booruType/posts')
   @Header('Cache-Control', 'public, max-age=250')
   @UseGuards(JwtBooruGuard)
-  GetPosts(
+  async GetPosts(
     @Request()
     request,
     @Param()
@@ -46,13 +47,19 @@ export class BooruController {
       order: queries.order
     }
 
-    return Api.getPosts(postQueryValues)
+    const posts = await Api.getPosts(postQueryValues)
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    queries.pageID = queries.pageID ?? Api.booruType.initialPageID
+
+    return ResponseDto.createFromController(request, queries, Api, posts)
   }
 
   @Get(':booruType/random-posts')
   @Header('Cache-Control', 'no-cache')
   @UseGuards(JwtBooruGuard)
-  GetRandomPosts(
+  async GetRandomPosts(
     @Request()
     request,
     @Param()
@@ -78,13 +85,19 @@ export class BooruController {
       order: queries.order
     }
 
-    return Api.getRandomPosts(postQueryValues)
+    const posts = await Api.getRandomPosts(postQueryValues)
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    queries.pageID = queries.pageID ?? Api.booruType.initialPageID
+
+    return ResponseDto.createFromController(request, queries, Api, posts)
   }
 
   @Get(':booruType/single-post')
   @Header('Cache-Control', 'public, max-age=604800, immutable')
   @UseGuards(JwtBooruGuard)
-  GetSinglePost(
+  async GetSinglePost(
     @Request()
     request,
     @Param()
@@ -105,13 +118,15 @@ export class BooruController {
       id: queries.ID
     }
 
-    return Api.getSinglePost(postQueryValues)
+    const posts = await Api.getSinglePost(postQueryValues)
+
+    return ResponseDto.createFromController(request, queries, Api, posts)
   }
 
   @Get(':booruType/tags')
   @Header('Cache-Control', 'public, max-age=3600')
   @UseGuards(JwtBooruGuard)
-  GetTags(
+  async GetTags(
     @Request()
     request,
     @Param()
@@ -136,6 +151,8 @@ export class BooruController {
       order: queries.order
     }
 
-    return Api.getTags(postQueryValues)
+    const tags = await Api.getTags(postQueryValues)
+
+    return ResponseDto.createFromController(request, queries, Api, tags)
   }
 }
