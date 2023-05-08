@@ -151,6 +151,10 @@ export class BooruController {
       order: queries.order
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    queries.pageID = queries.pageID ?? Api.booruType.initialPageID
+
     const tags = await Api.getTags(postQueryValues)
 
     return ResponseDto.createFromController(request, queries, Api, tags)
