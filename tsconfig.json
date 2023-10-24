@@ -3,7 +3,7 @@
     "module": "commonjs",
     "moduleResolution": "Node",
     //
-    "target": "es2019",
+    "target": "ES2021",
     //
     "incremental": true,
     "declaration": true,

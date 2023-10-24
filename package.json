@@ -5,7 +5,6 @@
   "author": "Alejandro Akbal",
   "main": "dist/main.js",
   "scripts": {
-    "prebuild": "rimraf dist",
     "build": "nest build",
     "debug": "nest start --debug --watch",
     "dev": "nest start --watch",
