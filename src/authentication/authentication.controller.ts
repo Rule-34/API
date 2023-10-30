@@ -1,9 +1,8 @@
-import { Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards } from '@nestjs/common'
+import { Controller, Get, HttpCode, HttpStatus, Post, Request, Res, UseGuards } from '@nestjs/common'
 import { UserData } from 'src/users/interfaces/users.interface'
 import { AuthenticationService } from './authentication.service'
 import { LocalGuard } from './guards/local.guard'
 import { JwtGuard } from './guards/jwt.guard'
-import { JwtRefreshGuard } from './guards/jwt-refresh.guard'
 import { RequestWithUserData } from './interfaces/requestWithUserData.interface'
 
 @Controller('auth')
@@ -15,31 +14,23 @@ export class AuthenticationController {
   @UseGuards(LocalGuard)
   async login(
     @Request()
-    req
+    req,
+    @Res({ passthrough: true })
+    res
   ) {
     // Set by LocalAuthenticationGuard on a successful validation
     // by this.authenticationService.loginWithLicense
     const userData: UserData = req.user
 
     const token = this.authenticationService.signToken(userData)
-    const refreshToken = this.authenticationService.signRefreshToken(userData)
 
-    return { ...token, ...refreshToken }
-  }
+    res.setCookie('auth-cookie', token, {
+      httpOnly: true
+      // secure: 'auto',
+      // sameSite: 'strict'
+    })
 
-  @Post('refresh')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtRefreshGuard)
-  async refresh(
-    @Request()
-    req
-  ) {
-    // Got from the JWT
-    const userData: RequestWithUserData = req.user
-
-    const token = this.authenticationService.signToken(userData.data)
-
-    return token
+    return { message: 'Logged in' }
   }
 
   @Get('profile')

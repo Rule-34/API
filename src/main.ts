@@ -6,6 +6,7 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import helmet from '@fastify/helmet'
 import * as Sentry from '@sentry/node'
 import { AppModule } from './app.module'
+import fastifyCookie from '@fastify/cookie'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter())
@@ -20,7 +21,11 @@ async function bootstrap() {
     // ignoreErrors: ['NoContentException', 'MethodNotAllowedException'],
   })
 
-  app.register(helmet)
+  await app.register(fastifyCookie, {
+    secret: configService.get<string>('COOKIE_SECRET')
+  })
+
+  await app.register(helmet)
 
   const corsOptions: CorsOptions = {
     origin: configService.get<string>('NODE_ENV') === 'development' ? true : /r34\.app$/,

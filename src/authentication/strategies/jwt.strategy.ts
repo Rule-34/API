@@ -8,7 +8,17 @@ import { UserData } from '../../users/interfaces/users.interface'
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly configService: ConfigService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request) => {
+          const data = request.cookies['auth-cookie']
+
+          if (!data) {
+            return null
+          }
+
+          return data
+        }
+      ]),
       secretOrKey: configService.get<string>('JWT_SECRET'),
       ignoreExpiration: false,
       passReqToCallback: true
