@@ -1,8 +1,9 @@
-
 export function createUrlFromRequest(request: any) {
-  const protocol = request.protocol
   const hostname = request.hostname
   const originalUrl = request.url
+
+  // TODO: Do not hardcode protocol
+  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
 
   return `${protocol}://${hostname}${originalUrl}`
 }
