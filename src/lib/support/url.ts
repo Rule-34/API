@@ -1,6 +1,5 @@
-import { FastifyRequest } from 'fastify'
 
-export function createUrlFromRequest(request: FastifyRequest) {
+export function createUrlFromRequest(request: any) {
   const protocol = request.protocol
   const hostname = request.hostname
   const originalUrl = request.url
@@ -8,7 +7,7 @@ export function createUrlFromRequest(request: FastifyRequest) {
   return `${protocol}://${hostname}${originalUrl}`
 }
 
-export function createPreviousPageUrl(request: FastifyRequest, pageID: number, initialPageID: number) {
+export function createPreviousPageUrl(request: any, pageID: number, initialPageID: number) {
   const url = new URL(createUrlFromRequest(request))
 
   if (pageID == null) {
@@ -26,7 +25,7 @@ export function createPreviousPageUrl(request: FastifyRequest, pageID: number, i
   return url.toString()
 }
 
-export function createNextPageUrl(request: FastifyRequest, pageID: number) {
+export function createNextPageUrl(request: any, pageID: number) {
   const url = new URL(createUrlFromRequest(request))
 
   if (pageID == null) {
@@ -40,7 +39,7 @@ export function createNextPageUrl(request: FastifyRequest, pageID: number) {
   return url.toString()
 }
 
-export function createFirstPageUrl(request: FastifyRequest, initialPageID: number) {
+export function createFirstPageUrl(request: any, initialPageID: number) {
   const url = new URL(createUrlFromRequest(request))
 
   if (initialPageID == null) {
