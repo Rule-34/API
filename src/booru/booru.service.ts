@@ -1,17 +1,19 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import {
+  BooruTypes,
   BooruTypesStringEnum,
-  Gelbooru,
   Danbooru,
   Danbooru2,
-  GelbooruCom,
-  Rule34Xxx,
-  Rule34PahealNet,
   E621Net,
+  Gelbooru,
+  GelbooruCom,
   IBooruEndpoints,
   IBooruOptions,
-  BooruTypes,
-  IBooruQueryIdentifiers
+  IBooruQueryIdentifiers,
+  Moebooru,
+  RealBooruCom,
+  Rule34PahealNet,
+  Rule34Xxx
 } from '@alejandroakbal/universal-booru-wrapper'
 import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
@@ -19,32 +21,6 @@ import { BooruObj, defaultBooruList, findBoorusWithValueByKey } from '../externa
 
 @Injectable()
 export class BooruService {
-  private getApiClassByType(booruType: BooruTypesStringEnum) {
-    switch (booruType) {
-      case BooruTypesStringEnum.GELBOORU:
-        return Gelbooru
-
-      case BooruTypesStringEnum.GELBOORU_COM:
-        return GelbooruCom
-
-      // Moebooru and MyImouto are danbooru
-      case BooruTypesStringEnum.DANBOORU:
-        return Danbooru
-
-      case BooruTypesStringEnum.DANBOORU2:
-        return Danbooru2
-
-      case BooruTypesStringEnum.RULE_34_XXX:
-        return Rule34Xxx
-
-      case BooruTypesStringEnum.RULE34_PAHEAL_NET:
-        return Rule34PahealNet
-
-      case BooruTypesStringEnum.E621_NET:
-        return E621Net
-    }
-  }
-
   public buildApiClass(params: BooruEndpointParamsDTO, queries: booruQueriesDTO): BooruTypes {
     const booruClass = this.getApiClassByType(params.booruType)
 
@@ -102,6 +78,37 @@ export class BooruService {
 
     if (!booru || !booru.length) {
       throw new UnauthorizedException()
+    }
+  }
+
+  private getApiClassByType(booruType: BooruTypesStringEnum) {
+    switch (booruType) {
+      case BooruTypesStringEnum.DANBOORU:
+        return Danbooru
+
+      case BooruTypesStringEnum.DANBOORU2:
+        return Danbooru2
+
+      case BooruTypesStringEnum.MOEBOORU:
+        return Moebooru
+
+      case BooruTypesStringEnum.GELBOORU:
+        return Gelbooru
+
+      case BooruTypesStringEnum.RULE_34_XXX:
+        return Rule34Xxx
+
+      case BooruTypesStringEnum.RULE34_PAHEAL_NET:
+        return Rule34PahealNet
+
+      case BooruTypesStringEnum.GELBOORU_COM:
+        return GelbooruCom
+
+      case BooruTypesStringEnum.E621_NET:
+        return E621Net
+
+      case BooruTypesStringEnum.REALBOORU_COM:
+        return RealBooruCom
     }
   }
 }
