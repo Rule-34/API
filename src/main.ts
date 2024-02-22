@@ -27,7 +27,9 @@ async function bootstrap() {
     const allowedOriginRegex = new RegExp(escapeRegExp(allowedOrigin) + '$')
 
     const corsOptions: CorsOptions = {
-        origin: configService.get<string>('NODE_ENV') === 'development' ? true : allowedOriginRegex,
+        origin: configService.get<string>('NODE_ENV') === 'development'
+            ? '*'
+            : allowedOriginRegex,
         credentials: true
     }
 
