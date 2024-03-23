@@ -1,22 +1,22 @@
+import { EmptyDataError, IBooruQueryValues } from '@alejandroakbal/universal-booru-wrapper'
 import { Controller, Get, Header, Param, Query, Request, UseGuards, UseInterceptors } from '@nestjs/common'
-import { IBooruQueryValues } from '@alejandroakbal/universal-booru-wrapper'
-import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
+import { JwtBooruGuard } from '../authentication/guards/jwt.guard'
+import { ResponseDto } from '../lib/dto/response.dto'
+import { UserData } from '../users/interfaces/users.interface'
+import { BooruService } from './booru.service'
 import {
   booruQueryValuesPostsDTO,
   booruQueryValuesRandomPostsDTO,
   booruQueryValuesSinglePostDTO,
   booruQueryValuesTagsDTO
 } from './dto/booru-queries.dto'
-import { BooruService } from './booru.service'
+import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import { BooruErrorsInterceptor } from './interceptors/booru-exception.interceptor'
-import { UserData } from '../users/interfaces/users.interface'
-import { JwtBooruGuard } from '../authentication/guards/jwt.guard'
-import { ResponseDto } from '../lib/dto/response.dto'
 
 @Controller('booru')
 @UseInterceptors(BooruErrorsInterceptor)
 export class BooruController {
-  constructor(private readonly booruService: BooruService) {}
+  constructor(private readonly booruService: BooruService) { }
 
   @Get(':booruType/posts')
   @Header('Cache-Control', 'public, max-age=250')
@@ -47,13 +47,25 @@ export class BooruController {
       order: queries.order
     }
 
-    const posts = await Api.getPosts(postQueryValues)
-
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     queries.pageID = queries.pageID ?? Api.booruType.initialPageID
 
-    return ResponseDto.createFromController(request, queries, Api, posts)
+    try {
+      const posts = await Api.getPosts(postQueryValues)
+
+      return ResponseDto.createFromController(request, queries, Api, posts)
+    }
+    //
+    catch (error) {
+
+      // TODO: Send a 204 status code
+      if (error instanceof EmptyDataError) {
+        return ResponseDto.createFromController(request, queries, Api, [])
+      }
+
+      throw error
+    }
   }
 
   @Get(':booruType/random-posts')
@@ -85,13 +97,25 @@ export class BooruController {
       order: queries.order
     }
 
-    const posts = await Api.getRandomPosts(postQueryValues)
-
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     queries.pageID = queries.pageID ?? Api.booruType.initialPageID
 
-    return ResponseDto.createFromController(request, queries, Api, posts)
+    try {
+      const posts = await Api.getRandomPosts(postQueryValues)
+
+      return ResponseDto.createFromController(request, queries, Api, posts)
+    }
+    //
+    catch (error) {
+
+      // TODO: Send a 204 status code
+      if (error instanceof EmptyDataError) {
+        return ResponseDto.createFromController(request, queries, Api, [])
+      }
+
+      throw error
+    }
   }
 
   @Get(':booruType/single-post')
@@ -155,8 +179,20 @@ export class BooruController {
     // @ts-ignore
     queries.pageID = queries.pageID ?? Api.booruType.initialPageID
 
-    const tags = await Api.getTags(postQueryValues)
+    try {
+      const tags = await Api.getTags(postQueryValues)
 
-    return ResponseDto.createFromController(request, queries, Api, tags)
+      return ResponseDto.createFromController(request, queries, Api, tags)
+    }
+    //
+    catch (error) {
+
+      // TODO: Send a 204 status code
+      if (error instanceof EmptyDataError) {
+        return ResponseDto.createFromController(request, queries, Api, [])
+      }
+
+      throw error
+    }
   }
 }
