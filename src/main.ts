@@ -1,51 +1,51 @@
-import {ValidationPipe} from '@nestjs/common'
-import {CorsOptions} from '@nestjs/common/interfaces/external/cors-options.interface'
-import {NestFactory} from '@nestjs/core'
-import {ConfigService} from '@nestjs/config'
-import {FastifyAdapter, NestFastifyApplication} from '@nestjs/platform-fastify'
+import { ValidationPipe } from '@nestjs/common'
+import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface'
+import { NestFactory } from '@nestjs/core'
+import { ConfigService } from '@nestjs/config'
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import helmet from '@fastify/helmet'
 import * as Sentry from '@sentry/node'
-import {AppModule} from './app.module'
-import {escapeRegExp} from 'lodash'
+import { AppModule } from './app.module'
+import { escapeRegExp } from 'lodash'
+import { AppClusterService } from './cluster.service'
 
 async function bootstrap() {
-    const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter())
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter())
 
-    const configService: ConfigService = app.get(ConfigService)
+  const configService: ConfigService = app.get(ConfigService)
 
-    // Sentry
-    Sentry.init({
-        enabled: configService.get<boolean>('SENTRY_ENABLED') || false,
-        dsn: configService.get<string>('SENTRY_DSN')
+  // Sentry
+  Sentry.init({
+    enabled: configService.get<boolean>('SENTRY_ENABLED') || false,
+    dsn: configService.get<string>('SENTRY_DSN')
 
-        // ignoreErrors: ['NoContentException', 'MethodNotAllowedException'],
+    // ignoreErrors: ['NoContentException', 'MethodNotAllowedException'],
+  })
+
+  app.register(helmet)
+
+  const allowedOrigin = configService.get<string>('ALLOWED_ORIGIN')
+  const allowedOriginRegex = new RegExp(escapeRegExp(allowedOrigin) + '$')
+
+  const corsOptions: CorsOptions = {
+    origin: configService.get<string>('NODE_ENV') === 'development' ? '*' : allowedOriginRegex,
+    credentials: true
+  }
+
+  app.enableCors(corsOptions)
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true, // Transform to DTO type
+      // transformOptions: { enableImplicitConversion: true },
+
+      whitelist: true, // Remove unnecessary properties
+      forbidNonWhitelisted: true // Sends "property <property> should not exist." error
     })
+  )
 
-    app.register(helmet)
-
-    const allowedOrigin = configService.get<string>('ALLOWED_ORIGIN')
-    const allowedOriginRegex = new RegExp(escapeRegExp(allowedOrigin) + '$')
-
-    const corsOptions: CorsOptions = {
-        origin: configService.get<string>('NODE_ENV') === 'development'
-            ? '*'
-            : allowedOriginRegex,
-        credentials: true
-    }
-
-    app.enableCors(corsOptions)
-
-    app.useGlobalPipes(
-        new ValidationPipe({
-            transform: true, // Transform to DTO type
-            // transformOptions: { enableImplicitConversion: true },
-
-            whitelist: true, // Remove unnecessary properties
-            forbidNonWhitelisted: true // Sends "property <property> should not exist." error
-        })
-    )
-
-    await app.listen(configService.get<number>('PORT'), '0.0.0.0')
+  await app.listen(configService.get<number>('PORT'), '0.0.0.0')
 }
 
-bootstrap()
+// bootstrap()
+AppClusterService.clusterize(bootstrap)
