@@ -13,5 +13,5 @@ npm login --scope=@alejandroakbal --registry=https://npm.pkg.github.com
 ## Installation
 
 ```bash
-npm install
+bun install
 ```

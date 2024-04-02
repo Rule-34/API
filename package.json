@@ -5,7 +5,7 @@
   "author": "Alejandro Akbal",
   "main": "dist/main.js",
   "scripts": {
-    "start": "node dist/main",
+    "start": "bun dist/main.js",
     "build": "nest build",
     "dev": "nest start --watch",
     "debug": "nest start --debug --watch",

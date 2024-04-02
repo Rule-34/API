@@ -1,0 +1,6 @@
+# TODO: Remove when bun supports .npmrc
+# https://github.com/oven-sh/bun/issues/643
+# https://github.com/oven-sh/bun/issues/4654
+
+[install.scopes]
+"@alejandroakbal" = { token = "$GITHUB_TOKEN", url = "https://npm.pkg.github.com" }
