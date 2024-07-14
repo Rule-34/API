@@ -73,14 +73,6 @@ export class BooruService {
     return Api
   }
 
-  public checkIfItsFromDefaultBooruList(domain: BooruObj['domain']) {
-    const booru = findBoorusWithValueByKey(domain, 'domain', defaultBooruList)
-
-    if (!booru || !booru.length) {
-      throw new UnauthorizedException()
-    }
-  }
-
   private getApiClassByType(booruType: BooruTypesStringEnum) {
     switch (booruType) {
       case BooruTypesStringEnum.DANBOORU:

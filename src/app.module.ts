@@ -3,11 +3,10 @@ import { HttpException, Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { RavenInterceptor, RavenModule } from 'nest-raven'
 import { BooruModule } from './booru/booru.module'
-import { AuthenticationModule } from './authentication/authentication.module'
 import { AppController } from './app.controller'
 
 @Module({
-  imports: [RavenModule, ConfigModule.forRoot({ isGlobal: true, cache: true }), BooruModule, AuthenticationModule],
+  imports: [RavenModule, ConfigModule.forRoot({ isGlobal: true, cache: true }), BooruModule],
 
   controllers: [AppController],
 
