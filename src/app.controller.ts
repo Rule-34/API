@@ -9,6 +9,6 @@ export class AppController {
 
   @Get('status')
   GetStatusAsText() {
-    return 'OK'
+    return 'If you can read this, it means that the API is working. You can close this tab.'
   }
 }
