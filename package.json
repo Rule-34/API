@@ -72,6 +72,6 @@
     "typescript": "^5.5.4"
   },
   "engines": {
-    "node": "20"
+    "bun": "^1"
   }
 }

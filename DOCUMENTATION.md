@@ -1,6 +1,6 @@
 # Documentation
 
-This API has gone through many rewrites and should **ONLY** be used on the `Rule 34 App`, so there is no public documentation for now.
+This API has gone through many rewrites and must **ONLY** be used on the `Rule 34 App`, so there is no public documentation for now.
 
 ## Authentication
 
@@ -10,8 +10,22 @@ Log in to GitHub packages with:
 npm login --scope=@alejandroakbal --registry=https://npm.pkg.github.com
 ```
 
-## Installation
+## Development
+
+### Installation
 
 ```bash
-npm install
+bun install
+```
+
+### Running
+
+```bash
+bun --bun run start
+```
+
+### Building
+
+```bash
+bun --bun run build
 ```
