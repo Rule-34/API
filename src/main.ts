@@ -4,15 +4,21 @@ import { NestFactory } from '@nestjs/core'
 import { ConfigService } from '@nestjs/config'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import helmet from '@fastify/helmet'
+import fastifyStatic from '@fastify/static'
 import * as Sentry from '@sentry/node'
 import { AppModule } from './app.module'
 import { escapeRegExp } from 'lodash'
 import { AppClusterService } from './cluster.service'
+import { join } from 'path'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter())
 
   const configService: ConfigService = app.get(ConfigService)
+
+  app.register(fastifyStatic, {
+    root: join(__dirname, '..', 'public')
+  })
 
   // Sentry
   Sentry.init({
