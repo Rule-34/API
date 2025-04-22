@@ -16,7 +16,7 @@ async function bootstrap() {
 
   const configService: ConfigService = app.get(ConfigService)
 
-  app.register(fastifyStatic, {
+  await app.register(fastifyStatic, {
     root: join(__dirname, '..', 'public')
   })
 
@@ -28,7 +28,7 @@ async function bootstrap() {
     // ignoreErrors: ['NoContentException', 'MethodNotAllowedException'],
   })
 
-  app.register(helmet)
+  await app.register(helmet)
 
   const allowedOrigin = configService.get<string>('ALLOWED_ORIGIN')
   const allowedOriginRegex = new RegExp(escapeRegExp(allowedOrigin) + '$')
