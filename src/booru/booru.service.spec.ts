@@ -23,22 +23,4 @@ describe('BooruController', () => {
 
     expect(service).toBeDefined()
   })
-
-  describe('checkIfItsFromDefaultBooruList', () => {
-    it('should throw if it is NOT from the default list', () => {
-      expect.assertions(1)
-
-      const testBooru = findBoorusWithValueByKey('xbooru.com', 'domain', completeBooruList)[0]
-
-      expect(() => service.checkIfItsFromDefaultBooruList(testBooru.domain)).toThrowError(UnauthorizedException)
-    })
-
-    it('should NOT throw if it is from the default list', () => {
-      expect.assertions(1)
-
-      const testBooru = defaultBooruList[0]
-
-      expect(() => service.checkIfItsFromDefaultBooruList(testBooru.domain)).not.toThrowError(UnauthorizedException)
-    })
-  })
 })

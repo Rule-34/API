@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import {
   BooruTypes,
   BooruTypesStringEnum,
@@ -17,7 +17,6 @@ import {
 } from '@alejandroakbal/universal-booru-wrapper'
 import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
-import { BooruObj, defaultBooruList, findBoorusWithValueByKey } from '../external/r34_shared/src/util/BooruUtils'
 
 @Injectable()
 export class BooruService {
