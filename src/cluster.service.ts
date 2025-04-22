@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { availableParallelism } from 'os'
 import cluster from 'cluster'
 
-// TODO: Set to 1 for development
-const numCPUs = availableParallelism()
+const numCPUs = process.env.NODE_ENV === 'development' ? 1 : availableParallelism()
 
 @Injectable()
 export class AppClusterService {
