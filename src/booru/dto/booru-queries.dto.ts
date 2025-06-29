@@ -178,7 +178,7 @@ export class booruQueryValuesPostsDTO extends booruQueriesDTO {
 
   @IsString()
   @IsNotEmpty()
-  @IsIn(['safe', 'questionable', 'explicit'])
+  @IsIn(['safe', 'general', 'sensitive', 'questionable', 'explicit'])
   @IsOptional()
   readonly rating: IBooruQueryValues['posts']['rating']
 
