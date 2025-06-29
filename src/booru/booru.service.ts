@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import {
   BooruTypes,
   BooruTypesStringEnum,
@@ -18,8 +19,19 @@ import {
 import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 
+interface BooruAuthCredential {
+  user: string
+  password: string
+}
+
+interface BooruAuthConfig {
+  [domain: string]: BooruAuthCredential[]
+}
+
 @Injectable()
 export class BooruService {
+  constructor(private readonly configService: ConfigService) {}
+
   public buildApiClass(params: BooruEndpointParamsDTO, queries: booruQueriesDTO): BooruTypes {
     const booruClass = this.getApiClassByType(params.booruType)
 
@@ -65,11 +77,81 @@ export class BooruService {
 
     // No default QueryValues are needed
 
-    const options: IBooruOptions = { HTTPScheme: queries.httpScheme }
+    // Resolve authentication credentials
+    const authCredentials = this.resolveAuthCredentials(queries)
+
+    const options: IBooruOptions = {
+      HTTPScheme: queries.httpScheme,
+      ...authCredentials
+    }
 
     const Api = new booruClass(endpoints, defaultQueryIdentifiers, undefined, options)
 
     return Api
+  }
+
+  private resolveAuthCredentials(queries: booruQueriesDTO): { auth?: { username: string; apiKey: string } } {
+    // Priority 1: Query parameters
+    if (queries.auth_user && queries.auth_pass) {
+      return {
+        auth: {
+          username: queries.auth_user,
+          apiKey: queries.auth_pass
+        }
+      }
+    }
+
+    // Priority 2: Environment variables
+    const envCredentials = this.getEnvironmentAuthCredentials(queries.baseEndpoint)
+
+    if (envCredentials) {
+      return {
+        auth: {
+          username: envCredentials.user,
+          apiKey: envCredentials.password
+        }
+      }
+    }
+
+    // Priority 3: No authentication
+    return {}
+  }
+
+  private getEnvironmentAuthCredentials(baseEndpoint: string): BooruAuthCredential | null {
+    const authConfigJson = this.configService.get<string>('BOORU_AUTH_CONFIG')
+
+    if (!authConfigJson) {
+      return null
+    }
+
+    try {
+      const authConfig: BooruAuthConfig = JSON.parse(authConfigJson)
+      const domain = this.extractDomainFromUrl(baseEndpoint)
+
+      const credentialsArray = authConfig[domain]
+      if (credentialsArray && credentialsArray.length > 0) {
+        // Use the first credential in the array (index 0)
+        return credentialsArray[0]
+      }
+    } catch (error) {
+      // Silently handle JSON parsing errors - fallback to no auth
+      console.warn('Failed to parse BOORU_AUTH_CONFIG:', error.message)
+    }
+
+    return null
+  }
+
+  private extractDomainFromUrl(url: string): string {
+    try {
+      // Handle URLs with or without protocol
+      const normalizedUrl = url.startsWith('http') ? url : `https://${url}`
+      const urlObj = new URL(normalizedUrl)
+      // Remove 'www.' prefix if present
+      return urlObj.hostname.replace(/^www\./, '')
+    } catch (error) {
+      // Fallback: extract domain from string manually
+      return url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0]
+    }
   }
 
   private getApiClassByType(booruType: BooruTypesStringEnum) {

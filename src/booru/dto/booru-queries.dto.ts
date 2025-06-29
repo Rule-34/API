@@ -151,7 +151,17 @@ abstract class booruDefaultQueryIdentifiersTagsDTO extends booruDefaultQueryIden
 /**
  * Final class that extends all others
  */
-export abstract class booruQueriesDTO extends booruDefaultQueryIdentifiersTagsDTO {}
+export abstract class booruQueriesDTO extends booruDefaultQueryIdentifiersTagsDTO {
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly auth_user?: string
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly auth_pass?: string
+}
 
 // ----- Classes with QueryValues ----- //
 export class booruQueryValuesPostsDTO extends booruQueriesDTO {
