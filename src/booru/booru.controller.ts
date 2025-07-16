@@ -17,7 +17,7 @@ export class BooruController {
   constructor(private readonly booruService: BooruService) {}
 
   @Get(':booruType/posts')
-  @Header('Cache-Control', 'public, max-age=250')
+  @Header('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600, stale-if-error=0') // 5 minutes, 1 hour
   async GetPosts(
     @Request()
     request,
@@ -99,7 +99,7 @@ export class BooruController {
   }
 
   @Get(':booruType/single-post')
-  @Header('Cache-Control', 'public, max-age=604800, immutable')
+  @Header('Cache-Control', 'public, max-age=604800, immutable') // 1 week
   async GetSinglePost(
     @Request()
     request,
@@ -120,7 +120,7 @@ export class BooruController {
   }
 
   @Get(':booruType/tags')
-  @Header('Cache-Control', 'public, max-age=3600')
+  @Header('Cache-Control', 'public, max-age=86400, stale-while-revalidate=86400, stale-if-error=0') // 1 day, 1 day
   async GetTags(
     @Request()
     request,
