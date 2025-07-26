@@ -167,14 +167,12 @@ export abstract class booruQueriesDTO extends booruDefaultQueryIdentifiersTagsDT
 export class booruQueryValuesPostsDTO extends booruQueriesDTO {
   @IsInt()
   @Min(1)
-  @Max(100)
   @Transform(({ value }) => parseInt(value))
   @IsOptional()
   readonly limit: IBooruQueryValues['posts']['limit']
 
   @IsInt()
   @Min(0)
-  @Max(1000)
   @Transform(({ value }) => parseInt(value))
   @IsOptional()
   readonly pageID: IBooruQueryValues['posts']['pageID']
@@ -227,14 +225,12 @@ export class booruQueryValuesTagsDTO extends booruQueriesDTO {
 
   @IsInt()
   @Min(1)
-  @Max(100)
   @Transform(({ value }) => parseInt(value))
   @IsOptional()
   readonly limit: IBooruQueryValues['tags']['limit']
 
   @IsInt()
   @Min(0)
-  @Max(1000)
   @Transform(({ value }) => parseInt(value))
   @IsOptional()
   readonly pageID: IBooruQueryValues['tags']['pageID']
