@@ -130,8 +130,8 @@ export class BooruService {
 
       const credentialsArray = authConfig[domain]
       if (credentialsArray && credentialsArray.length > 0) {
-        // Use the first credential in the array (index 0)
-        return credentialsArray[0]
+        // Randomly select from available credentials
+        return this.getRandomCredential(credentialsArray)
       }
     } catch (error) {
       // Silently handle JSON parsing errors - fallback to no auth
@@ -139,6 +139,12 @@ export class BooruService {
     }
 
     return null
+  }
+
+  private getRandomCredential(credentialsArray: BooruAuthCredential[]): BooruAuthCredential {
+    // Randomly select from available credentials for natural load distribution
+    const randomIndex = Math.floor(Math.random() * credentialsArray.length)
+    return credentialsArray[randomIndex]
   }
 
   private extractDomainFromUrl(url: string): string {

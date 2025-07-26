@@ -7,7 +7,6 @@ import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 
 describe('BooruService', () => {
   let service: BooruService
-  let configService: ConfigService
 
   const mockConfigService = {
     get: jest.fn()
@@ -18,7 +17,7 @@ describe('BooruService', () => {
   }
 
   const baseQueries: Partial<booruQueriesDTO> = {
-    baseEndpoint: 'https://gelbooru.com',
+    baseEndpoint: 'https://gelbooru.com'
   }
 
   beforeEach(async () => {
@@ -33,7 +32,6 @@ describe('BooruService', () => {
     }).compile()
 
     service = module.get<BooruService>(BooruService)
-    configService = module.get<ConfigService>(ConfigService)
 
     jest.clearAllMocks()
   })
@@ -105,20 +103,76 @@ describe('BooruService', () => {
       expect((api as any).options?.auth?.apiKey).toBeUndefined()
     })
 
-    it('should use first credential when multiple environment credentials exist', () => {
+    it('should randomly select from multiple environment credentials', () => {
       const envConfig = {
         'gelbooru.com': [
-          { user: 'first_user', password: 'first_pass' },
-          { user: 'second_user', password: 'second_pass' }
+          { user: 'user_1', password: 'pass_1' },
+          { user: 'user_2', password: 'pass_2' },
+          { user: 'user_3', password: 'pass_3' }
         ]
       }
       mockConfigService.get.mockReturnValue(JSON.stringify(envConfig))
 
       const queries = { ...baseQueries } as booruQueriesDTO
-      const api = service.buildApiClass(mockParams, queries)
+      const usedCredentials = new Set<string>()
 
-      expect((api as any).options?.auth?.username).toBe('first_user')
-      expect((api as any).options?.auth?.apiKey).toBe('first_pass')
+      // Make multiple requests to check random distribution
+      for (let i = 0; i < 20; i++) {
+        const api = service.buildApiClass(mockParams, queries)
+        const username = (api as any).options?.auth?.username
+
+        // Should be one of the configured users
+        expect(['user_1', 'user_2', 'user_3']).toContain(username)
+        usedCredentials.add(username)
+      }
+
+      // Over 20 requests, we should see some variety (not always the same credential)
+      // With 3 credentials and 20 requests, probability of using only 1 is extremely low
+      expect(usedCredentials.size).toBeGreaterThan(1)
+    })
+
+    it('should randomly select from credentials for different domains independently', () => {
+      const envConfig = {
+        'gelbooru.com': [
+          { user: 'gel_user_1', password: 'gel_pass_1' },
+          { user: 'gel_user_2', password: 'gel_pass_2' }
+        ],
+        'danbooru.donmai.us': [
+          { user: 'dan_user_1', password: 'dan_pass_1' },
+          { user: 'dan_user_2', password: 'dan_pass_2' }
+        ]
+      }
+      mockConfigService.get.mockReturnValue(JSON.stringify(envConfig))
+
+      const gelbooruQueries = { ...baseQueries, baseEndpoint: 'https://gelbooru.com' } as booruQueriesDTO
+      const danbooruQueries = { ...baseQueries, baseEndpoint: 'https://danbooru.donmai.us' } as booruQueriesDTO
+      const danbooruParams = { booruType: BooruTypesStringEnum.DANBOORU2 }
+
+      // Test gelbooru domain uses gelbooru credentials
+      const gelApi = service.buildApiClass(mockParams, gelbooruQueries)
+      const gelUsername = (gelApi as any).options?.auth?.username
+      expect(['gel_user_1', 'gel_user_2']).toContain(gelUsername)
+
+      // Test danbooru domain uses danbooru credentials
+      const danApi = service.buildApiClass(danbooruParams, danbooruQueries)
+      const danUsername = (danApi as any).options?.auth?.username
+      expect(['dan_user_1', 'dan_user_2']).toContain(danUsername)
+    })
+
+    it('should handle single credential without issues', () => {
+      const envConfig = {
+        'gelbooru.com': [{ user: 'single_user', password: 'single_pass' }]
+      }
+      mockConfigService.get.mockReturnValue(JSON.stringify(envConfig))
+
+      const queries = { ...baseQueries } as booruQueriesDTO
+
+      // Multiple requests should always use the single available credential
+      for (let i = 0; i < 5; i++) {
+        const api = service.buildApiClass(mockParams, queries)
+        expect((api as any).options?.auth?.username).toBe('single_user')
+        expect((api as any).options?.auth?.apiKey).toBe('single_pass')
+      }
     })
 
     it('should handle malformed environment configuration gracefully', () => {
