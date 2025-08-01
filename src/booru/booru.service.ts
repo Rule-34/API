@@ -18,19 +18,14 @@ import {
 } from '@alejandroakbal/universal-booru-wrapper'
 import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
-
-interface BooruAuthCredential {
-  user: string
-  password: string
-}
-
-interface BooruAuthConfig {
-  [domain: string]: BooruAuthCredential[]
-}
+import { BooruAuthManagerService } from './services/booru-auth-manager.service'
 
 @Injectable()
 export class BooruService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly authManager: BooruAuthManagerService
+  ) {}
 
   public buildApiClass(params: BooruEndpointParamsDTO, queries: booruQueriesDTO): BooruTypes {
     const booruClass = this.getApiClassByType(params.booruType)
@@ -101,8 +96,8 @@ export class BooruService {
       }
     }
 
-    // Priority 2: Environment variables
-    const envCredentials = this.getEnvironmentAuthCredentials(queries.baseEndpoint)
+    // Priority 2: Environment variables through auth manager
+    const envCredentials = this.authManager.getAvailableCredential(queries.baseEndpoint)
 
     if (envCredentials) {
       return {
@@ -115,49 +110,6 @@ export class BooruService {
 
     // Priority 3: No authentication
     return {}
-  }
-
-  private getEnvironmentAuthCredentials(baseEndpoint: string): BooruAuthCredential | null {
-    const authConfigJson = this.configService.get<string>('BOORU_AUTH_CONFIG')
-
-    if (!authConfigJson) {
-      return null
-    }
-
-    try {
-      const authConfig: BooruAuthConfig = JSON.parse(authConfigJson)
-      const domain = this.extractDomainFromUrl(baseEndpoint)
-
-      const credentialsArray = authConfig[domain]
-      if (credentialsArray && credentialsArray.length > 0) {
-        // Randomly select from available credentials
-        return this.getRandomCredential(credentialsArray)
-      }
-    } catch (error) {
-      // Silently handle JSON parsing errors - fallback to no auth
-      console.warn('Failed to parse BOORU_AUTH_CONFIG:', error.message)
-    }
-
-    return null
-  }
-
-  private getRandomCredential(credentialsArray: BooruAuthCredential[]): BooruAuthCredential {
-    // Randomly select from available credentials for natural load distribution
-    const randomIndex = Math.floor(Math.random() * credentialsArray.length)
-    return credentialsArray[randomIndex]
-  }
-
-  private extractDomainFromUrl(url: string): string {
-    try {
-      // Handle URLs with or without protocol
-      const normalizedUrl = url.startsWith('http') ? url : `https://${url}`
-      const urlObj = new URL(normalizedUrl)
-      // Remove 'www.' prefix if present
-      return urlObj.hostname.replace(/^www\./, '')
-    } catch (error) {
-      // Fallback: extract domain from string manually
-      return url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0]
-    }
   }
 
   private getApiClassByType(booruType: BooruTypesStringEnum) {

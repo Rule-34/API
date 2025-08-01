@@ -4,9 +4,11 @@ import { BooruTypesStringEnum } from '@alejandroakbal/universal-booru-wrapper'
 import { BooruService } from './booru.service'
 import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
+import { BooruAuthManagerService } from './services/booru-auth-manager.service'
 
 describe('BooruService', () => {
   let service: BooruService
+  let mockAuthManager: any
 
   const mockConfigService = {
     get: jest.fn()
@@ -21,12 +23,20 @@ describe('BooruService', () => {
   }
 
   beforeEach(async () => {
+    mockAuthManager = {
+      getAvailableCredential: jest.fn()
+    }
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BooruService,
         {
           provide: ConfigService,
           useValue: mockConfigService
+        },
+        {
+          provide: BooruAuthManagerService,
+          useValue: mockAuthManager
         }
       ]
     }).compile()
@@ -51,15 +61,13 @@ describe('BooruService', () => {
     })
 
     it('should fallback to environment variables when query parameters are missing or incomplete', () => {
-      const envConfig = {
-        'gelbooru.com': [{ user: 'env_user', password: 'env_pass' }]
-      }
-      mockConfigService.get.mockReturnValue(JSON.stringify(envConfig))
+      mockAuthManager.getAvailableCredential.mockReturnValue({ user: 'env_user', password: 'env_pass' })
 
       // Test with no query params
       const queriesNoAuth = { ...baseQueries } as booruQueriesDTO
       const apiNoAuth = service.buildApiClass(mockParams, queriesNoAuth)
 
+      expect(mockAuthManager.getAvailableCredential).toHaveBeenCalledWith('https://gelbooru.com')
       expect((apiNoAuth as any).options?.auth?.username).toBe('env_user')
       expect((apiNoAuth as any).options?.auth?.apiKey).toBe('env_pass')
 
@@ -75,10 +83,7 @@ describe('BooruService', () => {
     })
 
     it('should prioritize query parameters over environment variables', () => {
-      const envConfig = {
-        'gelbooru.com': [{ user: 'env_user', password: 'env_pass' }]
-      }
-      mockConfigService.get.mockReturnValue(JSON.stringify(envConfig))
+      mockAuthManager.getAvailableCredential.mockReturnValue({ user: 'env_user', password: 'env_pass' })
 
       const queries = {
         ...baseQueries,
@@ -88,106 +93,34 @@ describe('BooruService', () => {
 
       const api = service.buildApiClass(mockParams, queries)
 
-      // Should use query credentials, not env credentials
+      // Should use query credentials, not env credentials - auth manager should not be called
+      expect(mockAuthManager.getAvailableCredential).not.toHaveBeenCalled()
       expect((api as any).options?.auth?.username).toBe('query_user')
       expect((api as any).options?.auth?.apiKey).toBe('query_pass')
     })
 
     it('should create API without authentication when no credentials are available', () => {
-      mockConfigService.get.mockReturnValue(undefined)
+      mockAuthManager.getAvailableCredential.mockReturnValue(null)
 
       const queries = { ...baseQueries } as booruQueriesDTO
       const api = service.buildApiClass(mockParams, queries)
 
+      expect(mockAuthManager.getAvailableCredential).toHaveBeenCalledWith('https://gelbooru.com')
       expect((api as any).options?.auth?.username).toBeUndefined()
       expect((api as any).options?.auth?.apiKey).toBeUndefined()
     })
 
-    it('should randomly select from multiple environment credentials', () => {
-      const envConfig = {
-        'gelbooru.com': [
-          { user: 'user_1', password: 'pass_1' },
-          { user: 'user_2', password: 'pass_2' },
-          { user: 'user_3', password: 'pass_3' }
-        ]
-      }
-      mockConfigService.get.mockReturnValue(JSON.stringify(envConfig))
-
-      const queries = { ...baseQueries } as booruQueriesDTO
-      const usedCredentials = new Set<string>()
-
-      // Make multiple requests to check random distribution
-      for (let i = 0; i < 20; i++) {
-        const api = service.buildApiClass(mockParams, queries)
-        const username = (api as any).options?.auth?.username
-
-        // Should be one of the configured users
-        expect(['user_1', 'user_2', 'user_3']).toContain(username)
-        usedCredentials.add(username)
-      }
-
-      // Over 20 requests, we should see some variety (not always the same credential)
-      // With 3 credentials and 20 requests, probability of using only 1 is extremely low
-      expect(usedCredentials.size).toBeGreaterThan(1)
-    })
-
-    it('should randomly select from credentials for different domains independently', () => {
-      const envConfig = {
-        'gelbooru.com': [
-          { user: 'gel_user_1', password: 'gel_pass_1' },
-          { user: 'gel_user_2', password: 'gel_pass_2' }
-        ],
-        'danbooru.donmai.us': [
-          { user: 'dan_user_1', password: 'dan_pass_1' },
-          { user: 'dan_user_2', password: 'dan_pass_2' }
-        ]
-      }
-      mockConfigService.get.mockReturnValue(JSON.stringify(envConfig))
-
-      const gelbooruQueries = { ...baseQueries, baseEndpoint: 'https://gelbooru.com' } as booruQueriesDTO
-      const danbooruQueries = { ...baseQueries, baseEndpoint: 'https://danbooru.donmai.us' } as booruQueriesDTO
-      const danbooruParams = { booruType: BooruTypesStringEnum.DANBOORU2 }
-
-      // Test gelbooru domain uses gelbooru credentials
-      const gelApi = service.buildApiClass(mockParams, gelbooruQueries)
-      const gelUsername = (gelApi as any).options?.auth?.username
-      expect(['gel_user_1', 'gel_user_2']).toContain(gelUsername)
-
-      // Test danbooru domain uses danbooru credentials
-      const danApi = service.buildApiClass(danbooruParams, danbooruQueries)
-      const danUsername = (danApi as any).options?.auth?.username
-      expect(['dan_user_1', 'dan_user_2']).toContain(danUsername)
-    })
-
-    it('should handle single credential without issues', () => {
-      const envConfig = {
-        'gelbooru.com': [{ user: 'single_user', password: 'single_pass' }]
-      }
-      mockConfigService.get.mockReturnValue(JSON.stringify(envConfig))
-
-      const queries = { ...baseQueries } as booruQueriesDTO
-
-      // Multiple requests should always use the single available credential
-      for (let i = 0; i < 5; i++) {
-        const api = service.buildApiClass(mockParams, queries)
-        expect((api as any).options?.auth?.username).toBe('single_user')
-        expect((api as any).options?.auth?.apiKey).toBe('single_pass')
-      }
-    })
-
-    it('should handle malformed environment configuration gracefully', () => {
-      mockConfigService.get.mockReturnValue('invalid-json{')
-
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation()
+    it('should use auth manager for credential selection', () => {
+      mockAuthManager.getAvailableCredential.mockReturnValue({ user: 'managed_user', password: 'managed_pass' })
 
       const queries = { ...baseQueries } as booruQueriesDTO
       const api = service.buildApiClass(mockParams, queries)
 
-      expect(consoleSpy).toHaveBeenCalledWith('Failed to parse BOORU_AUTH_CONFIG:', expect.any(String))
-      expect((api as any).options?.auth?.username).toBeUndefined()
-      expect((api as any).options?.auth?.apiKey).toBeUndefined()
-
-      consoleSpy.mockRestore()
+      expect(mockAuthManager.getAvailableCredential).toHaveBeenCalledWith('https://gelbooru.com')
+      expect((api as any).options?.auth?.username).toBe('managed_user')
+      expect((api as any).options?.auth?.apiKey).toBe('managed_pass')
     })
+
+
   })
 })

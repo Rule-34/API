@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { CallHandler, ExecutionContext } from '@nestjs/common'
-import { Observable, throwError } from 'rxjs'
+import { throwError } from 'rxjs'
 import { BooruErrorsInterceptor } from './booru-exception.interceptor'
 import { EmptyDataError, EndpointError, HttpError } from '@alejandroakbal/universal-booru-wrapper'
 import { NoContentException } from '../../common/exceptions/no-content.exception'
+import { BooruAuthManagerService } from '../services/booru-auth-manager.service'
 
 describe('BooruErrorsInterceptor', () => {
   let interceptor: BooruErrorsInterceptor
@@ -11,8 +12,18 @@ describe('BooruErrorsInterceptor', () => {
   let mockCallHandler: CallHandler
 
   beforeEach(async () => {
+    const mockAuthManager = {
+      reportAuthFailure: jest.fn()
+    }
+
     const module: TestingModule = await Test.createTestingModule({
-      providers: [BooruErrorsInterceptor]
+      providers: [
+        BooruErrorsInterceptor,
+        {
+          provide: BooruAuthManagerService,
+          useValue: mockAuthManager
+        }
+      ]
     }).compile()
 
     interceptor = module.get<BooruErrorsInterceptor>(BooruErrorsInterceptor)
