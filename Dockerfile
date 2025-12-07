@@ -54,6 +54,9 @@ USER node
 # Expose port (configurable via PORT env var)
 EXPOSE 3000
 
+# Health check using the root endpoint that returns { status: 'OK' }
+HEALTHCHECK CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+
 # Set production environment
 ENV NODE_ENV=production
 
