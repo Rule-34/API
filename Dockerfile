@@ -35,7 +35,6 @@ COPY package.json package-lock.json ./
 # Set up GitHub token for private npm packages
 RUN echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> .npmrc
 
-# Install only production dependencies
 RUN npm ci --omit=dev
 
 # Remove .npmrc after install (don't leak token)
