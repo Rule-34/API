@@ -41,9 +41,9 @@ RUN npm ci --omit=dev
 # Remove .npmrc after install (don't leak token)
 RUN rm -f .npmrc
 
-COPY --from=builder /app/dist ./dist
+COPY --from=builder --chown=node:node /app/dist ./dist
 
-COPY --from=builder /app/public ./public
+COPY --from=builder --chown=node:node /app/public ./public
 
 USER node
 
@@ -51,4 +51,5 @@ EXPOSE 3000
 
 HEALTHCHECK CMD wget --no-verbose --spider http://localhost:3000/ || exit 1
 
+# Use `docker run --init` or `init: true` in compose for proper signal handling
 CMD ["node", "dist/main.js"]
