@@ -25,13 +25,15 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
+RUN apk add --no-cache tini
+
 COPY --from=builder --chown=node:node /app/package.json ./
 COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 
-RUN npm prune --omit=dev
-
 COPY --from=builder --chown=node:node /app/dist ./dist
 COPY --from=builder --chown=node:node /app/public ./public
+
+RUN npm prune --omit=dev
 
 USER node
 
@@ -39,5 +41,5 @@ EXPOSE 3000
 
 HEALTHCHECK CMD wget --no-verbose --spider http://127.0.0.1:3000/ || exit 1
 
-# Use `docker run --init` or `init: true` in compose for proper signal handling
+ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["node", "dist/main.js"]
