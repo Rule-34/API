@@ -37,7 +37,8 @@ USER node
 
 EXPOSE 3000
 
-HEALTHCHECK CMD wget --no-verbose --spider http://127.0.0.1:3000/ || exit 1
+HEALTHCHECK --start-period=10s --interval=10s --timeout=5s --retries=3 \
+    CMD wget --no-verbose --spider http://127.0.0.1:3000/ || exit 1
 
 # Use `docker run --init` or `init: true` in compose for proper signal handling
 CMD ["node", "dist/main.js"]
