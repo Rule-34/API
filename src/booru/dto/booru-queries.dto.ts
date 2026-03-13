@@ -18,6 +18,7 @@ import {
   Min
 } from 'class-validator'
 import { Transform } from 'class-transformer'
+import { BadRequestException } from '@nestjs/common'
 
 abstract class booruEndpointsDTO {
   @IsFQDN()
@@ -184,7 +185,13 @@ export class booruQueryValuesPostsDTO extends booruQueriesDTO {
     value
       .trim()
       .split('|')
-      .map((tag) => decodeURIComponent(tag))
+      .map((tag) => {
+        try {
+          return decodeURIComponent(tag)
+        } catch (error) {
+          throw new BadRequestException('Invalid tag encoding')
+        }
+      })
   )
   @IsOptional()
   readonly tags: IBooruQueryValues['posts']['tags']
