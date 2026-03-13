@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common'
 import { plainToInstance } from 'class-transformer'
 import { booruQueryValuesPostsDTO } from './booru-queries.dto'
 
@@ -17,6 +18,28 @@ describe('booruQueryValuesPostsDTO', () => {
       })
 
       expect(dto.tags).toEqual(['panty_&_stocking_with_garterbelt', 'rating:safe'])
+    })
+
+    it('should keep non-encoded percent tags unchanged', () => {
+      const dto = plainToInstance(booruQueryValuesPostsDTO, {
+        tags: '100%_real'
+      })
+
+      expect(dto.tags).toEqual(['100%_real'])
+    })
+
+    it('should throw BadRequestException when encoded tag decoding fails', () => {
+      expect(() =>
+        plainToInstance(booruQueryValuesPostsDTO, {
+          tags: 'bad%25%'
+        })
+      ).toThrow(BadRequestException)
+
+      expect(() =>
+        plainToInstance(booruQueryValuesPostsDTO, {
+          tags: 'bad%25%'
+        })
+      ).toThrow('Invalid tag encoding')
     })
   })
 })

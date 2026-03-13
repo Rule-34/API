@@ -186,9 +186,13 @@ export class booruQueryValuesPostsDTO extends booruQueriesDTO {
       .trim()
       .split('|')
       .map((tag) => {
+        if (!/%[0-9A-Fa-f]{2}/.test(tag)) {
+          return tag
+        }
+
         try {
           return decodeURIComponent(tag)
-        } catch (error) {
+        } catch {
           throw new BadRequestException('Invalid tag encoding')
         }
       })
