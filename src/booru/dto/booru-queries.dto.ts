@@ -180,7 +180,12 @@ export class booruQueryValuesPostsDTO extends booruQueriesDTO {
   @IsArray()
   @ArrayNotEmpty()
   @ArrayNotContains([''])
-  @Transform(({ value }) => value.trim().split('|'))
+  @Transform(({ value }) =>
+    value
+      .trim()
+      .split('|')
+      .map((tag) => decodeURIComponent(tag))
+  )
   @IsOptional()
   readonly tags: IBooruQueryValues['posts']['tags']
 
