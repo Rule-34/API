@@ -61,5 +61,19 @@ describe('booruQueryValuesPostsDTO', () => {
         })
       ).toThrow('Invalid tag encoding')
     })
+
+    it('should return undefined when tags is undefined', () => {
+      const dto = plainToInstance(booruQueryValuesPostsDTO, {})
+
+      expect(dto.tags).toBeUndefined()
+    })
+
+    it('should return null when tags is null', () => {
+      const dto = plainToInstance(booruQueryValuesPostsDTO, {
+        tags: null
+      })
+
+      expect(dto.tags).toBeNull()
+    })
   })
 })
