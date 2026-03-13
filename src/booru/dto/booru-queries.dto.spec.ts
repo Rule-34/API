@@ -20,6 +20,26 @@ describe('booruQueryValuesPostsDTO', () => {
       expect(dto.tags).toEqual(['panty_&_stocking_with_garterbelt', 'rating:safe'])
     })
 
+    it('should normalize array tag inputs and keep tag array shape', () => {
+      const dto = plainToInstance(booruQueryValuesPostsDTO, {
+        tags: ['panty_%26_stocking_with_garterbelt|rating%3Asafe', 'score%3A%3E100']
+      })
+
+      expect(dto.tags).toEqual([
+        'panty_&_stocking_with_garterbelt',
+        'rating:safe',
+        'score:>100'
+      ])
+    })
+
+    it('should normalize non-string tag input without throwing', () => {
+      const dto = plainToInstance(booruQueryValuesPostsDTO, {
+        tags: 123
+      })
+
+      expect(dto.tags).toEqual(['123'])
+    })
+
     it('should keep non-encoded percent tags unchanged', () => {
       const dto = plainToInstance(booruQueryValuesPostsDTO, {
         tags: '100%_real'

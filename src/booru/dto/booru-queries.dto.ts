@@ -181,10 +181,14 @@ export class booruQueryValuesPostsDTO extends booruQueriesDTO {
   @IsArray()
   @ArrayNotEmpty()
   @ArrayNotContains([''])
-  @Transform(({ value }) =>
-    value
-      .trim()
-      .split('|')
+  @Transform(({ value }) => {
+    if (value === undefined || value === null) {
+      return value
+    }
+
+    return (Array.isArray(value) ? value : [value])
+      .map((tag) => (typeof tag === 'string' ? tag : String(tag)))
+      .flatMap((tag) => tag.trim().split('|'))
       .map((tag) => {
         if (!/%[0-9A-Fa-f]{2}/.test(tag)) {
           return tag
@@ -196,7 +200,7 @@ export class booruQueryValuesPostsDTO extends booruQueriesDTO {
           throw new BadRequestException('Invalid tag encoding')
         }
       })
-  )
+  })
   @IsOptional()
   readonly tags: IBooruQueryValues['posts']['tags']
 
