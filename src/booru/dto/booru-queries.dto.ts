@@ -186,9 +186,9 @@ export class booruQueryValuesPostsDTO extends booruQueriesDTO {
       return value
     }
 
-    return (Array.isArray(value) ? value : [value]).flatMap((tag) =>
-      typeof tag === 'string' ? tag.trim().split('|') : [tag]
-    )
+    return (Array.isArray(value) ? value : [value])
+      .map((tag) => (typeof tag === 'string' ? tag : String(tag)))
+      .map((tag) => tag.trim())
   })
   @IsOptional()
   readonly tags: IBooruQueryValues['posts']['tags']

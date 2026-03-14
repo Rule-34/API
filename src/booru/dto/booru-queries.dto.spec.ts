@@ -31,34 +31,34 @@ describe('booruQueryValuesPostsDTO request handling', () => {
     await app.close()
   })
 
-  it('should rely on request parsing for percent-decoding and split tags by pipe', async () => {
+  it('should rely on request parsing for percent-decoding and preserve comma OR-groups', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/dto-test/posts?baseEndpoint=gelbooru.com&tags=panty_%26_stocking_with_garterbelt%7Crating%3Asafe'
+      url: '/dto-test/posts?baseEndpoint=gelbooru.com&tags=panty_%26_stocking_with_garterbelt%2Cblue_hair'
     })
 
     const body = JSON.parse(response.body)
 
     expect(response.statusCode).toBe(200)
-    expect(body.tags).toEqual(['panty_&_stocking_with_garterbelt', 'rating:safe'])
+    expect(body.tags).toEqual(['panty_&_stocking_with_garterbelt,blue_hair'])
   })
 
-  it('should normalize repeated tags query params and split each entry', async () => {
+  it('should normalize repeated tags query params and keep each OR-group token intact', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/dto-test/posts?baseEndpoint=gelbooru.com&tags=artist%3Afoo%7Crating%3Asafe&tags=score%3A%3E100'
+      url: '/dto-test/posts?baseEndpoint=gelbooru.com&tags=artist%3Afoo%2Crating%3Asafe&tags=score%3A%3E100'
     })
 
     const body = JSON.parse(response.body)
 
     expect(response.statusCode).toBe(200)
-    expect(body.tags).toEqual(['artist:foo', 'rating:safe', 'score:>100'])
+    expect(body.tags).toEqual(['artist:foo,rating:safe', 'score:>100'])
   })
 
-  it('should reject empty tags created after pipe splitting', async () => {
+  it('should reject empty tags produced by repeated query params', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/dto-test/posts?baseEndpoint=gelbooru.com&tags=tag1%7C'
+      url: '/dto-test/posts?baseEndpoint=gelbooru.com&tags=tag1&tags='
     })
 
     expect(response.statusCode).toBe(400)
