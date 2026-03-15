@@ -18,6 +18,26 @@ export class BooruAuthManagerService implements OnModuleInit {
     'www.rule34.xxx': 'rule34.xxx',
     'api.rule34.xxx': 'rule34.xxx'
   }
+  private readonly sensitiveParams = new Set([
+    'user_id',
+    'api_key',
+    'password',
+    'password_hash',
+    'pass_hash',
+    'auth_user',
+    'auth_pass',
+    'token',
+    'secret',
+    'key',
+    'access_token',
+    'auth_token',
+    'session_id',
+    'session',
+    'login',
+    'username',
+    'user',
+    'hash'
+  ])
 
   constructor(private readonly configService: ConfigService) {}
 
@@ -67,7 +87,7 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
 
     const availableCredentials = credentialsArray.filter(
-      (credential) => !this.isCredentialDisabled(normalizedDomain, credential.user)
+      (credential) => !this.isCredentialDisabled(normalizedDomain, credential.user, credential.password)
     )
 
     if (availableCredentials.length === 0) {
@@ -89,24 +109,25 @@ export class BooruAuthManagerService implements OnModuleInit {
 
   public reportAuthFailure(authFailure: AuthFailureEvent): void {
     const normalizedDomain = this.normalizeDomain(authFailure.domain)
-    const credentialKey = `${normalizedDomain}:${authFailure.user}`
+    const sanitizedError = this.sanitizeErrorMessage(authFailure.error)
 
-    if (this.disabledCredentials.has(credentialKey)) {
+    if (this.isCredentialDisabled(normalizedDomain, authFailure.user, authFailure.password)) {
       return
     }
 
     const disabledCredential: DisabledCredential = {
       domain: normalizedDomain,
       user: authFailure.user,
+      password: authFailure.password,
       disabledAt: authFailure.timestamp,
-      reason: authFailure.error
+      reason: sanitizedError
     }
 
     this.disableCredentialLocally(disabledCredential)
     this.broadcastDisabledCredential(disabledCredential)
 
     const stats = this.getDomainStats(normalizedDomain)
-    console.error(`❌ Auth failure for ${normalizedDomain}:${authFailure.user} - ${authFailure.error}`)
+    console.error(`❌ Auth failure for ${normalizedDomain}:${authFailure.user} - ${sanitizedError}`)
     console.warn(
       `📊 ${normalizedDomain} credentials: ${stats.available}/${stats.total} available, ${stats.disabled} disabled`
     )
@@ -114,7 +135,7 @@ export class BooruAuthManagerService implements OnModuleInit {
 
   private disableCredentialLocally(credential: DisabledCredential): void {
     const normalizedDomain = this.normalizeDomain(credential.domain)
-    const credentialKey = `${normalizedDomain}:${credential.user}`
+    const credentialKey = this.getCredentialKey(normalizedDomain, credential.user, credential.password)
     this.disabledCredentials.add(credentialKey)
   }
 
@@ -128,10 +149,20 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
   }
 
-  private isCredentialDisabled(domain: string, user: string): boolean {
+  private isCredentialDisabled(domain: string, user: string, password?: string): boolean {
     const normalizedDomain = this.normalizeDomain(domain)
-    const credentialKey = `${normalizedDomain}:${user}`
-    return this.disabledCredentials.has(credentialKey)
+    const userScopedCredentialKey = this.getCredentialKey(normalizedDomain, user)
+
+    if (this.disabledCredentials.has(userScopedCredentialKey)) {
+      return true
+    }
+
+    if (password === undefined) {
+      return false
+    }
+
+    const passwordScopedCredentialKey = this.getCredentialKey(normalizedDomain, user, password)
+    return this.disabledCredentials.has(passwordScopedCredentialKey)
   }
 
   public getCredentialStats(): AuthCredentialStats[] {
@@ -143,7 +174,7 @@ export class BooruAuthManagerService implements OnModuleInit {
   private getDomainStats(domain: string): AuthCredentialStats {
     const normalizedDomain = this.normalizeDomain(domain)
     const credentials = this.authConfig[normalizedDomain] || []
-    const disabled = credentials.filter((cred) => this.isCredentialDisabled(normalizedDomain, cred.user)).length
+    const disabled = credentials.filter((cred) => this.isCredentialDisabled(normalizedDomain, cred.user, cred.password)).length
 
     return {
       domain: normalizedDomain,
@@ -180,6 +211,17 @@ export class BooruAuthManagerService implements OnModuleInit {
     return Array.from(uniqueCredentials.values())
   }
 
+  private getCredentialKey(domain: string, user: string, password?: string): string {
+    const encodedUser = encodeURIComponent(user)
+
+    if (password === undefined) {
+      return `${domain}:${encodedUser}`
+    }
+
+    const encodedPassword = encodeURIComponent(password)
+    return `${domain}:${encodedUser}:${encodedPassword}`
+  }
+
   private normalizeDomain(domain: string): string {
     const extractedDomain = this.extractDomainFromUrl(domain)
     return this.domainAliases[extractedDomain] || extractedDomain
@@ -198,12 +240,42 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
   }
 
+  private sanitizeErrorMessage(message: string): string {
+    if (!message) {
+      return message
+    }
+
+    const urlPattern = /https?:\/\/[^\s]+/g
+    return message.replace(urlPattern, (url) => this.sanitizeUrl(url))
+  }
+
+  private sanitizeUrl(url: string): string {
+    try {
+      const urlObj = new URL(url)
+
+      for (const [key] of urlObj.searchParams.entries()) {
+        if (this.sensitiveParams.has(key.toLowerCase())) {
+          urlObj.searchParams.set(key, 'REDACTED')
+        }
+      }
+
+      return urlObj.toString()
+    } catch (error) {
+      return url
+    }
+  }
+
   public getDisabledCredentials(): DisabledCredential[] {
     return Array.from(this.disabledCredentials).map((key) => {
-      const [domain, user] = key.split(':')
+      const [domain, encodedUser, ...encodedPasswordParts] = key.split(':')
+      const user = decodeURIComponent(encodedUser)
+      const password =
+        encodedPasswordParts.length > 0 ? decodeURIComponent(encodedPasswordParts.join(':')) : undefined
+
       return {
         domain,
         user,
+        password,
         disabledAt: new Date(),
         reason: 'Authentication failure'
       }

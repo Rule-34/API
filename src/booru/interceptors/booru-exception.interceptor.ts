@@ -119,6 +119,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest()
     const baseEndpoint = request.query?.baseEndpoint || request.body?.baseEndpoint
     const authUser = request.query?.auth_user || request.body?.auth_user
+    const authPass = request.query?.auth_pass || request.body?.auth_pass
 
     if (!baseEndpoint || !authUser) {
       return
@@ -128,6 +129,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     const authFailure: AuthFailureEvent = {
       domain,
       user: authUser,
+      password: authPass,
       error: this.getAuthErrorMessage(error),
       timestamp: new Date()
     }

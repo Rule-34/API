@@ -10,6 +10,7 @@ export interface BooruAuthConfig {
 export interface DisabledCredential {
   domain: string
   user: string
+  password?: string
   disabledAt: Date
   reason?: string
 }
@@ -24,6 +25,7 @@ export interface AuthCredentialStats {
 export interface AuthFailureEvent {
   domain: string
   user: string
+  password?: string
   error: string
   timestamp: Date
 }

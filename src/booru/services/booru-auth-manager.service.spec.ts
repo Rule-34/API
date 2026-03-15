@@ -15,7 +15,11 @@ describe('BooruAuthManagerService', () => {
         { user: 'api-user', password: 'api-pass' }
       ],
       'gelbooru.com': [{ user: 'gel-user', password: 'gel-pass' }],
-      'www.gelbooru.com': [{ user: 'www-gel-user', password: 'www-gel-pass' }]
+      'www.gelbooru.com': [{ user: 'www-gel-user', password: 'www-gel-pass' }],
+      'same-user.test': [
+        { user: 'shared-user', password: 'first-pass' },
+        { user: 'shared-user', password: 'second-pass' }
+      ]
     })
 
     const module: TestingModule = await Test.createTestingModule({
@@ -80,5 +84,67 @@ describe('BooruAuthManagerService', () => {
     expect(
       disabledCredentials.some((cred) => cred.domain === 'rule34.xxx' && cred.user === selectedCredential!.user)
     ).toBe(true)
+  })
+
+  it('should redact sensitive auth params in auth failure logs', () => {
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    service.reportAuthFailure({
+      domain: 'https://www.gelbooru.com/index.php?page=dapi',
+      user: 'www-gel-user',
+      password: 'www-gel-pass',
+      error:
+        'HTTP 403: Forbidden for https://www.gelbooru.com/index.php?page=dapi&auth_user=www-gel-user&auth_pass=secret123',
+      timestamp: new Date()
+    })
+
+    const loggedMessage = errorSpy.mock.calls[0][0]
+
+    expect(loggedMessage).toContain('auth_user=REDACTED')
+    expect(loggedMessage).toContain('auth_pass=REDACTED')
+    expect(loggedMessage).not.toContain('auth_pass=secret123')
+
+    errorSpy.mockRestore()
+    warnSpy.mockRestore()
+  })
+
+  it('should disable only matching same-user credential when password is provided', () => {
+    service.reportAuthFailure({
+      domain: 'same-user.test',
+      user: 'shared-user',
+      password: 'first-pass',
+      error: 'HTTP 403',
+      timestamp: new Date()
+    })
+
+    const stats = service.getCredentialStats()
+    const sameUserStats = stats.find((stat) => stat.domain === 'same-user.test')
+
+    expect(sameUserStats).toEqual({
+      domain: 'same-user.test',
+      total: 2,
+      available: 1,
+      disabled: 1
+    })
+  })
+
+  it('should disable all same-user credentials when password is missing', () => {
+    service.reportAuthFailure({
+      domain: 'same-user.test',
+      user: 'shared-user',
+      error: 'HTTP 403',
+      timestamp: new Date()
+    })
+
+    const stats = service.getCredentialStats()
+    const sameUserStats = stats.find((stat) => stat.domain === 'same-user.test')
+
+    expect(sameUserStats).toEqual({
+      domain: 'same-user.test',
+      total: 2,
+      available: 0,
+      disabled: 2
+    })
   })
 })
