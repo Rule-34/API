@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { availableParallelism } from 'os'
 import cluster from 'cluster'
 import { IpcAuthMessage, DisabledCredential } from './booru/interfaces/auth-manager.interface'
+import { createCredentialKey } from './booru/services/credential-key.util'
 
 const numCPUs = process.env.NODE_ENV === 'development' ? 1 : availableParallelism()
 
@@ -34,7 +35,7 @@ export class AppClusterService {
     cluster.on('message', (worker, message: IpcAuthMessage) => {
       if (message.type === 'DISABLE_CREDENTIAL') {
         const credential = message.payload as DisabledCredential
-        const credentialKey = this.getCredentialKey(credential.domain, credential.user, credential.password)
+        const credentialKey = createCredentialKey(credential.domain, credential.user, credential.password)
 
         // Store in primary process
         this.disabledCredentials.add(credentialKey)
@@ -53,17 +54,6 @@ export class AppClusterService {
         )
       }
     })
-  }
-
-  private static getCredentialKey(domain: string, user: string, password?: string): string {
-    const encodedUser = encodeURIComponent(user)
-
-    if (password === undefined) {
-      return `${domain}:${encodedUser}`
-    }
-
-    const encodedPassword = encodeURIComponent(password)
-    return `${domain}:${encodedUser}:${encodedPassword}`
   }
 
   static getDisabledCredentials(): Set<string> {

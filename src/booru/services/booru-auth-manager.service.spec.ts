@@ -192,4 +192,25 @@ describe('BooruAuthManagerService', () => {
       disabled: 0
     })
   })
+
+  it('should parse disabled credentials when domain contains a colon', () => {
+    service.reportAuthFailure({
+      domain: 'invalid-domain:test',
+      user: 'domain-user',
+      password: 'domain-pass',
+      error: 'HTTP 403',
+      timestamp: new Date()
+    })
+
+    const disabledCredentials = service.getDisabledCredentials()
+
+    expect(
+      disabledCredentials.some(
+        (credential) =>
+          credential.domain === 'invalid-domain:test' &&
+          credential.user === 'domain-user' &&
+          credential.password === 'domain-pass'
+      )
+    ).toBe(true)
+  })
 })

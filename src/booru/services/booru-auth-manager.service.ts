@@ -10,6 +10,7 @@ import {
   IpcAuthMessage
 } from '../interfaces/auth-manager.interface'
 import { SENSITIVE_AUTH_PARAMS } from '../constants/sensitive-auth-params'
+import { createCredentialKey, parseCredentialKey } from './credential-key.util'
 
 @Injectable()
 export class BooruAuthManagerService implements OnModuleInit {
@@ -117,7 +118,7 @@ export class BooruAuthManagerService implements OnModuleInit {
 
   private disableCredentialLocally(credential: DisabledCredential): void {
     const normalizedDomain = this.normalizeDomain(credential.domain)
-    const credentialKey = this.getCredentialKey(normalizedDomain, credential.user, credential.password)
+    const credentialKey = createCredentialKey(normalizedDomain, credential.user, credential.password)
     this.disabledCredentials.add(credentialKey)
   }
 
@@ -133,7 +134,7 @@ export class BooruAuthManagerService implements OnModuleInit {
 
   private isCredentialDisabled(domain: string, user: string, password?: string): boolean {
     const normalizedDomain = this.normalizeDomain(domain)
-    const userScopedCredentialKey = this.getCredentialKey(normalizedDomain, user)
+    const userScopedCredentialKey = createCredentialKey(normalizedDomain, user)
 
     if (this.disabledCredentials.has(userScopedCredentialKey)) {
       return true
@@ -143,7 +144,7 @@ export class BooruAuthManagerService implements OnModuleInit {
       return false
     }
 
-    const passwordScopedCredentialKey = this.getCredentialKey(normalizedDomain, user, password)
+    const passwordScopedCredentialKey = createCredentialKey(normalizedDomain, user, password)
     return this.disabledCredentials.has(passwordScopedCredentialKey)
   }
 
@@ -193,17 +194,6 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
 
     return Array.from(uniqueCredentials.values())
-  }
-
-  private getCredentialKey(domain: string, user: string, password?: string): string {
-    const encodedUser = encodeURIComponent(user)
-
-    if (password === undefined) {
-      return `${domain}:${encodedUser}`
-    }
-
-    const encodedPassword = encodeURIComponent(password)
-    return `${domain}:${encodedUser}:${encodedPassword}`
   }
 
   private normalizeDomain(domain: string): string {
@@ -265,9 +255,7 @@ export class BooruAuthManagerService implements OnModuleInit {
 
   public getDisabledCredentials(): DisabledCredential[] {
     return Array.from(this.disabledCredentials).map((key) => {
-      const [domain, encodedUser, ...encodedPasswordParts] = key.split(':')
-      const user = decodeURIComponent(encodedUser)
-      const password = encodedPasswordParts.length > 0 ? decodeURIComponent(encodedPasswordParts.join(':')) : undefined
+      const { domain, user, password } = parseCredentialKey(key)
 
       return {
         domain,
