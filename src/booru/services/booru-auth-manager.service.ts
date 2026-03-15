@@ -14,6 +14,10 @@ import {
 export class BooruAuthManagerService implements OnModuleInit {
   private disabledCredentials = new Set<string>()
   private authConfig: BooruAuthConfig = {}
+  private readonly domainAliases: Record<string, string> = {
+    'www.rule34.xxx': 'rule34.xxx',
+    'api.rule34.xxx': 'rule34.xxx'
+  }
 
   constructor(private readonly configService: ConfigService) {}
 
@@ -31,7 +35,8 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
 
     try {
-      this.authConfig = JSON.parse(authConfigJson)
+      const parsedAuthConfig = JSON.parse(authConfigJson) as BooruAuthConfig
+      this.authConfig = this.normalizeAuthConfig(parsedAuthConfig)
       const stats = this.getCredentialStats()
       console.log(
         '🔐 Auth manager initialized with credentials for:',
@@ -54,7 +59,7 @@ export class BooruAuthManagerService implements OnModuleInit {
   }
 
   public getAvailableCredential(domain: string): BooruAuthCredential | null {
-    const normalizedDomain = this.extractDomainFromUrl(domain)
+    const normalizedDomain = this.normalizeDomain(domain)
     const credentialsArray = this.authConfig[normalizedDomain]
 
     if (!credentialsArray || credentialsArray.length === 0) {
@@ -83,14 +88,15 @@ export class BooruAuthManagerService implements OnModuleInit {
   }
 
   public reportAuthFailure(authFailure: AuthFailureEvent): void {
-    const credentialKey = `${authFailure.domain}:${authFailure.user}`
+    const normalizedDomain = this.normalizeDomain(authFailure.domain)
+    const credentialKey = `${normalizedDomain}:${authFailure.user}`
 
     if (this.disabledCredentials.has(credentialKey)) {
       return
     }
 
     const disabledCredential: DisabledCredential = {
-      domain: authFailure.domain,
+      domain: normalizedDomain,
       user: authFailure.user,
       disabledAt: authFailure.timestamp,
       reason: authFailure.error
@@ -99,15 +105,16 @@ export class BooruAuthManagerService implements OnModuleInit {
     this.disableCredentialLocally(disabledCredential)
     this.broadcastDisabledCredential(disabledCredential)
 
-    const stats = this.getDomainStats(authFailure.domain)
-    console.error(`❌ Auth failure for ${authFailure.domain}:${authFailure.user} - ${authFailure.error}`)
+    const stats = this.getDomainStats(normalizedDomain)
+    console.error(`❌ Auth failure for ${normalizedDomain}:${authFailure.user} - ${authFailure.error}`)
     console.warn(
-      `📊 ${authFailure.domain} credentials: ${stats.available}/${stats.total} available, ${stats.disabled} disabled`
+      `📊 ${normalizedDomain} credentials: ${stats.available}/${stats.total} available, ${stats.disabled} disabled`
     )
   }
 
   private disableCredentialLocally(credential: DisabledCredential): void {
-    const credentialKey = `${credential.domain}:${credential.user}`
+    const normalizedDomain = this.normalizeDomain(credential.domain)
+    const credentialKey = `${normalizedDomain}:${credential.user}`
     this.disabledCredentials.add(credentialKey)
   }
 
@@ -122,7 +129,8 @@ export class BooruAuthManagerService implements OnModuleInit {
   }
 
   private isCredentialDisabled(domain: string, user: string): boolean {
-    const credentialKey = `${domain}:${user}`
+    const normalizedDomain = this.normalizeDomain(domain)
+    const credentialKey = `${normalizedDomain}:${user}`
     return this.disabledCredentials.has(credentialKey)
   }
 
@@ -133,24 +141,44 @@ export class BooruAuthManagerService implements OnModuleInit {
   }
 
   private getDomainStats(domain: string): AuthCredentialStats {
-    const credentials = this.authConfig[domain] || []
-    const disabled = credentials.filter((cred) => this.isCredentialDisabled(domain, cred.user)).length
+    const normalizedDomain = this.normalizeDomain(domain)
+    const credentials = this.authConfig[normalizedDomain] || []
+    const disabled = credentials.filter((cred) => this.isCredentialDisabled(normalizedDomain, cred.user)).length
 
     return {
-      domain,
+      domain: normalizedDomain,
       total: credentials.length,
       available: credentials.length - disabled,
       disabled
     }
   }
 
+  private normalizeAuthConfig(authConfig: BooruAuthConfig): BooruAuthConfig {
+    const normalizedAuthConfig: BooruAuthConfig = {}
+
+    for (const [domain, credentials] of Object.entries(authConfig)) {
+      const normalizedDomain = this.normalizeDomain(domain)
+      normalizedAuthConfig[normalizedDomain] = [...(normalizedAuthConfig[normalizedDomain] || []), ...credentials]
+    }
+
+    return normalizedAuthConfig
+  }
+
+  private normalizeDomain(domain: string): string {
+    const extractedDomain = this.extractDomainFromUrl(domain)
+    return this.domainAliases[extractedDomain] || extractedDomain
+  }
+
   private extractDomainFromUrl(url: string): string {
     try {
       const normalizedUrl = url.startsWith('http') ? url : `https://${url}`
       const urlObj = new URL(normalizedUrl)
-      return urlObj.hostname.replace(/^www\./, '')
+      return urlObj.hostname.replace(/^www\./, '').toLowerCase()
     } catch (error) {
-      return url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0]
+      return url
+        .replace(/^(https?:\/\/)?(www\.)?/, '')
+        .split('/')[0]
+        .toLowerCase()
     }
   }
 
