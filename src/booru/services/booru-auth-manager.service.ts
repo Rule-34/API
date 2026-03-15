@@ -9,6 +9,7 @@ import {
   AuthFailureEvent,
   IpcAuthMessage
 } from '../interfaces/auth-manager.interface'
+import { SENSITIVE_AUTH_PARAMS } from '../constants/sensitive-auth-params'
 
 @Injectable()
 export class BooruAuthManagerService implements OnModuleInit {
@@ -18,26 +19,7 @@ export class BooruAuthManagerService implements OnModuleInit {
     'www.rule34.xxx': 'rule34.xxx',
     'api.rule34.xxx': 'rule34.xxx'
   }
-  private readonly sensitiveParams = new Set([
-    'user_id',
-    'api_key',
-    'password',
-    'password_hash',
-    'pass_hash',
-    'auth_user',
-    'auth_pass',
-    'token',
-    'secret',
-    'key',
-    'access_token',
-    'auth_token',
-    'session_id',
-    'session',
-    'login',
-    'username',
-    'user',
-    'hash'
-  ])
+  private readonly sensitiveParams = new Set<string>(SENSITIVE_AUTH_PARAMS)
 
   constructor(private readonly configService: ConfigService) {}
 
@@ -174,7 +156,9 @@ export class BooruAuthManagerService implements OnModuleInit {
   private getDomainStats(domain: string): AuthCredentialStats {
     const normalizedDomain = this.normalizeDomain(domain)
     const credentials = this.authConfig[normalizedDomain] || []
-    const disabled = credentials.filter((cred) => this.isCredentialDisabled(normalizedDomain, cred.user, cred.password)).length
+    const disabled = credentials.filter((cred) =>
+      this.isCredentialDisabled(normalizedDomain, cred.user, cred.password)
+    ).length
 
     return {
       domain: normalizedDomain,
@@ -236,6 +220,7 @@ export class BooruAuthManagerService implements OnModuleInit {
     } catch (error) {
       return url
         .replace(/^(https?:\/\/)?/i, '')
+        .split(/[?#]/)[0]
         .split('/')[0]
         .toLowerCase()
     }
@@ -282,8 +267,7 @@ export class BooruAuthManagerService implements OnModuleInit {
     return Array.from(this.disabledCredentials).map((key) => {
       const [domain, encodedUser, ...encodedPasswordParts] = key.split(':')
       const user = decodeURIComponent(encodedUser)
-      const password =
-        encodedPasswordParts.length > 0 ? decodeURIComponent(encodedPasswordParts.join(':')) : undefined
+      const password = encodedPasswordParts.length > 0 ? decodeURIComponent(encodedPasswordParts.join(':')) : undefined
 
       return {
         domain,

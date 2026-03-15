@@ -35,7 +35,7 @@ describe('BooruAuthManagerService', () => {
     service.onModuleInit()
   })
 
-  afterAll(() => {
+  afterEach(() => {
     if (originalAuthConfig === undefined) {
       delete process.env.BOORU_AUTH_CONFIG
       return
@@ -128,8 +128,7 @@ describe('BooruAuthManagerService', () => {
       domain: 'https://www.gelbooru.com/index.php?page=dapi',
       user: 'www-gel-user',
       password: 'www-gel-pass',
-      error:
-        'HTTP 403: Forbidden for HTTPS://%ZZ?page=dapi&AUTH_USER=www-gel-user&AUTH_PASS=secret123&limit=10',
+      error: 'HTTP 403: Forbidden for HTTPS://%ZZ?page=dapi&AUTH_USER=www-gel-user&AUTH_PASS=secret123&limit=10',
       timestamp: new Date()
     })
 

@@ -13,32 +13,14 @@ import { EmptyDataError, EndpointError, HttpError } from '@alejandroakbal/univer
 import { NoContentException } from '../../common/exceptions/no-content.exception'
 import { BooruAuthManagerService } from '../services/booru-auth-manager.service'
 import { AuthFailureEvent } from '../interfaces/auth-manager.interface'
+import { SENSITIVE_AUTH_PARAMS } from '../constants/sensitive-auth-params'
 
 @Injectable()
 export class BooruErrorsInterceptor implements NestInterceptor {
   constructor(private readonly authManager: BooruAuthManagerService) {}
 
   // Common booru authentication parameters that should be redacted from error messages
-  private readonly sensitiveParams = [
-    'user_id',
-    'api_key',
-    'password',
-    'password_hash',
-    'pass_hash',
-    'auth_user',
-    'auth_pass',
-    'token',
-    'secret',
-    'key',
-    'access_token',
-    'auth_token',
-    'session_id',
-    'session',
-    'login',
-    'username',
-    'user',
-    'hash'
-  ]
+  private readonly sensitiveParams = SENSITIVE_AUTH_PARAMS
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
@@ -198,6 +180,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     } catch (error) {
       return url
         .replace(/^(https?:\/\/)?/i, '')
+        .split(/[?#]/)[0]
         .split('/')[0]
         .toLowerCase()
     }

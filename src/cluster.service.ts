@@ -20,7 +20,7 @@ export class AppClusterService {
         cluster.fork()
       }
 
-      cluster.on('exit', (worker, code, signal) => {
+      cluster.on('exit', (worker) => {
         console.log(`Worker ${worker.process.pid} died. Restarting...`)
         cluster.fork()
       })
@@ -49,7 +49,7 @@ export class AppClusterService {
         const scope = credential.password === undefined ? 'user-scoped' : 'password-scoped'
 
         console.log(
-          `🔄 Broadcasting disabled ${scope} credential for ${credential.domain}:${credential.user} to ${Object.keys(cluster.workers || {}).length - 1} other workers`
+          `🔄 Broadcasting disabled ${scope} credential for ${credential.domain} to ${Object.keys(cluster.workers || {}).length - 1} other workers`
         )
       }
     })
