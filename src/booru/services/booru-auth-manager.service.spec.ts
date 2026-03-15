@@ -115,6 +115,39 @@ describe('BooruAuthManagerService', () => {
     expect(loggedMessage).toContain('auth_user=REDACTED')
     expect(loggedMessage).toContain('auth_pass=REDACTED')
     expect(loggedMessage).not.toContain('auth_pass=secret123')
+    expect(loggedMessage).not.toContain('www-gel-user')
+
+    errorSpy.mockRestore()
+    warnSpy.mockRestore()
+  })
+
+  it('should redact sensitive key=value pairs outside of URLs in auth failure logs', () => {
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    service.reportAuthFailure({
+      domain: 'https://www.gelbooru.com/index.php?page=dapi',
+      user: 'www-gel-user',
+      password: 'www-gel-pass',
+      error:
+        'HTTP 403: Forbidden auth_user=www-gel-user auth_pass=secret123 token=abc123 api_key=xyz789 user_id=42 key=plain-key limit=10',
+      timestamp: new Date()
+    })
+
+    const loggedMessage = errorSpy.mock.calls[0][0]
+
+    expect(loggedMessage).toContain('auth_user=REDACTED')
+    expect(loggedMessage).toContain('auth_pass=REDACTED')
+    expect(loggedMessage).toContain('token=REDACTED')
+    expect(loggedMessage).toContain('api_key=REDACTED')
+    expect(loggedMessage).toContain('user_id=REDACTED')
+    expect(loggedMessage).toContain('key=REDACTED')
+    expect(loggedMessage).toContain('limit=10')
+    expect(loggedMessage).not.toContain('www-gel-user')
+    expect(loggedMessage).not.toContain('secret123')
+    expect(loggedMessage).not.toContain('abc123')
+    expect(loggedMessage).not.toContain('xyz789')
+    expect(loggedMessage).not.toContain('plain-key')
 
     errorSpy.mockRestore()
     warnSpy.mockRestore()

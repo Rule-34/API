@@ -93,6 +93,7 @@ export class BooruAuthManagerService implements OnModuleInit {
   public reportAuthFailure(authFailure: AuthFailureEvent): void {
     const normalizedDomain = this.normalizeDomain(authFailure.domain)
     const sanitizedError = this.sanitizeErrorMessage(authFailure.error)
+    const sanitizedUser = this.sanitizeUserIdentifier(authFailure.user)
 
     if (this.isCredentialDisabled(normalizedDomain, authFailure.user, authFailure.password)) {
       return
@@ -110,7 +111,7 @@ export class BooruAuthManagerService implements OnModuleInit {
     this.broadcastDisabledCredential(disabledCredential)
 
     const stats = this.getDomainStats(normalizedDomain)
-    console.error(`❌ Auth failure for ${normalizedDomain}:${authFailure.user} - ${sanitizedError}`)
+    console.error(`❌ Auth failure for ${normalizedDomain}:${sanitizedUser} - ${sanitizedError}`)
     console.warn(
       `📊 ${normalizedDomain} credentials: ${stats.available}/${stats.total} available, ${stats.disabled} disabled`
     )
@@ -222,7 +223,28 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
 
     const urlPattern = /https?:\/\/[^\s]+/gi
-    return message.replace(urlPattern, (url) => this.sanitizeUrl(url))
+    const sanitizedUrlMessage = message.replace(urlPattern, (url) => this.sanitizeUrl(url))
+    return this.sanitizeKeyValueTokens(sanitizedUrlMessage)
+  }
+
+  private sanitizeUserIdentifier(user: string): string {
+    if (!user) {
+      return 'REDACTED'
+    }
+
+    return `REDACTED(${user.length})`
+  }
+
+  private sanitizeKeyValueTokens(message: string): string {
+    let sanitizedMessage = message
+
+    for (const key of this.sensitiveParams) {
+      const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const pattern = new RegExp(`\\b(${escapedKey})(\\s*=\\s*)([^\\s&#,;\\]\\)\\}]+)`, 'gi')
+      sanitizedMessage = sanitizedMessage.replace(pattern, '$1$2REDACTED')
+    }
+
+    return sanitizedMessage
   }
 
   private sanitizeUrl(url: string): string {
