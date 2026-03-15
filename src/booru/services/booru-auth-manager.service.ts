@@ -239,6 +239,9 @@ export class BooruAuthManagerService implements OnModuleInit {
     let sanitizedMessage = message
 
     for (const key of this.sensitiveParams) {
+      // `sensitiveParams` comes from a hardcoded constant, so only the value
+      // fragment is dynamic here. We still escape each key before building the
+      // regex, which makes the static-analysis ReDoS warning a false positive.
       const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
       const pattern = new RegExp(`\\b(${escapedKey})(\\s*=\\s*)([^\\s&#,;\\]\\)\\}]+)`, 'gi')
       sanitizedMessage = sanitizedMessage.replace(pattern, '$1$2REDACTED')
