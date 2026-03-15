@@ -1,41 +1,39 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { ConfigService } from '@nestjs/config'
+import { ConfigModule } from '@nestjs/config'
 import { BooruAuthManagerService } from './booru-auth-manager.service'
 
 describe('BooruAuthManagerService', () => {
   let service: BooruAuthManagerService
 
-  beforeEach(async () => {
-    const configServiceMock = {
-      get: jest.fn((key: string) => {
-        if (key !== 'BOORU_AUTH_CONFIG') {
-          return undefined
-        }
+  const originalAuthConfig = process.env.BOORU_AUTH_CONFIG
 
-        return JSON.stringify({
-          'rule34.xxx': [{ user: 'canonical-user', password: 'canonical-pass' }],
-          'api.rule34.xxx': [
-            { user: 'canonical-user', password: 'canonical-pass' },
-            { user: 'api-user', password: 'api-pass' }
-          ],
-          'gelbooru.com': [{ user: 'gel-user', password: 'gel-pass' }],
-          'www.gelbooru.com': [{ user: 'www-gel-user', password: 'www-gel-pass' }]
-        })
-      })
-    }
+  beforeEach(async () => {
+    process.env.BOORU_AUTH_CONFIG = JSON.stringify({
+      'rule34.xxx': [{ user: 'canonical-user', password: 'canonical-pass' }],
+      'api.rule34.xxx': [
+        { user: 'canonical-user', password: 'canonical-pass' },
+        { user: 'api-user', password: 'api-pass' }
+      ],
+      'gelbooru.com': [{ user: 'gel-user', password: 'gel-pass' }],
+      'www.gelbooru.com': [{ user: 'www-gel-user', password: 'www-gel-pass' }]
+    })
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        BooruAuthManagerService,
-        {
-          provide: ConfigService,
-          useValue: configServiceMock
-        }
-      ]
+      imports: [ConfigModule.forRoot({ isGlobal: true, cache: false, ignoreEnvFile: true })],
+      providers: [BooruAuthManagerService]
     }).compile()
 
     service = module.get<BooruAuthManagerService>(BooruAuthManagerService)
     service.onModuleInit()
+  })
+
+  afterAll(() => {
+    if (originalAuthConfig === undefined) {
+      delete process.env.BOORU_AUTH_CONFIG
+      return
+    }
+
+    process.env.BOORU_AUTH_CONFIG = originalAuthConfig
   })
 
   it('should normalize rule34 aliases into canonical deduplicated domain config', () => {

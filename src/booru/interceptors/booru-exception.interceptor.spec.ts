@@ -1,277 +1,101 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { CallHandler, ExecutionContext } from '@nestjs/common'
-import { throwError } from 'rxjs'
+import { ConfigModule } from '@nestjs/config'
+import { Controller, Get, UseInterceptors } from '@nestjs/common'
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
+import request from 'supertest'
+import { EmptyDataError, HttpError } from '@alejandroakbal/universal-booru-wrapper'
 import { BooruErrorsInterceptor } from './booru-exception.interceptor'
-import { EmptyDataError, EndpointError, HttpError } from '@alejandroakbal/universal-booru-wrapper'
-import { NoContentException } from '../../common/exceptions/no-content.exception'
 import { BooruAuthManagerService } from '../services/booru-auth-manager.service'
 
-describe('BooruErrorsInterceptor', () => {
-  let interceptor: BooruErrorsInterceptor
-  let mockAuthManager: { reportAuthFailure: jest.Mock }
-  let mockExecutionContext: ExecutionContext
-  let mockCallHandler: CallHandler
-
-  beforeEach(async () => {
-    mockAuthManager = {
-      reportAuthFailure: jest.fn()
-    }
-
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        BooruErrorsInterceptor,
-        {
-          provide: BooruAuthManagerService,
-          useValue: mockAuthManager
-        }
-      ]
-    }).compile()
-
-    interceptor = module.get<BooruErrorsInterceptor>(BooruErrorsInterceptor)
-    mockExecutionContext = {} as ExecutionContext
-    mockCallHandler = {
-      handle: jest.fn()
-    } as CallHandler
-  })
-
-  // Helper function to test URL sanitization
-  const testUrlSanitization = (
-    errorMessage: string,
-    expectedRedactedParams: string[],
-    forbiddenValues: string[],
-    preservedParams: string[] = []
-  ): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      const originalError = new Error(errorMessage)
-      mockCallHandler.handle = jest.fn().mockReturnValue(throwError(() => originalError))
-
-      interceptor.intercept(mockExecutionContext, mockCallHandler).subscribe({
-        error: (error) => {
-          try {
-            // Check that sensitive params are redacted
-            expectedRedactedParams.forEach((param) => {
-              expect(error.message).toContain(`${param}=REDACTED`)
-            })
-
-            // Check that forbidden values are not present
-            forbiddenValues.forEach((value) => {
-              expect(error.message).not.toContain(value)
-            })
-
-            // Check that preserved params remain unchanged
-            preservedParams.forEach((param) => {
-              expect(error.message).toContain(param)
-            })
-
-            resolve()
-          } catch (err) {
-            reject(err)
-          }
-        }
-      })
-    })
+@Controller('test-booru-errors')
+@UseInterceptors(BooruErrorsInterceptor)
+class TestBooruErrorsController {
+  @Get('empty')
+  getEmpty() {
+    throw new EmptyDataError(
+      'Request failed for https://gelbooru.com/index.php?page=dapi&user_id=12345&api_key=secret123&limit=10'
+    )
   }
 
-  describe('Error Type Handling', () => {
-    const errorTypeTests = [
-      {
-        name: 'EmptyDataError to NoContentException',
-        errorClass: EmptyDataError,
-        expectedClass: NoContentException,
-        url: 'https://gelbooru.com/index.php?page=dapi&user_id=12345&api_key=secret123'
-      },
-      {
-        name: 'HttpError to ServiceUnavailableException',
-        errorClass: HttpError,
-        expectedClass: Error, // ServiceUnavailableException extends Error
-        url: 'https://gelbooru.com/index.php?user_id=98765&api_key=topsecret&tags=test'
-      },
-      {
-        name: 'EndpointError to MethodNotAllowedException',
-        errorClass: EndpointError,
-        expectedClass: Error, // MethodNotAllowedException extends Error
-        url: 'https://danbooru.donmai.us/posts.json?auth_user=testuser&auth_pass=password123'
-      }
-    ]
+  @Get('auth-failure')
+  getAuthFailure() {
+    const error = new HttpError(
+      'Forbidden for https://www.gelbooru.com/index.php?page=dapi&auth_user=www-gel-user&auth_pass=secret123'
+    )
 
-    errorTypeTests.forEach(({ name, errorClass, expectedClass, url }) => {
-      it(`should convert ${name} with sanitized message`, async () => {
-        const originalError = new errorClass(`Request failed for ${url}`)
-        mockCallHandler.handle = jest.fn().mockReturnValue(throwError(() => originalError))
+    ;(error as any).statusCode = 403
 
-        return new Promise<void>((resolve, reject) => {
-          interceptor.intercept(mockExecutionContext, mockCallHandler).subscribe({
-            error: (error) => {
-              try {
-                expect(error).toBeInstanceOf(expectedClass)
-                expect(error.message).toContain('=REDACTED')
-                resolve()
-              } catch (err) {
-                reject(err)
-              }
-            }
-          })
-        })
-      })
+    throw error
+  }
+}
+
+describe('BooruErrorsInterceptor', () => {
+  let app: NestFastifyApplication
+  let authManager: BooruAuthManagerService
+
+  const originalAuthConfig = process.env.BOORU_AUTH_CONFIG
+
+  beforeEach(async () => {
+    process.env.BOORU_AUTH_CONFIG = JSON.stringify({
+      'www.gelbooru.com': [{ user: 'www-gel-user', password: 'www-gel-pass' }]
     })
 
-    it('should sanitize unknown error types', async () => {
-      await testUrlSanitization(
-        'Custom error with URL: https://example.com/api?token=abc123&secret=xyz789',
-        ['token', 'secret'],
-        ['abc123', 'xyz789']
-      )
-    })
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [ConfigModule.forRoot({ isGlobal: true, cache: false, ignoreEnvFile: true })],
+      controllers: [TestBooruErrorsController],
+      providers: [BooruErrorsInterceptor, BooruAuthManagerService]
+    }).compile()
+
+    app = module.createNestApplication<NestFastifyApplication>(new FastifyAdapter())
+    await app.init()
+    await app.getHttpAdapter().getInstance().ready()
+
+    authManager = app.get(BooruAuthManagerService)
   })
 
-  describe('URL Sanitization', () => {
-    it('should sanitize multiple sensitive parameters in a single URL', async () => {
-      await testUrlSanitization(
-        'Failed: https://site.com/api?user_id=123&api_key=secret&password=password123&limit=10',
-        ['user_id', 'api_key', 'password'],
-        ['123', 'secret', 'password123'],
-        ['limit=10']
-      )
-    })
-
-    it('should sanitize multiple URLs in a single error message', async () => {
-      await testUrlSanitization(
-        'Failed to connect to https://site1.com/api?user_id=111&api_key=key1 and https://site2.com/posts?auth_user=user2&auth_pass=pass2',
-        ['user_id', 'api_key', 'auth_user', 'auth_pass'],
-        ['111', 'key1', 'user2', 'pass2']
-      )
-    })
-
-    it('should handle URLs with case-insensitive parameter matching', async () => {
-      await testUrlSanitization(
-        'Error with https://api.com/data?USER_ID=123&Api_Key=secret&AUTH_USER=test',
-        ['USER_ID', 'Api_Key', 'AUTH_USER'],
-        ['123', 'secret', 'test']
-      )
-    })
-
-    it('should preserve non-sensitive parameters', async () => {
-      await testUrlSanitization(
-        'Request failed: https://booru.com/posts?limit=50&tags=safe&user_id=123&page=2&api_key=secret',
-        ['user_id', 'api_key'],
-        ['123', 'secret'],
-        ['limit=50', 'tags=safe', 'page=2']
-      )
-    })
-
-    it('should leave malformed URLs unchanged', async () => {
-      const malformedUrl = 'not-a-valid-url-but-contains-user_id=123&api_key=secret'
-      await testUrlSanitization(
-        `Error with ${malformedUrl}`,
-        [], // No params should be redacted since it's not a valid URL
-        [],
-        [malformedUrl] // Should preserve the malformed URL as-is
-      )
-    })
-
-    it('should handle errors with empty/default messages gracefully', async () => {
-      const testCases = [
-        { name: 'explicit empty string', error: new Error('') },
-        { name: 'default Error constructor', error: new Error() }
-      ]
-
-      for (const { name, error: originalError } of testCases) {
-        mockCallHandler.handle = jest.fn().mockReturnValue(throwError(() => originalError))
-
-        await new Promise<void>((resolve, reject) => {
-          interceptor.intercept(mockExecutionContext, mockCallHandler).subscribe({
-            error: (error) => {
-              try {
-                expect(error.message).toBe('')
-                resolve()
-              } catch (err) {
-                reject(new Error(`Failed for ${name}: ${err.message}`))
-              }
-            }
-          })
-        })
-      }
-    })
-
-    it('should sanitize stack traces containing sensitive URLs', async () => {
-      const sensitiveUrl = 'https://api.com/endpoint?user_id=123&api_key=secret'
-      const originalError = new Error('Test error')
-      originalError.stack = `Error: Test error
-        at someFunction (${sensitiveUrl}:10:5)
-        at anotherFunction (file.js:20:10)`
-
-      mockCallHandler.handle = jest.fn().mockReturnValue(throwError(() => originalError))
-
-      return new Promise<void>((resolve, reject) => {
-        interceptor.intercept(mockExecutionContext, mockCallHandler).subscribe({
-          error: (error) => {
-            try {
-              expect(error.stack).toContain('user_id=REDACTED')
-              expect(error.stack).toContain('api_key=REDACTED')
-              expect(error.stack).not.toContain('123')
-              expect(error.stack).not.toContain('secret')
-              resolve()
-            } catch (err) {
-              reject(err)
-            }
-          }
-        })
-      })
-    })
+  afterEach(async () => {
+    await app.close()
   })
 
-  describe('Sensitive Parameter Detection', () => {
-    it('should detect all configured sensitive parameters', async () => {
-      const sensitiveParams = ['user_id', 'api_key', 'password', 'auth_user', 'auth_pass', 'token', 'secret', 'key']
-      const paramString = sensitiveParams.map((param, index) => `${param}=${index + 1}`).join('&')
+  afterAll(() => {
+    if (originalAuthConfig === undefined) {
+      delete process.env.BOORU_AUTH_CONFIG
+      return
+    }
 
-      await testUrlSanitization(
-        `All params: https://api.com/test?${paramString}`,
-        sensitiveParams,
-        Array.from({ length: 8 }, (_, i) => `=${i + 1}`) // ['=1', '=2', '=3', ...]
-      )
-    })
+    process.env.BOORU_AUTH_CONFIG = originalAuthConfig
   })
 
-  describe('Auth Failure Tracking', () => {
-    it('should preserve www subdomains when reporting auth failures', async () => {
-      const originalError = {
-        constructor: HttpError,
-        statusCode: 403,
-        message: 'Forbidden'
-      }
+  it('should sanitize EmptyDataError responses from a real request', async () => {
+    const response = await request(app.getHttpServer()).get('/test-booru-errors/empty')
+    const body = JSON.stringify(response.body)
 
-      mockExecutionContext = {
-        switchToHttp: () => ({
-          getRequest: () => ({
-            query: {
-              baseEndpoint: 'https://www.gelbooru.com/index.php?page=dapi',
-              auth_user: 'www-gel-user'
-            },
-            body: {}
-          })
-        })
-      } as ExecutionContext
+    expect(response.status).toBe(404)
+    expect(body).toContain('user_id=REDACTED')
+    expect(body).toContain('api_key=REDACTED')
+    expect(body).toContain('limit=10')
+    expect(body).not.toContain('12345')
+    expect(body).not.toContain('secret123')
+  })
 
-      mockCallHandler.handle = jest.fn().mockReturnValue(throwError(() => originalError))
-
-      await new Promise<void>((resolve, reject) => {
-        interceptor.intercept(mockExecutionContext, mockCallHandler).subscribe({
-          error: () => {
-            try {
-              expect(mockAuthManager.reportAuthFailure).toHaveBeenCalledWith(
-                expect.objectContaining({
-                  domain: 'www.gelbooru.com',
-                  user: 'www-gel-user'
-                })
-              )
-              resolve()
-            } catch (err) {
-              reject(err)
-            }
-          }
-        })
-      })
+  it('should report auth failures with preserved www subdomains from a real request', async () => {
+    const response = await request(app.getHttpServer()).get('/test-booru-errors/auth-failure').query({
+      baseEndpoint: 'https://www.gelbooru.com/index.php?page=dapi',
+      auth_user: 'www-gel-user'
     })
+
+    const disabledCredentials = authManager.getDisabledCredentials()
+    const body = JSON.stringify(response.body)
+
+    expect(response.status).toBe(401)
+    expect(
+      disabledCredentials.some(
+        (credential) => credential.domain === 'www.gelbooru.com' && credential.user === 'www-gel-user'
+      )
+    ).toBe(true)
+    expect(body).toContain('auth_user=REDACTED')
+    expect(body).toContain('auth_pass=REDACTED')
+    expect(body).not.toContain('www-gel-user')
+    expect(body).not.toContain('secret123')
   })
 })

@@ -65,7 +65,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
             }
             return throwError(() => new ServiceUnavailableException(undefined, sanitizedMessage))
 
-          default:
+          default: {
             // For unknown errors, also sanitize the message
             const sanitizedError = new Error(sanitizedMessage)
 
@@ -76,6 +76,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
             }
 
             return throwError(() => sanitizedError)
+          }
         }
       })
     )
@@ -176,7 +177,10 @@ export class BooruErrorsInterceptor implements NestInterceptor {
       const urlObj = new URL(normalizedUrl)
       return urlObj.hostname.toLowerCase()
     } catch (error) {
-      return url.replace(/^(https?:\/\/)?/, '').split('/')[0].toLowerCase()
+      return url
+        .replace(/^(https?:\/\/)?/, '')
+        .split('/')[0]
+        .toLowerCase()
     }
   }
 }
