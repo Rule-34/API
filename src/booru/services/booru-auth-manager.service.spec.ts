@@ -19,6 +19,10 @@ describe('BooruAuthManagerService', () => {
       'same-user.test': [
         { user: 'shared-user', password: 'first-pass' },
         { user: 'shared-user', password: 'second-pass' }
+      ],
+      'colon-user.test': [
+        { user: 'name:one', password: 'pass' },
+        { user: 'name', password: 'one:pass' }
       ]
     })
 
@@ -152,6 +156,18 @@ describe('BooruAuthManagerService', () => {
       total: 2,
       available: 0,
       disabled: 2
+    })
+  })
+
+  it('should not collapse distinct credentials when user/password contain colons', () => {
+    const stats = service.getCredentialStats()
+    const colonStats = stats.find((stat) => stat.domain === 'colon-user.test')
+
+    expect(colonStats).toEqual({
+      domain: 'colon-user.test',
+      total: 2,
+      available: 2,
+      disabled: 0
     })
   })
 })

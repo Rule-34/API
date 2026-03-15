@@ -201,7 +201,7 @@ export class BooruAuthManagerService implements OnModuleInit {
     const uniqueCredentials = new Map<string, BooruAuthCredential>()
 
     for (const credential of credentials) {
-      const credentialKey = `${credential.user}:${credential.password}`
+      const credentialKey = JSON.stringify([credential.user, credential.password])
 
       if (!uniqueCredentials.has(credentialKey)) {
         uniqueCredentials.set(credentialKey, credential)
