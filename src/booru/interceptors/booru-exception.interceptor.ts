@@ -99,16 +99,20 @@ export class BooruErrorsInterceptor implements NestInterceptor {
    * Sanitizes a single URL by removing sensitive query parameters using native URL API
    */
   private sanitizeUrl(url: string): string {
-    const urlObj = new URL(url)
+    try {
+      const urlObj = new URL(url)
 
-    // Check each query parameter and redact sensitive ones
-    for (const [key] of urlObj.searchParams.entries()) {
-      if (this.sensitiveParams.some((param) => param.toLowerCase() === key.toLowerCase())) {
-        urlObj.searchParams.set(key, 'REDACTED')
+      // Check each query parameter and redact sensitive ones
+      for (const [key] of urlObj.searchParams.entries()) {
+        if (this.sensitiveParams.some((param) => param.toLowerCase() === key.toLowerCase())) {
+          urlObj.searchParams.set(key, 'REDACTED')
+        }
       }
-    }
 
-    return urlObj.toString()
+      return urlObj.toString()
+    } catch (error) {
+      return url
+    }
   }
 
   private checkForAuthFailure(error: any, context: ExecutionContext): void {
@@ -175,12 +179,13 @@ export class BooruErrorsInterceptor implements NestInterceptor {
 
   private extractDomainFromUrl(url: string): string {
     try {
-      const normalizedUrl = url.startsWith('http') ? url : `https://${url}`
+      const hasProtocol = /^https?:\/\//i.test(url)
+      const normalizedUrl = hasProtocol ? url : `https://${url}`
       const urlObj = new URL(normalizedUrl)
       return urlObj.hostname.toLowerCase()
     } catch (error) {
       return url
-        .replace(/^(https?:\/\/)?/, '')
+        .replace(/^(https?:\/\/)?/i, '')
         .split('/')[0]
         .toLowerCase()
     }

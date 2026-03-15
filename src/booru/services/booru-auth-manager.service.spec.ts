@@ -67,6 +67,13 @@ describe('BooruAuthManagerService', () => {
     expect(['canonical-user', 'api-user']).toContain(credential!.user)
   })
 
+  it('should resolve credentials when base endpoint uses uppercase protocol', () => {
+    const credential = service.getAvailableCredential('HTTPS://API.RULE34.XXX/index.php?page=dapi')
+
+    expect(credential).not.toBeNull()
+    expect(['canonical-user', 'api-user']).toContain(credential!.user)
+  })
+
   it('should normalize reported auth failures to canonical rule34 domain', () => {
     const selectedCredential = service.getAvailableCredential('https://rule34.xxx/index.php?page=dapi')
 

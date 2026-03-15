@@ -34,7 +34,7 @@ export class AppClusterService {
     cluster.on('message', (worker, message: IpcAuthMessage) => {
       if (message.type === 'DISABLE_CREDENTIAL') {
         const credential = message.payload as DisabledCredential
-        const credentialKey = `${credential.domain}:${credential.user}`
+        const credentialKey = this.getCredentialKey(credential.domain, credential.user, credential.password)
 
         // Store in primary process
         this.disabledCredentials.add(credentialKey)
@@ -51,6 +51,17 @@ export class AppClusterService {
         )
       }
     })
+  }
+
+  private static getCredentialKey(domain: string, user: string, password?: string): string {
+    const encodedUser = encodeURIComponent(user)
+
+    if (password === undefined) {
+      return `${domain}:${encodedUser}`
+    }
+
+    const encodedPassword = encodeURIComponent(password)
+    return `${domain}:${encodedUser}:${encodedPassword}`
   }
 
   static getDisabledCredentials(): Set<string> {

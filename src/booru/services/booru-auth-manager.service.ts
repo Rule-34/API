@@ -229,12 +229,13 @@ export class BooruAuthManagerService implements OnModuleInit {
 
   private extractDomainFromUrl(url: string): string {
     try {
-      const normalizedUrl = url.startsWith('http') ? url : `https://${url}`
+      const hasProtocol = /^https?:\/\//i.test(url)
+      const normalizedUrl = hasProtocol ? url : `https://${url}`
       const urlObj = new URL(normalizedUrl)
       return urlObj.hostname.toLowerCase()
     } catch (error) {
       return url
-        .replace(/^(https?:\/\/)?/, '')
+        .replace(/^(https?:\/\/)?/i, '')
         .split('/')[0]
         .toLowerCase()
     }

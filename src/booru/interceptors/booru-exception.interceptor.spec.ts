@@ -27,6 +27,13 @@ class TestBooruErrorsController {
 
     throw error
   }
+
+  @Get('malformed-url')
+  getMalformedUrl() {
+    throw new EmptyDataError(
+      'Request failed for https://%zz?page=dapi&auth_user=www-gel-user&auth_pass=secret123&limit=10'
+    )
+  }
 }
 
 describe('BooruErrorsInterceptor', () => {
@@ -97,5 +104,29 @@ describe('BooruErrorsInterceptor', () => {
     expect(body).toContain('auth_pass=REDACTED')
     expect(body).not.toContain('www-gel-user')
     expect(body).not.toContain('secret123')
+  })
+
+  it('should report auth failures when baseEndpoint protocol casing is uppercase', async () => {
+    const response = await request(app.getHttpServer()).get('/test-booru-errors/auth-failure').query({
+      baseEndpoint: 'HTTPS://WWW.GELBOORU.COM/index.php?page=dapi',
+      auth_user: 'www-gel-user'
+    })
+
+    const disabledCredentials = authManager.getDisabledCredentials()
+
+    expect(response.status).toBe(401)
+    expect(
+      disabledCredentials.some(
+        (credential) => credential.domain === 'www.gelbooru.com' && credential.user === 'www-gel-user'
+      )
+    ).toBe(true)
+  })
+
+  it('should not throw when sanitizing malformed URLs in error messages', async () => {
+    const response = await request(app.getHttpServer()).get('/test-booru-errors/malformed-url')
+    const body = JSON.stringify(response.body)
+
+    expect(response.status).toBe(404)
+    expect(body).toContain('https://%zz?page=dapi&auth_user=www-gel-user&auth_pass=secret123&limit=10')
   })
 })
