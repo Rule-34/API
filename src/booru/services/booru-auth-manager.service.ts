@@ -158,10 +158,26 @@ export class BooruAuthManagerService implements OnModuleInit {
 
     for (const [domain, credentials] of Object.entries(authConfig)) {
       const normalizedDomain = this.normalizeDomain(domain)
-      normalizedAuthConfig[normalizedDomain] = [...(normalizedAuthConfig[normalizedDomain] || []), ...credentials]
+      const mergedCredentials = [...(normalizedAuthConfig[normalizedDomain] || []), ...credentials]
+
+      normalizedAuthConfig[normalizedDomain] = this.dedupeCredentials(mergedCredentials)
     }
 
     return normalizedAuthConfig
+  }
+
+  private dedupeCredentials(credentials: BooruAuthCredential[]): BooruAuthCredential[] {
+    const uniqueCredentials = new Map<string, BooruAuthCredential>()
+
+    for (const credential of credentials) {
+      const credentialKey = `${credential.user}:${credential.password}`
+
+      if (!uniqueCredentials.has(credentialKey)) {
+        uniqueCredentials.set(credentialKey, credential)
+      }
+    }
+
+    return Array.from(uniqueCredentials.values())
   }
 
   private normalizeDomain(domain: string): string {
@@ -173,10 +189,10 @@ export class BooruAuthManagerService implements OnModuleInit {
     try {
       const normalizedUrl = url.startsWith('http') ? url : `https://${url}`
       const urlObj = new URL(normalizedUrl)
-      return urlObj.hostname.replace(/^www\./, '').toLowerCase()
+      return urlObj.hostname.toLowerCase()
     } catch (error) {
       return url
-        .replace(/^(https?:\/\/)?(www\.)?/, '')
+        .replace(/^(https?:\/\/)?/, '')
         .split('/')[0]
         .toLowerCase()
     }

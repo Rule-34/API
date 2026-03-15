@@ -14,8 +14,12 @@ describe('BooruAuthManagerService', () => {
 
         return JSON.stringify({
           'rule34.xxx': [{ user: 'canonical-user', password: 'canonical-pass' }],
-          'api.rule34.xxx': [{ user: 'api-user', password: 'api-pass' }],
-          'gelbooru.com': [{ user: 'gel-user', password: 'gel-pass' }]
+          'api.rule34.xxx': [
+            { user: 'canonical-user', password: 'canonical-pass' },
+            { user: 'api-user', password: 'api-pass' }
+          ],
+          'gelbooru.com': [{ user: 'gel-user', password: 'gel-pass' }],
+          'www.gelbooru.com': [{ user: 'www-gel-user', password: 'www-gel-pass' }]
         })
       })
     }
@@ -34,7 +38,7 @@ describe('BooruAuthManagerService', () => {
     service.onModuleInit()
   })
 
-  it('should normalize rule34 aliases into canonical domain config', () => {
+  it('should normalize rule34 aliases into canonical deduplicated domain config', () => {
     const stats = service.getCredentialStats()
     const rule34Stats = stats.find((stat) => stat.domain === 'rule34.xxx')
 
@@ -44,6 +48,14 @@ describe('BooruAuthManagerService', () => {
       available: 2,
       disabled: 0
     })
+  })
+
+  it('should keep non-aliased www domains separate from root domains', () => {
+    const rootCredential = service.getAvailableCredential('https://gelbooru.com/index.php?page=dapi')
+    const wwwCredential = service.getAvailableCredential('https://www.gelbooru.com/index.php?page=dapi')
+
+    expect(rootCredential).toEqual({ user: 'gel-user', password: 'gel-pass' })
+    expect(wwwCredential).toEqual({ user: 'www-gel-user', password: 'www-gel-pass' })
   })
 
   it('should resolve credentials for api.rule34.xxx using rule34.xxx auth pool', () => {

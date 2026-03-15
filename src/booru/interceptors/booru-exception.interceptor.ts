@@ -174,9 +174,9 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     try {
       const normalizedUrl = url.startsWith('http') ? url : `https://${url}`
       const urlObj = new URL(normalizedUrl)
-      return urlObj.hostname.replace(/^www\./, '')
+      return urlObj.hostname.toLowerCase()
     } catch (error) {
-      return url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0]
+      return url.replace(/^(https?:\/\/)?/, '').split('/')[0].toLowerCase()
     }
   }
 }

@@ -8,11 +8,12 @@ import { BooruAuthManagerService } from '../services/booru-auth-manager.service'
 
 describe('BooruErrorsInterceptor', () => {
   let interceptor: BooruErrorsInterceptor
+  let mockAuthManager: { reportAuthFailure: jest.Mock }
   let mockExecutionContext: ExecutionContext
   let mockCallHandler: CallHandler
 
   beforeEach(async () => {
-    const mockAuthManager = {
+    mockAuthManager = {
       reportAuthFailure: jest.fn()
     }
 
@@ -229,6 +230,48 @@ describe('BooruErrorsInterceptor', () => {
         sensitiveParams,
         Array.from({ length: 8 }, (_, i) => `=${i + 1}`) // ['=1', '=2', '=3', ...]
       )
+    })
+  })
+
+  describe('Auth Failure Tracking', () => {
+    it('should preserve www subdomains when reporting auth failures', async () => {
+      const originalError = {
+        constructor: HttpError,
+        statusCode: 403,
+        message: 'Forbidden'
+      }
+
+      mockExecutionContext = {
+        switchToHttp: () => ({
+          getRequest: () => ({
+            query: {
+              baseEndpoint: 'https://www.gelbooru.com/index.php?page=dapi',
+              auth_user: 'www-gel-user'
+            },
+            body: {}
+          })
+        })
+      } as ExecutionContext
+
+      mockCallHandler.handle = jest.fn().mockReturnValue(throwError(() => originalError))
+
+      await new Promise<void>((resolve, reject) => {
+        interceptor.intercept(mockExecutionContext, mockCallHandler).subscribe({
+          error: () => {
+            try {
+              expect(mockAuthManager.reportAuthFailure).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  domain: 'www.gelbooru.com',
+                  user: 'www-gel-user'
+                })
+              )
+              resolve()
+            } catch (err) {
+              reject(err)
+            }
+          }
+        })
+      })
     })
   })
 })
