@@ -127,6 +127,7 @@ describe('BooruErrorsInterceptor', () => {
     const body = JSON.stringify(response.body)
 
     expect(response.status).toBe(404)
-    expect(body).toContain('https://%zz?page=dapi&auth_user=www-gel-user&auth_pass=secret123&limit=10')
+    expect(body).toContain('https://%zz?page=dapi&auth_user=REDACTED&auth_pass=REDACTED&limit=10')
+    expect(body).not.toContain('secret123')
   })
 })

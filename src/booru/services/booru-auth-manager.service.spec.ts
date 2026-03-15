@@ -120,6 +120,29 @@ describe('BooruAuthManagerService', () => {
     warnSpy.mockRestore()
   })
 
+  it('should redact malformed uppercase-protocol URLs in auth failure logs', () => {
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    service.reportAuthFailure({
+      domain: 'https://www.gelbooru.com/index.php?page=dapi',
+      user: 'www-gel-user',
+      password: 'www-gel-pass',
+      error:
+        'HTTP 403: Forbidden for HTTPS://%ZZ?page=dapi&AUTH_USER=www-gel-user&AUTH_PASS=secret123&limit=10',
+      timestamp: new Date()
+    })
+
+    const loggedMessage = errorSpy.mock.calls[0][0]
+
+    expect(loggedMessage).toContain('AUTH_USER=REDACTED')
+    expect(loggedMessage).toContain('AUTH_PASS=REDACTED')
+    expect(loggedMessage).not.toContain('AUTH_PASS=secret123')
+
+    errorSpy.mockRestore()
+    warnSpy.mockRestore()
+  })
+
   it('should disable only matching same-user credential when password is provided', () => {
     service.reportAuthFailure({
       domain: 'same-user.test',

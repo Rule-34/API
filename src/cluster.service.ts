@@ -46,8 +46,10 @@ export class AppClusterService {
           }
         })
 
+        const scope = credential.password === undefined ? 'user-scoped' : 'password-scoped'
+
         console.log(
-          `🔄 Broadcasting disabled credential ${credentialKey} to ${Object.keys(cluster.workers || {}).length - 1} other workers`
+          `🔄 Broadcasting disabled ${scope} credential for ${credential.domain}:${credential.user} to ${Object.keys(cluster.workers || {}).length - 1} other workers`
         )
       }
     })

@@ -90,7 +90,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
       return message
     }
 
-    const urlPattern = /https?:\/\/[^\s]+/g
+    const urlPattern = /https?:\/\/[^\s]+/gi
 
     return message.replace(urlPattern, (url) => this.sanitizeUrl(url))
   }
@@ -111,8 +111,20 @@ export class BooruErrorsInterceptor implements NestInterceptor {
 
       return urlObj.toString()
     } catch (error) {
-      return url
+      return this.sanitizeRawUrl(url)
     }
+  }
+
+  private sanitizeRawUrl(url: string): string {
+    let sanitizedUrl = url
+
+    for (const key of this.sensitiveParams) {
+      const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const pattern = new RegExp(`([?&]${escapedKey}=)[^&#\\s]*`, 'gi')
+      sanitizedUrl = sanitizedUrl.replace(pattern, '$1REDACTED')
+    }
+
+    return sanitizedUrl
   }
 
   private checkForAuthFailure(error: any, context: ExecutionContext): void {

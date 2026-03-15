@@ -246,7 +246,7 @@ export class BooruAuthManagerService implements OnModuleInit {
       return message
     }
 
-    const urlPattern = /https?:\/\/[^\s]+/g
+    const urlPattern = /https?:\/\/[^\s]+/gi
     return message.replace(urlPattern, (url) => this.sanitizeUrl(url))
   }
 
@@ -262,8 +262,20 @@ export class BooruAuthManagerService implements OnModuleInit {
 
       return urlObj.toString()
     } catch (error) {
-      return url
+      return this.sanitizeRawUrl(url)
     }
+  }
+
+  private sanitizeRawUrl(url: string): string {
+    let sanitizedUrl = url
+
+    for (const key of this.sensitiveParams) {
+      const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const pattern = new RegExp(`([?&]${escapedKey}=)[^&#\\s]*`, 'gi')
+      sanitizedUrl = sanitizedUrl.replace(pattern, '$1REDACTED')
+    }
+
+    return sanitizedUrl
   }
 
   public getDisabledCredentials(): DisabledCredential[] {
