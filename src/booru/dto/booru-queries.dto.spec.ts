@@ -1,6 +1,7 @@
-import { Controller, Get, Query, ValidationPipe } from '@nestjs/common'
+import { Controller, Get, Query } from '@nestjs/common'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import { Test, TestingModule } from '@nestjs/testing'
+import { createAppValidationPipe } from '../../common/validation'
 import { booruQueryValuesPostsDTO } from './booru-queries.dto'
 
 @Controller('dto-test')
@@ -20,13 +21,7 @@ describe('booruQueryValuesPostsDTO request handling', () => {
     }).compile()
 
     app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter())
-    app.useGlobalPipes(
-      new ValidationPipe({
-        transform: true,
-        whitelist: true,
-        forbidNonWhitelisted: true
-      })
-    )
+    app.useGlobalPipes(createAppValidationPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
