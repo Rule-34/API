@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { ConfigService } from '@nestjs/config'
 import { BooruTypesStringEnum } from '@alejandroakbal/universal-booru-wrapper'
+import * as UBW from '@alejandroakbal/universal-booru-wrapper'
 import { BooruService } from './booru.service'
 import { booruQueriesDTO } from './dto/booru-queries.dto'
-import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
+import { BooruEndpointParamsDTO, SupportedBooruType } from './dto/request-booru.dto'
 import { BooruAuthManagerService } from './services/booru-auth-manager.service'
 
 describe('BooruService', () => {
@@ -122,5 +123,45 @@ describe('BooruService', () => {
     })
 
 
+  })
+
+  describe('Booru type resolution', () => {
+    const queries = {
+      baseEndpoint: 'kemono.cr'
+    } as booruQueriesDTO
+
+    afterEach(() => {
+      if ((UBW as any).Kemono !== originalKemonoClass) {
+        ;(UBW as any).Kemono = originalKemonoClass
+      }
+    })
+
+    const originalKemonoClass = (UBW as any).Kemono
+
+    it('should resolve kemono when the wrapper exports it', () => {
+      if (!originalKemonoClass) {
+        return
+      }
+
+      const params: BooruEndpointParamsDTO = {
+        booruType: 'kemono' as SupportedBooruType
+      }
+
+      const api = service.buildApiClass(params, queries)
+
+      expect(api).toBeInstanceOf(originalKemonoClass)
+    })
+
+    it('should fail clearly when the wrapper does not export kemono', () => {
+      ;(UBW as any).Kemono = undefined
+
+      const params: BooruEndpointParamsDTO = {
+        booruType: 'kemono' as SupportedBooruType
+      }
+
+      expect(() => service.buildApiClass(params, queries)).toThrow(
+        'Kemono booru type requires @alejandroakbal/universal-booru-wrapper version that exports Kemono'
+      )
+    })
   })
 })
