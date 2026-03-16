@@ -13,32 +13,14 @@ import { EmptyDataError, EndpointError, HttpError } from '@alejandroakbal/univer
 import { NoContentException } from '../../common/exceptions/no-content.exception'
 import { BooruAuthManagerService } from '../services/booru-auth-manager.service'
 import { AuthFailureEvent } from '../interfaces/auth-manager.interface'
+import { SENSITIVE_AUTH_PARAMS } from '../constants/sensitive-auth-params'
 
 @Injectable()
 export class BooruErrorsInterceptor implements NestInterceptor {
   constructor(private readonly authManager: BooruAuthManagerService) {}
 
   // Common booru authentication parameters that should be redacted from error messages
-  private readonly sensitiveParams = [
-    'user_id',
-    'api_key',
-    'password',
-    'password_hash',
-    'pass_hash',
-    'auth_user',
-    'auth_pass',
-    'token',
-    'secret',
-    'key',
-    'access_token',
-    'auth_token',
-    'session_id',
-    'session',
-    'login',
-    'username',
-    'user',
-    'hash'
-  ]
+  private readonly sensitiveParams = SENSITIVE_AUTH_PARAMS
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
@@ -65,7 +47,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
             }
             return throwError(() => new ServiceUnavailableException(undefined, sanitizedMessage))
 
-          default:
+          default: {
             // For unknown errors, also sanitize the message
             const sanitizedError = new Error(sanitizedMessage)
 
@@ -76,6 +58,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
             }
 
             return throwError(() => sanitizedError)
+          }
         }
       })
     )
@@ -89,7 +72,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
       return message
     }
 
-    const urlPattern = /https?:\/\/[^\s]+/g
+    const urlPattern = /https?:\/\/[^\s]+/gi
 
     return message.replace(urlPattern, (url) => this.sanitizeUrl(url))
   }
@@ -98,16 +81,32 @@ export class BooruErrorsInterceptor implements NestInterceptor {
    * Sanitizes a single URL by removing sensitive query parameters using native URL API
    */
   private sanitizeUrl(url: string): string {
-    const urlObj = new URL(url)
+    try {
+      const urlObj = new URL(url)
 
-    // Check each query parameter and redact sensitive ones
-    for (const [key] of urlObj.searchParams.entries()) {
-      if (this.sensitiveParams.some((param) => param.toLowerCase() === key.toLowerCase())) {
-        urlObj.searchParams.set(key, 'REDACTED')
+      // Check each query parameter and redact sensitive ones
+      for (const [key] of urlObj.searchParams.entries()) {
+        if (this.sensitiveParams.some((param) => param.toLowerCase() === key.toLowerCase())) {
+          urlObj.searchParams.set(key, 'REDACTED')
+        }
       }
+
+      return urlObj.toString()
+    } catch (error) {
+      return this.sanitizeRawUrl(url)
+    }
+  }
+
+  private sanitizeRawUrl(url: string): string {
+    let sanitizedUrl = url
+
+    for (const key of this.sensitiveParams) {
+      const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const pattern = new RegExp(`([?&]${escapedKey}=)[^&#\\s]*`, 'gi')
+      sanitizedUrl = sanitizedUrl.replace(pattern, '$1REDACTED')
     }
 
-    return urlObj.toString()
+    return sanitizedUrl
   }
 
   private checkForAuthFailure(error: any, context: ExecutionContext): void {
@@ -118,6 +117,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest()
     const baseEndpoint = request.query?.baseEndpoint || request.body?.baseEndpoint
     const authUser = request.query?.auth_user || request.body?.auth_user
+    const authPass = request.query?.auth_pass || request.body?.auth_pass
 
     if (!baseEndpoint || !authUser) {
       return
@@ -127,6 +127,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     const authFailure: AuthFailureEvent = {
       domain,
       user: authUser,
+      password: authPass,
       error: this.getAuthErrorMessage(error),
       timestamp: new Date()
     }
@@ -172,11 +173,16 @@ export class BooruErrorsInterceptor implements NestInterceptor {
 
   private extractDomainFromUrl(url: string): string {
     try {
-      const normalizedUrl = url.startsWith('http') ? url : `https://${url}`
+      const hasProtocol = /^https?:\/\//i.test(url)
+      const normalizedUrl = hasProtocol ? url : `https://${url}`
       const urlObj = new URL(normalizedUrl)
-      return urlObj.hostname.replace(/^www\./, '')
+      return urlObj.hostname.toLowerCase()
     } catch (error) {
-      return url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0]
+      return url
+        .replace(/^(https?:\/\/)?/i, '')
+        .split(/[?#]/)[0]
+        .split('/')[0]
+        .toLowerCase()
     }
   }
 }

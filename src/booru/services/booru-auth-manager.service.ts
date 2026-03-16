@@ -9,11 +9,18 @@ import {
   AuthFailureEvent,
   IpcAuthMessage
 } from '../interfaces/auth-manager.interface'
+import { SENSITIVE_AUTH_PARAMS } from '../constants/sensitive-auth-params'
+import { createCredentialKey, parseCredentialKey } from './credential-key.util'
 
 @Injectable()
 export class BooruAuthManagerService implements OnModuleInit {
   private disabledCredentials = new Set<string>()
   private authConfig: BooruAuthConfig = {}
+  private readonly domainAliases: Record<string, string> = {
+    'www.rule34.xxx': 'rule34.xxx',
+    'api.rule34.xxx': 'rule34.xxx'
+  }
+  private readonly sensitiveParams = new Set<string>(SENSITIVE_AUTH_PARAMS)
 
   constructor(private readonly configService: ConfigService) {}
 
@@ -31,7 +38,8 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
 
     try {
-      this.authConfig = JSON.parse(authConfigJson)
+      const parsedAuthConfig = JSON.parse(authConfigJson) as BooruAuthConfig
+      this.authConfig = this.normalizeAuthConfig(parsedAuthConfig)
       const stats = this.getCredentialStats()
       console.log(
         '🔐 Auth manager initialized with credentials for:',
@@ -54,7 +62,7 @@ export class BooruAuthManagerService implements OnModuleInit {
   }
 
   public getAvailableCredential(domain: string): BooruAuthCredential | null {
-    const normalizedDomain = this.extractDomainFromUrl(domain)
+    const normalizedDomain = this.normalizeDomain(domain)
     const credentialsArray = this.authConfig[normalizedDomain]
 
     if (!credentialsArray || credentialsArray.length === 0) {
@@ -62,7 +70,7 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
 
     const availableCredentials = credentialsArray.filter(
-      (credential) => !this.isCredentialDisabled(normalizedDomain, credential.user)
+      (credential) => !this.isCredentialDisabled(normalizedDomain, credential.user, credential.password)
     )
 
     if (availableCredentials.length === 0) {
@@ -83,31 +91,35 @@ export class BooruAuthManagerService implements OnModuleInit {
   }
 
   public reportAuthFailure(authFailure: AuthFailureEvent): void {
-    const credentialKey = `${authFailure.domain}:${authFailure.user}`
+    const normalizedDomain = this.normalizeDomain(authFailure.domain)
+    const sanitizedError = this.sanitizeErrorMessage(authFailure.error)
+    const sanitizedUser = this.sanitizeUserIdentifier(authFailure.user)
 
-    if (this.disabledCredentials.has(credentialKey)) {
+    if (this.isCredentialDisabled(normalizedDomain, authFailure.user, authFailure.password)) {
       return
     }
 
     const disabledCredential: DisabledCredential = {
-      domain: authFailure.domain,
+      domain: normalizedDomain,
       user: authFailure.user,
+      password: authFailure.password,
       disabledAt: authFailure.timestamp,
-      reason: authFailure.error
+      reason: sanitizedError
     }
 
     this.disableCredentialLocally(disabledCredential)
     this.broadcastDisabledCredential(disabledCredential)
 
-    const stats = this.getDomainStats(authFailure.domain)
-    console.error(`❌ Auth failure for ${authFailure.domain}:${authFailure.user} - ${authFailure.error}`)
+    const stats = this.getDomainStats(normalizedDomain)
+    console.error(`❌ Auth failure for ${normalizedDomain}:${sanitizedUser} - ${sanitizedError}`)
     console.warn(
-      `📊 ${authFailure.domain} credentials: ${stats.available}/${stats.total} available, ${stats.disabled} disabled`
+      `📊 ${normalizedDomain} credentials: ${stats.available}/${stats.total} available, ${stats.disabled} disabled`
     )
   }
 
   private disableCredentialLocally(credential: DisabledCredential): void {
-    const credentialKey = `${credential.domain}:${credential.user}`
+    const normalizedDomain = this.normalizeDomain(credential.domain)
+    const credentialKey = createCredentialKey(normalizedDomain, credential.user, credential.password)
     this.disabledCredentials.add(credentialKey)
   }
 
@@ -121,9 +133,20 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
   }
 
-  private isCredentialDisabled(domain: string, user: string): boolean {
-    const credentialKey = `${domain}:${user}`
-    return this.disabledCredentials.has(credentialKey)
+  private isCredentialDisabled(domain: string, user: string, password?: string): boolean {
+    const normalizedDomain = this.normalizeDomain(domain)
+    const userScopedCredentialKey = createCredentialKey(normalizedDomain, user)
+
+    if (this.disabledCredentials.has(userScopedCredentialKey)) {
+      return true
+    }
+
+    if (password === undefined) {
+      return false
+    }
+
+    const passwordScopedCredentialKey = createCredentialKey(normalizedDomain, user, password)
+    return this.disabledCredentials.has(passwordScopedCredentialKey)
   }
 
   public getCredentialStats(): AuthCredentialStats[] {
@@ -133,33 +156,133 @@ export class BooruAuthManagerService implements OnModuleInit {
   }
 
   private getDomainStats(domain: string): AuthCredentialStats {
-    const credentials = this.authConfig[domain] || []
-    const disabled = credentials.filter((cred) => this.isCredentialDisabled(domain, cred.user)).length
+    const normalizedDomain = this.normalizeDomain(domain)
+    const credentials = this.authConfig[normalizedDomain] || []
+    const disabled = credentials.filter((cred) =>
+      this.isCredentialDisabled(normalizedDomain, cred.user, cred.password)
+    ).length
 
     return {
-      domain,
+      domain: normalizedDomain,
       total: credentials.length,
       available: credentials.length - disabled,
       disabled
     }
   }
 
+  private normalizeAuthConfig(authConfig: BooruAuthConfig): BooruAuthConfig {
+    const normalizedAuthConfig: BooruAuthConfig = {}
+
+    for (const [domain, credentials] of Object.entries(authConfig)) {
+      const normalizedDomain = this.normalizeDomain(domain)
+      const mergedCredentials = [...(normalizedAuthConfig[normalizedDomain] || []), ...credentials]
+
+      normalizedAuthConfig[normalizedDomain] = this.dedupeCredentials(mergedCredentials)
+    }
+
+    return normalizedAuthConfig
+  }
+
+  private dedupeCredentials(credentials: BooruAuthCredential[]): BooruAuthCredential[] {
+    const uniqueCredentials = new Map<string, BooruAuthCredential>()
+
+    for (const credential of credentials) {
+      const credentialKey = JSON.stringify([credential.user, credential.password])
+
+      if (!uniqueCredentials.has(credentialKey)) {
+        uniqueCredentials.set(credentialKey, credential)
+      }
+    }
+
+    return Array.from(uniqueCredentials.values())
+  }
+
+  private normalizeDomain(domain: string): string {
+    const extractedDomain = this.extractDomainFromUrl(domain)
+    return this.domainAliases[extractedDomain] || extractedDomain
+  }
+
   private extractDomainFromUrl(url: string): string {
     try {
-      const normalizedUrl = url.startsWith('http') ? url : `https://${url}`
+      const hasProtocol = /^https?:\/\//i.test(url)
+      const normalizedUrl = hasProtocol ? url : `https://${url}`
       const urlObj = new URL(normalizedUrl)
-      return urlObj.hostname.replace(/^www\./, '')
+      return urlObj.hostname.toLowerCase()
     } catch (error) {
-      return url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0]
+      return url
+        .replace(/^(https?:\/\/)?/i, '')
+        .split(/[?#]/)[0]
+        .split('/')[0]
+        .toLowerCase()
     }
+  }
+
+  private sanitizeErrorMessage(message: string): string {
+    if (!message) {
+      return message
+    }
+
+    const urlPattern = /https?:\/\/[^\s]+/gi
+    const sanitizedUrlMessage = message.replace(urlPattern, (url) => this.sanitizeUrl(url))
+    return this.sanitizeKeyValueTokens(sanitizedUrlMessage)
+  }
+
+  private sanitizeUserIdentifier(user: string): string {
+    if (!user) {
+      return 'REDACTED'
+    }
+
+    return `REDACTED(${user.length})`
+  }
+
+  private sanitizeKeyValueTokens(message: string): string {
+    let sanitizedMessage = message
+
+    for (const key of this.sensitiveParams) {
+      const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const pattern = new RegExp(`\\b(${escapedKey})(\\s*=\\s*)([^\\s&#,;\\]\\)\\}]+)`, 'gi')
+      sanitizedMessage = sanitizedMessage.replace(pattern, '$1$2REDACTED')
+    }
+
+    return sanitizedMessage
+  }
+
+  private sanitizeUrl(url: string): string {
+    try {
+      const urlObj = new URL(url)
+
+      for (const [key] of urlObj.searchParams.entries()) {
+        if (this.sensitiveParams.has(key.toLowerCase())) {
+          urlObj.searchParams.set(key, 'REDACTED')
+        }
+      }
+
+      return urlObj.toString()
+    } catch (error) {
+      return this.sanitizeRawUrl(url)
+    }
+  }
+
+  private sanitizeRawUrl(url: string): string {
+    let sanitizedUrl = url
+
+    for (const key of this.sensitiveParams) {
+      const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const pattern = new RegExp(`([?&]${escapedKey}=)[^&#\\s]*`, 'gi')
+      sanitizedUrl = sanitizedUrl.replace(pattern, '$1REDACTED')
+    }
+
+    return sanitizedUrl
   }
 
   public getDisabledCredentials(): DisabledCredential[] {
     return Array.from(this.disabledCredentials).map((key) => {
-      const [domain, user] = key.split(':')
+      const { domain, user, password } = parseCredentialKey(key)
+
       return {
         domain,
         user,
+        password,
         disabledAt: new Date(),
         reason: 'Authentication failure'
       }

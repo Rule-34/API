@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { availableParallelism } from 'os'
 import cluster from 'cluster'
 import { IpcAuthMessage, DisabledCredential } from './booru/interfaces/auth-manager.interface'
+import { createCredentialKey } from './booru/services/credential-key.util'
 
 const numCPUs = process.env.NODE_ENV === 'development' ? 1 : availableParallelism()
 
@@ -20,7 +21,7 @@ export class AppClusterService {
         cluster.fork()
       }
 
-      cluster.on('exit', (worker, code, signal) => {
+      cluster.on('exit', (worker) => {
         console.log(`Worker ${worker.process.pid} died. Restarting...`)
         cluster.fork()
       })
@@ -34,7 +35,7 @@ export class AppClusterService {
     cluster.on('message', (worker, message: IpcAuthMessage) => {
       if (message.type === 'DISABLE_CREDENTIAL') {
         const credential = message.payload as DisabledCredential
-        const credentialKey = `${credential.domain}:${credential.user}`
+        const credentialKey = createCredentialKey(credential.domain, credential.user, credential.password)
 
         // Store in primary process
         this.disabledCredentials.add(credentialKey)
@@ -46,8 +47,10 @@ export class AppClusterService {
           }
         })
 
+        const scope = credential.password === undefined ? 'user-scoped' : 'password-scoped'
+
         console.log(
-          `🔄 Broadcasting disabled credential ${credentialKey} to ${Object.keys(cluster.workers || {}).length - 1} other workers`
+          `🔄 Broadcasting disabled ${scope} credential for ${credential.domain} to ${Object.keys(cluster.workers || {}).length - 1} other workers`
         )
       }
     })
