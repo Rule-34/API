@@ -5,7 +5,7 @@ import { createAppValidationPipe } from '../../common/validation'
 import { booruQueryValuesPostsDTO } from './booru-queries.dto'
 
 @Controller('dto-test')
-class booruQueriesTestController {
+class BooruQueriesTestController {
   @Get('posts')
   getPosts(@Query() queries: booruQueryValuesPostsDTO) {
     return { tags: queries.tags }
@@ -17,7 +17,7 @@ describe('booruQueryValuesPostsDTO request handling', () => {
 
   beforeEach(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
-      controllers: [booruQueriesTestController]
+      controllers: [BooruQueriesTestController]
     }).compile()
 
     app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter())
