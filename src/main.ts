@@ -1,4 +1,3 @@
-import { ValidationPipe } from '@nestjs/common'
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface'
 import { NestFactory } from '@nestjs/core'
 import { ConfigService } from '@nestjs/config'
@@ -10,6 +9,7 @@ import { AppModule } from './app.module'
 import { escapeRegExp } from 'lodash'
 import { AppClusterService } from './cluster.service'
 import { join } from 'path'
+import { createAppValidationPipe } from './common/validation'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter())
@@ -40,15 +40,7 @@ async function bootstrap() {
 
   app.enableCors(corsOptions)
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true, // Transform to DTO type
-      // transformOptions: { enableImplicitConversion: true },
-
-      whitelist: true, // Remove unnecessary properties
-      forbidNonWhitelisted: true // Sends "property <property> should not exist." error
-    })
-  )
+  app.useGlobalPipes(createAppValidationPipe())
 
   await app.listen(configService.get<number>('PORT') ?? 3000, '0.0.0.0')
 }
