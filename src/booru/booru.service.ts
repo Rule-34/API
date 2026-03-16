@@ -16,8 +16,9 @@ import {
   Rule34PahealNet,
   Rule34Xxx
 } from '@alejandroakbal/universal-booru-wrapper'
+import * as UBW from '@alejandroakbal/universal-booru-wrapper'
 import { booruQueriesDTO } from './dto/booru-queries.dto'
-import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
+import { BooruEndpointParamsDTO, SupportedBooruType } from './dto/request-booru.dto'
 import { BooruAuthManagerService } from './services/booru-auth-manager.service'
 
 @Injectable()
@@ -112,7 +113,7 @@ export class BooruService {
     return {}
   }
 
-  private getApiClassByType(booruType: BooruTypesStringEnum) {
+  private getApiClassByType(booruType: SupportedBooruType) {
     switch (booruType) {
       case BooruTypesStringEnum.DANBOORU:
         return Danbooru
@@ -140,6 +141,18 @@ export class BooruService {
 
       case BooruTypesStringEnum.REALBOORU_COM:
         return RealBooruCom
+
+      case 'kemono': {
+        const maybeKemonoClass = (UBW as any).Kemono
+
+        if (!maybeKemonoClass) {
+          throw new Error(
+            'Kemono booru type requires @alejandroakbal/universal-booru-wrapper version that exports Kemono'
+          )
+        }
+
+        return maybeKemonoClass
+      }
     }
   }
 }

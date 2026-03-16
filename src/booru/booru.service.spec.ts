@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { BooruTypesStringEnum } from '@alejandroakbal/universal-booru-wrapper'
 import { BooruService } from './booru.service'
 import { booruQueriesDTO } from './dto/booru-queries.dto'
-import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
+import { BooruEndpointParamsDTO, SupportedBooruType } from './dto/request-booru.dto'
 import { BooruAuthManagerService } from './services/booru-auth-manager.service'
 
 describe('BooruService', () => {
@@ -122,5 +122,31 @@ describe('BooruService', () => {
     })
 
 
+  })
+
+  describe('Booru type resolution', () => {
+    it('should resolve kemono when supported and fail clearly otherwise', () => {
+      const maybeKemonoClass = (require('@alejandroakbal/universal-booru-wrapper') as any).Kemono
+
+      const params: BooruEndpointParamsDTO = {
+        booruType: 'kemono' as SupportedBooruType
+      }
+
+      const queries = {
+        baseEndpoint: 'kemono.cr'
+      } as booruQueriesDTO
+
+      if (maybeKemonoClass) {
+        const api = service.buildApiClass(params, queries)
+
+        expect(api).toBeInstanceOf(maybeKemonoClass)
+
+        return
+      }
+
+      expect(() => service.buildApiClass(params, queries)).toThrow(
+        'Kemono booru type requires @alejandroakbal/universal-booru-wrapper version that exports Kemono'
+      )
+    })
   })
 })
