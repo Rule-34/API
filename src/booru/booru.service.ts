@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, ServiceUnavailableException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import {
   BooruTypes,
@@ -146,13 +146,16 @@ export class BooruService {
         const maybeKemonoClass = (UBW as any).Kemono
 
         if (!maybeKemonoClass) {
-          throw new Error(
+          throw new ServiceUnavailableException(
             'Kemono booru type requires @alejandroakbal/universal-booru-wrapper version that exports Kemono'
           )
         }
 
         return maybeKemonoClass
       }
+
+      default:
+        throw new BadRequestException(`Unsupported booru type: ${booruType}`)
     }
   }
 }
