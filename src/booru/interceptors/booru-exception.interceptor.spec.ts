@@ -1,11 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { ConfigModule } from '@nestjs/config'
-import { Controller, Get, UseInterceptors } from '@nestjs/common'
+import { Controller, Get, Request, UseInterceptors } from '@nestjs/common'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import request from 'supertest'
 import { EmptyDataError, HttpError } from '@alejandroakbal/universal-booru-wrapper'
 import { BooruErrorsInterceptor } from './booru-exception.interceptor'
 import { BooruAuthManagerService } from '../services/booru-auth-manager.service'
+import { ManagedCredentialPoolUnavailableError } from '../booru.service'
 
 @Controller('test-booru-errors')
 @UseInterceptors(BooruErrorsInterceptor)
@@ -47,6 +48,34 @@ class TestBooruErrorsController {
     throw new EmptyDataError(
       'Request failed for https://%zz?page=dapi&auth_user=www-gel-user&auth_pass=secret123&limit=10'
     )
+  }
+
+  @Get('pool-unavailable')
+  getPoolUnavailable() {
+    throw new ManagedCredentialPoolUnavailableError(
+      'https://www.gelbooru.com/index.php?page=dapi',
+      'cooldown_exhausted',
+      25
+    )
+  }
+
+  @Get('managed-auth-failure')
+  getManagedAuthFailure(@Request() request: any) {
+    request.booruAuthContext = {
+      baseEndpoint: 'https://www.gelbooru.com/index.php?page=dapi',
+      source: 'env',
+      handledByService: true,
+      credential: {
+        user: 'www-gel-user',
+        password: 'www-gel-pass'
+      }
+    }
+
+    throw new HttpError({
+      message: 'Forbidden for https://www.gelbooru.com/index.php?page=dapi&auth_user=www-gel-user&auth_pass=secret123',
+      statusCode: 403,
+      failureKind: 'auth_forbidden'
+    })
   }
 }
 
@@ -162,5 +191,22 @@ describe('BooruErrorsInterceptor', () => {
     expect(response.status).toBe(404)
     expect(body).toContain('https://%zz?page=dapi&auth_user=REDACTED&auth_pass=REDACTED&limit=10')
     expect(body).not.toContain('secret123')
+  })
+
+  it('should map managed pool unavailable errors to 503 with retry metadata', async () => {
+    const response = await request(app.getHttpServer()).get('/test-booru-errors/pool-unavailable')
+
+    expect(response.status).toBe(503)
+    expect(response.headers['retry-after']).toBe('25')
+    expect(response.body.retryAfterSeconds).toBe(25)
+    expect(response.body.reason).toBe('cooldown_exhausted')
+  })
+
+  it('should skip auth failure reporting when managed failures were handled by service', async () => {
+    const response = await request(app.getHttpServer()).get('/test-booru-errors/managed-auth-failure')
+    const disabledCredentials = authManager.getDisabledCredentials()
+
+    expect(response.status).toBe(401)
+    expect(disabledCredentials).toHaveLength(0)
   })
 })

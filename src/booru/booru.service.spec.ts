@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { ConfigService } from '@nestjs/config'
-import { BooruTypesStringEnum } from '@alejandroakbal/universal-booru-wrapper'
-import { BooruService } from './booru.service'
+import { BooruTypesStringEnum, HttpError } from '@alejandroakbal/universal-booru-wrapper'
+import { BooruService, ManagedCredentialPoolUnavailableError } from './booru.service'
 import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import { BooruAuthManagerService } from './services/booru-auth-manager.service'
@@ -24,7 +24,10 @@ describe('BooruService', () => {
 
   beforeEach(async () => {
     mockAuthManager = {
-      getAvailableCredential: jest.fn()
+      getAvailableCredential: jest.fn(),
+      getDomainStats: jest.fn(),
+      reportAuthFailure: jest.fn(),
+      getMinCooldownSeconds: jest.fn()
     }
 
     const module: TestingModule = await Test.createTestingModule({
@@ -44,6 +47,15 @@ describe('BooruService', () => {
     service = module.get<BooruService>(BooruService)
 
     jest.clearAllMocks()
+
+    mockAuthManager.getDomainStats.mockReturnValue({
+      domain: 'gelbooru.com',
+      total: 1,
+      available: 1,
+      disabled: 0,
+      cooldown: 0,
+      permanentDisabled: 0
+    })
   })
 
   describe('Authentication Resolution', () => {
@@ -153,5 +165,129 @@ describe('BooruService', () => {
     })
 
 
+  })
+
+  describe('Managed Strategy Execution', () => {
+    it('should not fallback when explicit auth is provided', async () => {
+      const queries = {
+        ...baseQueries,
+        auth_user: 'explicit_user',
+        auth_pass: 'explicit_pass'
+      } as booruQueriesDTO
+      const operation = jest.fn().mockResolvedValue('ok')
+
+      const result = await service.executeWithAuthStrategy(mockParams, queries, operation)
+
+      expect(result).toBe('ok')
+      expect(mockAuthManager.getAvailableCredential).not.toHaveBeenCalled()
+      expect(mockAuthManager.reportAuthFailure).not.toHaveBeenCalled()
+    })
+
+    it('should retry with another managed credential after rate limit failure', async () => {
+      mockAuthManager.getDomainStats.mockReturnValue({
+        domain: 'gelbooru.com',
+        total: 2,
+        available: 2,
+        disabled: 0,
+        cooldown: 0,
+        permanentDisabled: 0
+      })
+
+      mockAuthManager.getAvailableCredential
+        .mockReturnValueOnce({ user: 'managed_1', password: 'pass_1' })
+        .mockReturnValueOnce({ user: 'managed_2', password: 'pass_2' })
+
+      const queries = { ...baseQueries } as booruQueriesDTO
+      const operation = jest
+        .fn()
+        .mockImplementationOnce(() => {
+          throw new HttpError({
+            message: 'rate limited',
+            statusCode: 429,
+            failureKind: 'rate_limited',
+            retryAfterSeconds: 30
+          })
+        })
+        .mockResolvedValueOnce('ok')
+
+      const result = await service.executeWithAuthStrategy(mockParams, queries, operation)
+
+      expect(result).toBe('ok')
+      expect(operation).toHaveBeenCalledTimes(2)
+      expect(mockAuthManager.reportAuthFailure).toHaveBeenCalledTimes(1)
+      expect(mockAuthManager.reportAuthFailure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          user: 'managed_1',
+          password: 'pass_1',
+          failureKind: 'rate_limited',
+          retryAfterSeconds: 30
+        })
+      )
+    })
+
+    it('should throw pool unavailable error when managed credentials are exhausted', async () => {
+      mockAuthManager.getDomainStats.mockReturnValue({
+        domain: 'gelbooru.com',
+        total: 1,
+        available: 0,
+        disabled: 1,
+        cooldown: 1,
+        permanentDisabled: 0
+      })
+      mockAuthManager.getAvailableCredential.mockReturnValue(null)
+      mockAuthManager.getMinCooldownSeconds.mockReturnValue(42)
+
+      const queries = { ...baseQueries } as booruQueriesDTO
+
+      await expect(
+        service.executeWithAuthStrategy(mockParams, queries, async () => 'unused')
+      ).rejects.toEqual(
+        expect.objectContaining<Partial<ManagedCredentialPoolUnavailableError>>({
+          name: 'ManagedCredentialPoolUnavailableError',
+          retryAfterSeconds: 42,
+          reason: 'cooldown_exhausted'
+        })
+      )
+    })
+
+    it('should cap managed retries using BOORU_MANAGED_RETRY_CAP', async () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'BOORU_MANAGED_RETRY_CAP') {
+          return '1'
+        }
+
+        return undefined
+      })
+
+      mockAuthManager.getDomainStats.mockReturnValue({
+        domain: 'gelbooru.com',
+        total: 3,
+        available: 3,
+        disabled: 0,
+        cooldown: 0,
+        permanentDisabled: 0
+      })
+
+      mockAuthManager.getAvailableCredential.mockReturnValue({ user: 'managed_1', password: 'pass_1' })
+
+      const queries = { ...baseQueries } as booruQueriesDTO
+      const operation = jest.fn().mockImplementation(() => {
+        throw new HttpError({
+          message: 'rate limited',
+          statusCode: 429,
+          failureKind: 'rate_limited',
+          retryAfterSeconds: 10
+        })
+      })
+
+      await expect(service.executeWithAuthStrategy(mockParams, queries, operation)).rejects.toEqual(
+        expect.objectContaining<Partial<ManagedCredentialPoolUnavailableError>>({
+          name: 'ManagedCredentialPoolUnavailableError'
+        })
+      )
+
+      expect(operation).toHaveBeenCalledTimes(1)
+      expect(mockAuthManager.reportAuthFailure).toHaveBeenCalledTimes(1)
+    })
   })
 })

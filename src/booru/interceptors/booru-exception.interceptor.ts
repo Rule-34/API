@@ -16,6 +16,7 @@ import { NoContentException } from '../../common/exceptions/no-content.exception
 import { BooruAuthManagerService } from '../services/booru-auth-manager.service'
 import { AuthFailureEvent } from '../interfaces/auth-manager.interface'
 import { SENSITIVE_AUTH_PARAMS } from '../constants/sensitive-auth-params'
+import { ManagedCredentialPoolUnavailableError } from '../booru.service'
 
 @Injectable()
 export class BooruErrorsInterceptor implements NestInterceptor {
@@ -36,6 +37,30 @@ export class BooruErrorsInterceptor implements NestInterceptor {
 
         // Throw better errors with sanitized messages
         switch (error.constructor) {
+          case ManagedCredentialPoolUnavailableError: {
+            const poolError = error as ManagedCredentialPoolUnavailableError
+
+            if (typeof poolError.retryAfterSeconds === 'number') {
+              const response = context.switchToHttp().getResponse()
+              if (response && typeof response.header === 'function') {
+                response.header('Retry-After', `${poolError.retryAfterSeconds}`)
+              }
+            }
+
+            return throwError(
+              () =>
+                new HttpException(
+                  {
+                    statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+                    message: sanitizedMessage,
+                    retryAfterSeconds: poolError.retryAfterSeconds,
+                    reason: poolError.reason
+                  },
+                  HttpStatus.SERVICE_UNAVAILABLE
+                )
+            )
+          }
+
           case EmptyDataError:
             return throwError(() => new NoContentException(undefined, sanitizedMessage))
 
@@ -124,6 +149,15 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     }
 
     const request = context.switchToHttp().getRequest()
+
+    if (request.booruAuthContext?.handledByService) {
+      return
+    }
+
+    if (request.booruAuthContext?.source && request.booruAuthContext.source !== 'env') {
+      return
+    }
+
     const contextCredential = request.booruAuthContext?.credential
     const baseEndpoint =
       request.booruAuthContext?.baseEndpoint || request.query?.baseEndpoint || request.body?.baseEndpoint

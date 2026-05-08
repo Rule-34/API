@@ -6,6 +6,8 @@ import {
   BooruAuthCredential,
   DisabledCredential,
   AuthCredentialStats,
+  DomainCredentialStatus,
+  MaskedCredentialStatus,
   AuthFailureEvent,
   IpcAuthMessage
 } from '../interfaces/auth-manager.interface'
@@ -192,19 +194,90 @@ export class BooruAuthManagerService implements OnModuleInit {
     })
   }
 
-  private getDomainStats(domain: string): AuthCredentialStats {
+  public getDomainStats(domain: string): AuthCredentialStats {
     const normalizedDomain = this.normalizeDomain(domain)
     const credentials = this.authConfig[normalizedDomain] || []
-    const disabled = credentials.filter((cred) =>
-      this.isCredentialUnavailable(normalizedDomain, cred.user, cred.password)
-    ).length
+    let cooldown = 0
+    let permanentDisabled = 0
+
+    for (const credential of credentials) {
+      const fullKey = createCredentialKey(normalizedDomain, credential.user, credential.password)
+      const userKey = createCredentialKey(normalizedDomain, credential.user)
+
+      if (this.disabledCredentials.has(fullKey) || this.disabledCredentials.has(userKey)) {
+        permanentDisabled += 1
+        continue
+      }
+
+      if (this.isCooldownActive(fullKey) || this.isCooldownActive(userKey)) {
+        cooldown += 1
+      }
+    }
+
+    const disabled = cooldown + permanentDisabled
 
     return {
       domain: normalizedDomain,
       total: credentials.length,
       available: credentials.length - disabled,
-      disabled
+      disabled,
+      cooldown,
+      permanentDisabled
     }
+  }
+
+  public getMinCooldownSeconds(domain: string): number | undefined {
+    const normalizedDomain = this.normalizeDomain(domain)
+    let minCooldownUntil: number | undefined
+
+    for (const [credentialKey, cooldownUntil] of this.cooldownCredentials.entries()) {
+      const { domain: keyDomain } = parseCredentialKey(credentialKey)
+
+      if (keyDomain !== normalizedDomain) {
+        continue
+      }
+
+      if (cooldownUntil <= Date.now()) {
+        continue
+      }
+
+      if (minCooldownUntil === undefined || cooldownUntil < minCooldownUntil) {
+        minCooldownUntil = cooldownUntil
+      }
+    }
+
+    if (minCooldownUntil === undefined) {
+      return undefined
+    }
+
+    return Math.max(1, Math.ceil((minCooldownUntil - Date.now()) / 1000))
+  }
+
+  public getDomainCredentialStatus(domain: string): DomainCredentialStatus {
+    const normalizedDomain = this.normalizeDomain(domain)
+    this.cleanupExpiredCooldowns(normalizedDomain)
+
+    const credentials = this.authConfig[normalizedDomain] || []
+    const status = credentials.map((credential) =>
+      this.getMaskedCredentialStatus(normalizedDomain, credential)
+    )
+    const stats = this.getDomainStats(normalizedDomain)
+
+    return {
+      ...stats,
+      minCooldownSeconds: this.getMinCooldownSeconds(normalizedDomain),
+      credentials: status
+    }
+  }
+
+  public getCredentialPoolStatus(domain?: string): DomainCredentialStatus[] {
+    if (domain) {
+      return [this.getDomainCredentialStatus(domain)]
+    }
+
+    return Object.keys(this.authConfig)
+      .sort()
+      .map((key) => this.getDomainCredentialStatus(key))
   }
 
   private normalizeAuthConfig(authConfig: BooruAuthConfig): BooruAuthConfig {
@@ -267,6 +340,14 @@ export class BooruAuthManagerService implements OnModuleInit {
   private sanitizeUserIdentifier(user: string): string {
     if (!user) {
       return 'REDACTED'
+    }
+
+    return `REDACTED(${user.length})`
+  }
+
+  private maskUserIdentifier(user: string): string {
+    if (!user) {
+      return 'REDACTED(0)'
     }
 
     return `REDACTED(${user.length})`
@@ -410,5 +491,36 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
 
     return null
+  }
+
+  private getMaskedCredentialStatus(domain: string, credential: BooruAuthCredential): MaskedCredentialStatus {
+    const fullKey = createCredentialKey(domain, credential.user, credential.password)
+    const userKey = createCredentialKey(domain, credential.user)
+    const now = Date.now()
+
+    if (this.disabledCredentials.has(fullKey) || this.disabledCredentials.has(userKey)) {
+      return {
+        user: this.maskUserIdentifier(credential.user),
+        state: 'permanent',
+        reason: 'Authentication failure'
+      }
+    }
+
+    const cooldownUntil = this.cooldownCredentials.get(fullKey) ?? this.cooldownCredentials.get(userKey)
+
+    if (cooldownUntil && cooldownUntil > now) {
+      return {
+        user: this.maskUserIdentifier(credential.user),
+        state: 'cooldown',
+        cooldownUntil: new Date(cooldownUntil).toISOString(),
+        secondsRemaining: Math.max(1, Math.ceil((cooldownUntil - now) / 1000)),
+        reason: 'Rate limited'
+      }
+    }
+
+    return {
+      user: this.maskUserIdentifier(credential.user),
+      state: 'active'
+    }
   }
 }

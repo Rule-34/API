@@ -52,7 +52,9 @@ describe('BooruAuthManagerService', () => {
       domain: 'rule34.xxx',
       total: 2,
       available: 2,
-      disabled: 0
+      disabled: 0,
+      cooldown: 0,
+      permanentDisabled: 0
     })
   })
 
@@ -191,7 +193,9 @@ describe('BooruAuthManagerService', () => {
       domain: 'same-user.test',
       total: 2,
       available: 1,
-      disabled: 1
+      disabled: 1,
+      cooldown: 0,
+      permanentDisabled: 1
     })
   })
 
@@ -210,7 +214,9 @@ describe('BooruAuthManagerService', () => {
       domain: 'same-user.test',
       total: 2,
       available: 0,
-      disabled: 2
+      disabled: 2,
+      cooldown: 0,
+      permanentDisabled: 2
     })
   })
 
@@ -222,7 +228,9 @@ describe('BooruAuthManagerService', () => {
       domain: 'colon-user.test',
       total: 2,
       available: 2,
-      disabled: 0
+      disabled: 0,
+      cooldown: 0,
+      permanentDisabled: 0
     })
   })
 
@@ -266,7 +274,9 @@ describe('BooruAuthManagerService', () => {
       domain: 'www.gelbooru.com',
       total: 1,
       available: 0,
-      disabled: 1
+      disabled: 1,
+      cooldown: 1,
+      permanentDisabled: 0
     })
 
     expect(
@@ -294,5 +304,42 @@ describe('BooruAuthManagerService', () => {
     const selected = service.getAvailableCredential('https://www.gelbooru.com/index.php?page=dapi')
 
     expect(selected).toEqual({ user: 'www-gel-user', password: 'www-gel-pass' })
+  })
+
+  it('should expose minimum cooldown seconds for a domain', () => {
+    service.reportAuthFailure({
+      domain: 'https://www.gelbooru.com/index.php?page=dapi',
+      user: 'www-gel-user',
+      password: 'www-gel-pass',
+      error: 'HTTP 429: Too Many Requests',
+      failureKind: 'rate_limited',
+      retryAfterSeconds: 45,
+      timestamp: new Date()
+    })
+
+    const minCooldown = service.getMinCooldownSeconds('https://www.gelbooru.com/index.php?page=dapi')
+
+    expect(minCooldown).toBeDefined()
+    expect(minCooldown).toBeGreaterThan(0)
+    expect(minCooldown).toBeLessThanOrEqual(45)
+  })
+
+  it('should return masked credential pool status snapshots', () => {
+    service.reportAuthFailure({
+      domain: 'https://gelbooru.com/index.php?page=dapi',
+      user: 'gel-user',
+      password: 'gel-pass',
+      error: 'HTTP 403: Forbidden',
+      failureKind: 'auth_forbidden',
+      timestamp: new Date()
+    })
+
+    const snapshots = service.getCredentialPoolStatus('gelbooru.com')
+
+    expect(snapshots).toHaveLength(1)
+    expect(snapshots[0].domain).toBe('gelbooru.com')
+    expect(snapshots[0].credentials[0].user).toMatch(/^REDACTED\(\d+\)$/)
+    expect(snapshots[0].credentials[0].state).toBe('permanent')
+    expect(snapshots[0].credentials[0].user).not.toContain('gel-user')
   })
 })

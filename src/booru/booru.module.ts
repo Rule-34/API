@@ -5,6 +5,7 @@ import { BooruAuthManagerService } from './services/booru-auth-manager.service'
 
 @Module({
   providers: [BooruService, BooruAuthManagerService],
-  controllers: [BooruController]
+  controllers: [BooruController],
+  exports: [BooruAuthManagerService]
 })
 export class BooruModule {}

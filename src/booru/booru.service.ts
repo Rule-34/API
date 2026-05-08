@@ -11,6 +11,7 @@ import {
   IBooruEndpoints,
   IBooruOptions,
   IBooruQueryIdentifiers,
+  HttpError,
   Moebooru,
   RealBooruCom,
   Rule34PahealNet,
@@ -31,6 +32,17 @@ export interface BuiltBooruApi {
   authResolution: ResolvedAuthCredentials
 }
 
+export class ManagedCredentialPoolUnavailableError extends Error {
+  constructor(
+    public readonly domain: string,
+    public readonly reason: 'cooldown_exhausted' | 'permanent_exhausted' | 'no_credentials',
+    public readonly retryAfterSeconds?: number
+  ) {
+    super(`Managed credential pool unavailable for ${domain}`)
+    this.name = 'ManagedCredentialPoolUnavailableError'
+  }
+}
+
 @Injectable()
 export class BooruService {
   constructor(
@@ -40,6 +52,19 @@ export class BooruService {
 
   public buildApiClass(params: BooruEndpointParamsDTO, queries: booruQueriesDTO): BooruTypes {
     return this.buildApiWithContext(params, queries).api
+  }
+
+  public async executeWithAuthStrategy<T>(
+    params: BooruEndpointParamsDTO,
+    queries: booruQueriesDTO,
+    operation: (api: BooruTypes, authResolution: ResolvedAuthCredentials) => Promise<T>
+  ): Promise<T> {
+    if (queries.auth_user && queries.auth_pass) {
+      const explicitContext = this.buildApiWithContext(params, queries)
+      return operation(explicitContext.api, explicitContext.authResolution)
+    }
+
+    return this.executeManagedCredentialFailover(params, queries, operation)
   }
 
   public buildApiWithContext(params: BooruEndpointParamsDTO, queries: booruQueriesDTO): BuiltBooruApi {
@@ -137,6 +162,143 @@ export class BooruService {
     return {
       source: 'none'
     }
+  }
+
+  private async executeManagedCredentialFailover<T>(
+    params: BooruEndpointParamsDTO,
+    queries: booruQueriesDTO,
+    operation: (api: BooruTypes, authResolution: ResolvedAuthCredentials) => Promise<T>
+  ): Promise<T> {
+    const domainStats = this.authManager.getDomainStats(queries.baseEndpoint)
+
+    if (domainStats.total === 0) {
+      throw new ManagedCredentialPoolUnavailableError(queries.baseEndpoint, 'no_credentials')
+    }
+
+    const maxAttempts = Math.min(domainStats.total, this.getManagedRetryCap())
+    const attemptedCredentials = new Set<string>()
+    let lastError: unknown
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const context = this.buildApiWithContext(params, queries)
+      const selectedCredential = context.authResolution.selectedCredential
+
+      if (context.authResolution.source !== 'env' || !selectedCredential) {
+        throw this.createPoolUnavailableError(queries.baseEndpoint)
+      }
+
+      const credentialKey = `${selectedCredential.user}:${selectedCredential.password}`
+
+      if (attemptedCredentials.has(credentialKey)) {
+        throw this.createPoolUnavailableError(queries.baseEndpoint)
+      }
+
+      try {
+        return await operation(context.api, context.authResolution)
+      } catch (error) {
+        lastError = error
+
+        if (!this.isRetryableManagedCredentialFailure(error)) {
+          throw error
+        }
+
+        this.authManager.reportAuthFailure({
+          domain: queries.baseEndpoint,
+          user: selectedCredential.user,
+          password: selectedCredential.password,
+          error: error.message || error.toString(),
+          failureKind: this.getFailureKind(error),
+          retryAfterSeconds: this.getRetryAfterSeconds(error),
+          timestamp: new Date()
+        })
+
+        attemptedCredentials.add(credentialKey)
+      }
+    }
+
+    if (lastError !== undefined) {
+      throw this.createPoolUnavailableError(queries.baseEndpoint)
+    }
+
+    throw new ManagedCredentialPoolUnavailableError(queries.baseEndpoint, 'no_credentials')
+  }
+
+  private getManagedRetryCap(): number {
+    const configuredCap = this.configService.get<string | number>('BOORU_MANAGED_RETRY_CAP')
+
+    const parsedCap =
+      typeof configuredCap === 'number'
+        ? configuredCap
+        : parseInt(configuredCap ?? '', 10)
+
+    if (!Number.isFinite(parsedCap) || parsedCap < 1) {
+      return 5
+    }
+
+    return Math.floor(parsedCap)
+  }
+
+  private createPoolUnavailableError(domain: string): ManagedCredentialPoolUnavailableError {
+    const stats = this.authManager.getDomainStats(domain)
+
+    if (stats.total === 0) {
+      return new ManagedCredentialPoolUnavailableError(domain, 'no_credentials')
+    }
+
+    if (stats.available === 0 && stats.cooldown > 0) {
+      return new ManagedCredentialPoolUnavailableError(
+        domain,
+        'cooldown_exhausted',
+        this.authManager.getMinCooldownSeconds(domain)
+      )
+    }
+
+    return new ManagedCredentialPoolUnavailableError(domain, 'permanent_exhausted')
+  }
+
+  private isRetryableManagedCredentialFailure(error: any): boolean {
+    if (!(error instanceof HttpError)) {
+      return false
+    }
+
+    const kind = this.getFailureKind(error)
+    return kind === 'auth_invalid' || kind === 'auth_forbidden' || kind === 'rate_limited'
+  }
+
+  private getFailureKind(error: any):
+    | 'auth_invalid'
+    | 'auth_forbidden'
+    | 'rate_limited'
+    | 'upstream_error'
+    | 'network_error'
+    | 'unknown' {
+    if (error.failureKind) {
+      return error.failureKind
+    }
+
+    const statusCode = error.statusCode || error.status
+
+    if (statusCode === 429) {
+      return 'rate_limited'
+    }
+
+    if (statusCode === 403) {
+      return 'auth_forbidden'
+    }
+
+    if (statusCode === 401) {
+      return 'auth_invalid'
+    }
+
+    return 'unknown'
+  }
+
+  private getRetryAfterSeconds(error: any): number | undefined {
+    if (typeof error.retryAfterSeconds === 'number') {
+      return error.retryAfterSeconds
+    }
+
+    return undefined
   }
 
   private getApiClassByType(booruType: BooruTypesStringEnum) {

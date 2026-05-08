@@ -22,6 +22,27 @@ export interface AuthCredentialStats {
   total: number
   available: number
   disabled: number
+  cooldown: number
+  permanentDisabled: number
+}
+
+export interface MaskedCredentialStatus {
+  user: string
+  state: 'active' | 'cooldown' | 'permanent'
+  cooldownUntil?: string
+  secondsRemaining?: number
+  reason?: string
+}
+
+export interface DomainCredentialStatus {
+  domain: string
+  total: number
+  available: number
+  disabled: number
+  cooldown: number
+  permanentDisabled: number
+  minCooldownSeconds?: number
+  credentials: MaskedCredentialStatus[]
 }
 
 export interface AuthFailureEvent {

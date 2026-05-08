@@ -16,6 +16,15 @@ import { BooruErrorsInterceptor } from './interceptors/booru-exception.intercept
 export class BooruController {
   constructor(private readonly booruService: BooruService) {}
 
+  private attachAuthContext(request: any, baseEndpoint: string, authResolution: any): void {
+    request.booruAuthContext = {
+      baseEndpoint,
+      credential: authResolution.selectedCredential,
+      source: authResolution.source,
+      handledByService: authResolution.source === 'env'
+    }
+  }
+
   @Get(':booruType/posts')
   @Header('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600, stale-if-error=0') // 5 minutes, 1 hour
   async GetPosts(
@@ -26,37 +35,32 @@ export class BooruController {
     @Query()
     queries: booruQueryValuesPostsDTO
   ) {
-    const { api: Api, authResolution } = this.booruService.buildApiWithContext(params, queries)
-
-    request.booruAuthContext = {
-      baseEndpoint: queries.baseEndpoint,
-      credential: authResolution.selectedCredential,
-      source: authResolution.source
-    }
+    const initialApi = this.booruService.buildApiClass(params, queries)
+    const effectivePageId = queries.pageID ?? initialApi.booruType.initialPageID
+    const responseQueries = { ...queries, pageID: effectivePageId }
 
     const postQueryValues: IBooruQueryValues['posts'] = {
       limit: queries.limit,
-      pageID: queries.pageID,
+      pageID: effectivePageId,
       tags: queries.tags,
       rating: queries.rating,
       score: queries.score,
       order: queries.order
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    queries.pageID = queries.pageID ?? Api.booruType.initialPageID
-
     try {
-      const posts = await Api.getPosts(postQueryValues)
+      const posts = await this.booruService.executeWithAuthStrategy(params, queries, async (Api, authResolution) => {
+        this.attachAuthContext(request, queries.baseEndpoint, authResolution)
+        return Api.getPosts(postQueryValues)
+      })
 
-      return ResponseDto.createFromController(request, queries, Api, posts)
+      return ResponseDto.createFromController(request, responseQueries, initialApi, posts)
 
       //
     } catch (error) {
       // TODO: Send a 204 status code
       if (error instanceof EmptyDataError) {
-        return ResponseDto.createFromController(request, queries, Api, [])
+        return ResponseDto.createFromController(request, responseQueries, initialApi, [])
       }
 
       throw error
@@ -73,37 +77,32 @@ export class BooruController {
     @Query()
     queries: booruQueryValuesRandomPostsDTO
   ) {
-    const { api: Api, authResolution } = this.booruService.buildApiWithContext(params, queries)
-
-    request.booruAuthContext = {
-      baseEndpoint: queries.baseEndpoint,
-      credential: authResolution.selectedCredential,
-      source: authResolution.source
-    }
+    const initialApi = this.booruService.buildApiClass(params, queries)
+    const effectivePageId = queries.pageID ?? initialApi.booruType.initialPageID
+    const responseQueries = { ...queries, pageID: effectivePageId }
 
     const postQueryValues: IBooruQueryValues['randomPosts'] = {
       limit: queries.limit,
-      pageID: queries.pageID,
+      pageID: effectivePageId,
       tags: queries.tags,
       rating: queries.rating,
       score: queries.score,
       order: queries.order
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    queries.pageID = queries.pageID ?? Api.booruType.initialPageID
-
     try {
-      const posts = await Api.getRandomPosts(postQueryValues)
+      const posts = await this.booruService.executeWithAuthStrategy(params, queries, async (Api, authResolution) => {
+        this.attachAuthContext(request, queries.baseEndpoint, authResolution)
+        return Api.getRandomPosts(postQueryValues)
+      })
 
-      return ResponseDto.createFromController(request, queries, Api, posts)
+      return ResponseDto.createFromController(request, responseQueries, initialApi, posts)
 
       //
     } catch (error) {
       // TODO: Send a 204 status code
       if (error instanceof EmptyDataError) {
-        return ResponseDto.createFromController(request, queries, Api, [])
+        return ResponseDto.createFromController(request, responseQueries, initialApi, [])
       }
 
       throw error
@@ -120,21 +119,18 @@ export class BooruController {
     @Query()
     queries: booruQueryValuesSinglePostDTO
   ) {
-    const { api: Api, authResolution } = this.booruService.buildApiWithContext(params, queries)
-
-    request.booruAuthContext = {
-      baseEndpoint: queries.baseEndpoint,
-      credential: authResolution.selectedCredential,
-      source: authResolution.source
-    }
-
     const postQueryValues: IBooruQueryValues['singlePost'] = {
       id: queries.ID
     }
 
-    const posts = await Api.getSinglePost(postQueryValues)
+    const initialApi = this.booruService.buildApiClass(params, queries)
 
-    return ResponseDto.createFromController(request, queries, Api, posts)
+    const posts = await this.booruService.executeWithAuthStrategy(params, queries, async (Api, authResolution) => {
+      this.attachAuthContext(request, queries.baseEndpoint, authResolution)
+      return Api.getSinglePost(postQueryValues)
+    })
+
+    return ResponseDto.createFromController(request, queries, initialApi, posts)
   }
 
   @Get(':booruType/tags')
@@ -147,36 +143,31 @@ export class BooruController {
     @Query()
     queries: booruQueryValuesTagsDTO
   ) {
-    const { api: Api, authResolution } = this.booruService.buildApiWithContext(params, queries)
-
-    request.booruAuthContext = {
-      baseEndpoint: queries.baseEndpoint,
-      credential: authResolution.selectedCredential,
-      source: authResolution.source
-    }
+    const initialApi = this.booruService.buildApiClass(params, queries)
+    const effectivePageId = queries.pageID ?? initialApi.booruType.initialPageID
+    const responseQueries = { ...queries, pageID: effectivePageId }
 
     const postQueryValues: IBooruQueryValues['tags'] = {
       tag: queries.tag,
       tagEnding: queries.tagEnding,
       limit: queries.limit,
-      pageID: queries.pageID,
+      pageID: effectivePageId,
       order: queries.order
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    queries.pageID = queries.pageID ?? Api.booruType.initialPageID
-
     try {
-      const tags = await Api.getTags(postQueryValues)
+      const tags = await this.booruService.executeWithAuthStrategy(params, queries, async (Api, authResolution) => {
+        this.attachAuthContext(request, queries.baseEndpoint, authResolution)
+        return Api.getTags(postQueryValues)
+      })
 
-      return ResponseDto.createFromController(request, queries, Api, tags)
+      return ResponseDto.createFromController(request, responseQueries, initialApi, tags)
 
       //
     } catch (error) {
       // TODO: Send a 204 status code
       if (error instanceof EmptyDataError) {
-        return ResponseDto.createFromController(request, queries, Api, [])
+        return ResponseDto.createFromController(request, responseQueries, initialApi, [])
       }
 
       throw error
