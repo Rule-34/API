@@ -64,7 +64,12 @@ export class BooruAuthManagerService implements OnModuleInit {
     if (cluster.isWorker && process.send) {
       process.on('message', (message: IpcAuthMessage) => {
         if (message.type === 'DISABLE_CREDENTIAL') {
-          const credential = message.payload as DisabledCredential
+          const raw = message.payload as DisabledCredential
+          // IPC serializes Date objects as ISO strings — reconstruct them before use
+          const credential: DisabledCredential =
+            raw.state === 'cooldown'
+              ? { ...raw, disabledAt: new Date(raw.disabledAt), cooldownUntil: new Date(raw.cooldownUntil) }
+              : { ...raw, disabledAt: new Date(raw.disabledAt) }
           this.disableCredentialLocally(credential)
         }
       })
