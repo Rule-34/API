@@ -16,6 +16,10 @@ import { BooruErrorsInterceptor } from './interceptors/booru-exception.intercept
 export class BooruController {
   constructor(private readonly booruService: BooruService) {}
 
+  private withEffectivePageId<T extends object>(queries: T, pageID: number): T {
+    return Object.assign(Object.create(Object.getPrototypeOf(queries)), queries, { pageID })
+  }
+
   private attachAuthContext(request: any, baseEndpoint: string, authResolution: any): void {
     request.booruAuthContext = {
       baseEndpoint,
@@ -37,7 +41,7 @@ export class BooruController {
   ) {
     const initialApi = this.booruService.buildApiClass(params, queries)
     const effectivePageId = queries.pageID ?? initialApi.booruType.initialPageID
-    const responseQueries = { ...queries, pageID: effectivePageId }
+    const responseQueries = this.withEffectivePageId(queries, effectivePageId)
 
     const postQueryValues: IBooruQueryValues['posts'] = {
       limit: queries.limit,
@@ -79,7 +83,7 @@ export class BooruController {
   ) {
     const initialApi = this.booruService.buildApiClass(params, queries)
     const effectivePageId = queries.pageID ?? initialApi.booruType.initialPageID
-    const responseQueries = { ...queries, pageID: effectivePageId }
+    const responseQueries = this.withEffectivePageId(queries, effectivePageId)
 
     const postQueryValues: IBooruQueryValues['randomPosts'] = {
       limit: queries.limit,
@@ -145,7 +149,7 @@ export class BooruController {
   ) {
     const initialApi = this.booruService.buildApiClass(params, queries)
     const effectivePageId = queries.pageID ?? initialApi.booruType.initialPageID
-    const responseQueries = { ...queries, pageID: effectivePageId }
+    const responseQueries = this.withEffectivePageId(queries, effectivePageId)
 
     const postQueryValues: IBooruQueryValues['tags'] = {
       tag: queries.tag,
