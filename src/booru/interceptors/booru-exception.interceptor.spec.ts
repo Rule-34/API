@@ -24,6 +24,20 @@ class TestBooruErrorsController {
     )
 
     ;(error as any).statusCode = 403
+    ;(error as any).failureKind = 'auth_forbidden'
+
+    throw error
+  }
+
+  @Get('rate-limit')
+  getRateLimit() {
+    const error = new HttpError(
+      'Too many requests for https://www.gelbooru.com/index.php?page=dapi&auth_user=www-gel-user&auth_pass=secret123'
+    )
+
+    ;(error as any).statusCode = 429
+    ;(error as any).failureKind = 'rate_limited'
+    ;(error as any).retryAfterSeconds = 30
 
     throw error
   }
@@ -104,6 +118,25 @@ describe('BooruErrorsInterceptor', () => {
     expect(body).toContain('auth_pass=REDACTED')
     expect(body).not.toContain('www-gel-user')
     expect(body).not.toContain('secret123')
+  })
+
+  it('should map rate-limit errors to 429 and put the credential in cooldown', async () => {
+    const response = await request(app.getHttpServer()).get('/test-booru-errors/rate-limit').query({
+      baseEndpoint: 'https://www.gelbooru.com/index.php?page=dapi',
+      auth_user: 'www-gel-user'
+    })
+
+    const disabledCredentials = authManager.getDisabledCredentials()
+
+    expect(response.status).toBe(429)
+    expect(
+      disabledCredentials.some(
+        (credential) =>
+          credential.domain === 'www.gelbooru.com' &&
+          credential.user === 'www-gel-user' &&
+          credential.state === 'cooldown'
+      )
+    ).toBe(true)
   })
 
   it('should report auth failures when baseEndpoint protocol casing is uppercase', async () => {

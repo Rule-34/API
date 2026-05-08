@@ -26,7 +26,13 @@ export class BooruController {
     @Query()
     queries: booruQueryValuesPostsDTO
   ) {
-    const Api = this.booruService.buildApiClass(params, queries)
+    const { api: Api, authResolution } = this.booruService.buildApiWithContext(params, queries)
+
+    request.booruAuthContext = {
+      baseEndpoint: queries.baseEndpoint,
+      credential: authResolution.selectedCredential,
+      source: authResolution.source
+    }
 
     const postQueryValues: IBooruQueryValues['posts'] = {
       limit: queries.limit,
@@ -67,7 +73,13 @@ export class BooruController {
     @Query()
     queries: booruQueryValuesRandomPostsDTO
   ) {
-    const Api = this.booruService.buildApiClass(params, queries)
+    const { api: Api, authResolution } = this.booruService.buildApiWithContext(params, queries)
+
+    request.booruAuthContext = {
+      baseEndpoint: queries.baseEndpoint,
+      credential: authResolution.selectedCredential,
+      source: authResolution.source
+    }
 
     const postQueryValues: IBooruQueryValues['randomPosts'] = {
       limit: queries.limit,
@@ -108,7 +120,13 @@ export class BooruController {
     @Query()
     queries: booruQueryValuesSinglePostDTO
   ) {
-    const Api = this.booruService.buildApiClass(params, queries)
+    const { api: Api, authResolution } = this.booruService.buildApiWithContext(params, queries)
+
+    request.booruAuthContext = {
+      baseEndpoint: queries.baseEndpoint,
+      credential: authResolution.selectedCredential,
+      source: authResolution.source
+    }
 
     const postQueryValues: IBooruQueryValues['singlePost'] = {
       id: queries.ID
@@ -129,7 +147,13 @@ export class BooruController {
     @Query()
     queries: booruQueryValuesTagsDTO
   ) {
-    const Api = this.booruService.buildApiClass(params, queries)
+    const { api: Api, authResolution } = this.booruService.buildApiWithContext(params, queries)
+
+    request.booruAuthContext = {
+      baseEndpoint: queries.baseEndpoint,
+      credential: authResolution.selectedCredential,
+      source: authResolution.source
+    }
 
     const postQueryValues: IBooruQueryValues['tags'] = {
       tag: queries.tag,

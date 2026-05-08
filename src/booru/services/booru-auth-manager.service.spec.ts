@@ -246,4 +246,53 @@ describe('BooruAuthManagerService', () => {
       )
     ).toBe(true)
   })
+
+  it('should apply cooldown state for rate-limited credentials', () => {
+    service.reportAuthFailure({
+      domain: 'https://www.gelbooru.com/index.php?page=dapi',
+      user: 'www-gel-user',
+      password: 'www-gel-pass',
+      error: 'HTTP 429: Too Many Requests',
+      failureKind: 'rate_limited',
+      retryAfterSeconds: 30,
+      timestamp: new Date()
+    })
+
+    const stats = service.getCredentialStats()
+    const gelStats = stats.find((stat) => stat.domain === 'www.gelbooru.com')
+    const disabledCredentials = service.getDisabledCredentials()
+
+    expect(gelStats).toEqual({
+      domain: 'www.gelbooru.com',
+      total: 1,
+      available: 0,
+      disabled: 1
+    })
+
+    expect(
+      disabledCredentials.some(
+        (credential) =>
+          credential.domain === 'www.gelbooru.com' &&
+          credential.user === 'www-gel-user' &&
+          credential.state === 'cooldown' &&
+          credential.cooldownUntil instanceof Date
+      )
+    ).toBe(true)
+  })
+
+  it('should reactivate credentials after cooldown expiration', () => {
+    service.reportAuthFailure({
+      domain: 'https://www.gelbooru.com/index.php?page=dapi',
+      user: 'www-gel-user',
+      password: 'www-gel-pass',
+      error: 'HTTP 429: Too Many Requests',
+      failureKind: 'rate_limited',
+      retryAfterSeconds: 0,
+      timestamp: new Date()
+    })
+
+    const selected = service.getAvailableCredential('https://www.gelbooru.com/index.php?page=dapi')
+
+    expect(selected).toEqual({ user: 'www-gel-user', password: 'www-gel-pass' })
+  })
 })

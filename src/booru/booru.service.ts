@@ -20,6 +20,17 @@ import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import { BooruAuthManagerService } from './services/booru-auth-manager.service'
 
+export interface ResolvedAuthCredentials {
+  auth?: { username: string; apiKey: string }
+  source: 'query' | 'env' | 'none'
+  selectedCredential?: { user: string; password: string }
+}
+
+export interface BuiltBooruApi {
+  api: BooruTypes
+  authResolution: ResolvedAuthCredentials
+}
+
 @Injectable()
 export class BooruService {
   constructor(
@@ -28,6 +39,10 @@ export class BooruService {
   ) {}
 
   public buildApiClass(params: BooruEndpointParamsDTO, queries: booruQueriesDTO): BooruTypes {
+    return this.buildApiWithContext(params, queries).api
+  }
+
+  public buildApiWithContext(params: BooruEndpointParamsDTO, queries: booruQueriesDTO): BuiltBooruApi {
     const booruClass = this.getApiClassByType(params.booruType)
 
     const endpoints: IBooruEndpoints = {
@@ -73,25 +88,33 @@ export class BooruService {
     // No default QueryValues are needed
 
     // Resolve authentication credentials
-    const authCredentials = this.resolveAuthCredentials(queries)
+    const authResolution = this.resolveAuthCredentials(queries)
 
     const options: IBooruOptions = {
       HTTPScheme: queries.httpScheme,
-      ...authCredentials
+      auth: authResolution.auth
     }
 
     const Api = new booruClass(endpoints, defaultQueryIdentifiers, undefined, options)
 
-    return Api
+    return {
+      api: Api,
+      authResolution
+    }
   }
 
-  private resolveAuthCredentials(queries: booruQueriesDTO): { auth?: { username: string; apiKey: string } } {
+  private resolveAuthCredentials(queries: booruQueriesDTO): ResolvedAuthCredentials {
     // Priority 1: Query parameters
     if (queries.auth_user && queries.auth_pass) {
       return {
         auth: {
           username: queries.auth_user,
           apiKey: queries.auth_pass
+        },
+        source: 'query',
+        selectedCredential: {
+          user: queries.auth_user,
+          password: queries.auth_pass
         }
       }
     }
@@ -104,12 +127,16 @@ export class BooruService {
         auth: {
           username: envCredentials.user,
           apiKey: envCredentials.password
-        }
+        },
+        source: 'env',
+        selectedCredential: envCredentials
       }
     }
 
     // Priority 3: No authentication
-    return {}
+    return {
+      source: 'none'
+    }
   }
 
   private getApiClassByType(booruType: BooruTypesStringEnum) {

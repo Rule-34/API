@@ -1,6 +1,8 @@
 import {
   CallHandler,
   ExecutionContext,
+  HttpException,
+  HttpStatus,
   Injectable,
   MethodNotAllowedException,
   NestInterceptor,
@@ -42,9 +44,16 @@ export class BooruErrorsInterceptor implements NestInterceptor {
 
           case HttpError:
             // Check if this is an auth-related HTTP error
-            if (this.isAuthError(error)) {
+            if (this.isCredentialFailure(error)) {
               return throwError(() => new UnauthorizedException(undefined, sanitizedMessage))
             }
+
+            if (this.isRateLimitError(error)) {
+              return throwError(
+                () => new HttpException(sanitizedMessage, HttpStatus.TOO_MANY_REQUESTS)
+              )
+            }
+
             return throwError(() => new ServiceUnavailableException(undefined, sanitizedMessage))
 
           default: {
@@ -110,14 +119,16 @@ export class BooruErrorsInterceptor implements NestInterceptor {
   }
 
   private checkForAuthFailure(error: any, context: ExecutionContext): void {
-    if (!this.isAuthError(error)) {
+    if (!this.isCredentialFailure(error) && !this.isRateLimitError(error)) {
       return
     }
 
     const request = context.switchToHttp().getRequest()
-    const baseEndpoint = request.query?.baseEndpoint || request.body?.baseEndpoint
-    const authUser = request.query?.auth_user || request.body?.auth_user
-    const authPass = request.query?.auth_pass || request.body?.auth_pass
+    const contextCredential = request.booruAuthContext?.credential
+    const baseEndpoint =
+      request.booruAuthContext?.baseEndpoint || request.query?.baseEndpoint || request.body?.baseEndpoint
+    const authUser = contextCredential?.user || request.query?.auth_user || request.body?.auth_user
+    const authPass = contextCredential?.password || request.query?.auth_pass || request.body?.auth_pass
 
     if (!baseEndpoint || !authUser) {
       return
@@ -129,16 +140,23 @@ export class BooruErrorsInterceptor implements NestInterceptor {
       user: authUser,
       password: authPass,
       error: this.getAuthErrorMessage(error),
+      failureKind: this.getFailureKind(error),
+      retryAfterSeconds: this.getRetryAfterSeconds(error),
       timestamp: new Date()
     }
 
     this.authManager.reportAuthFailure(authFailure)
   }
 
-  private isAuthError(error: any): boolean {
+  private isCredentialFailure(error: any): boolean {
     if (error.constructor === HttpError) {
       const httpError = error as any
+      const failureKind = httpError.failureKind
       const statusCode = httpError.statusCode || httpError.status
+
+      if (failureKind === 'auth_invalid' || failureKind === 'auth_forbidden') {
+        return true
+      }
 
       if (statusCode === 401 || statusCode === 403) {
         return true
@@ -161,6 +179,25 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     return authErrorPatterns.some((pattern) => errorMessage.includes(pattern))
   }
 
+  private isRateLimitError(error: any): boolean {
+    if (error.constructor === HttpError) {
+      const httpError = error as any
+      const failureKind = httpError.failureKind
+      const statusCode = httpError.statusCode || httpError.status
+
+      if (failureKind === 'rate_limited') {
+        return true
+      }
+
+      if (statusCode === 429) {
+        return true
+      }
+    }
+
+    const errorMessage = (error.message || error.toString()).toLowerCase()
+    return errorMessage.includes('status: 429') || errorMessage.includes('http 429')
+  }
+
   private getAuthErrorMessage(error: any): string {
     if (error.constructor === HttpError) {
       const httpError = error as any
@@ -169,6 +206,34 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     }
 
     return error.message || error.toString() || 'Unknown authentication error'
+  }
+
+  private getFailureKind(error: any): AuthFailureEvent['failureKind'] {
+    const httpError = error as any
+
+    if (httpError.failureKind) {
+      return httpError.failureKind
+    }
+
+    if (this.isRateLimitError(error)) {
+      return 'rate_limited'
+    }
+
+    if (this.isCredentialFailure(error)) {
+      return 'auth_forbidden'
+    }
+
+    return 'unknown'
+  }
+
+  private getRetryAfterSeconds(error: any): number | undefined {
+    const httpError = error as any
+
+    if (typeof httpError.retryAfterSeconds === 'number') {
+      return httpError.retryAfterSeconds
+    }
+
+    return undefined
   }
 
   private extractDomainFromUrl(url: string): string {

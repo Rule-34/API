@@ -12,6 +12,8 @@ export interface DisabledCredential {
   user: string
   password?: string
   disabledAt: Date
+  state?: 'permanent' | 'cooldown'
+  cooldownUntil?: Date
   reason?: string
 }
 
@@ -27,6 +29,8 @@ export interface AuthFailureEvent {
   user: string
   password?: string
   error: string
+  failureKind?: 'auth_invalid' | 'auth_forbidden' | 'rate_limited' | 'upstream_error' | 'network_error' | 'unknown'
+  retryAfterSeconds?: number
   timestamp: Date
 }
 

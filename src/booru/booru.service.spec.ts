@@ -121,6 +121,37 @@ describe('BooruService', () => {
       expect((api as any).options?.auth?.apiKey).toBe('managed_pass')
     })
 
+    it('should expose selected credential metadata when building API with context', () => {
+      mockAuthManager.getAvailableCredential.mockReturnValue({ user: 'managed_user', password: 'managed_pass' })
+
+      const queries = { ...baseQueries } as booruQueriesDTO
+      const result = service.buildApiWithContext(mockParams, queries)
+
+      expect((result.api as any).options?.auth?.username).toBe('managed_user')
+      expect(result.authResolution.source).toBe('env')
+      expect(result.authResolution.selectedCredential).toEqual({
+        user: 'managed_user',
+        password: 'managed_pass'
+      })
+    })
+
+    it('should expose query credential metadata when query auth is provided', () => {
+      const queries = {
+        ...baseQueries,
+        auth_user: 'query_user',
+        auth_pass: 'query_pass'
+      } as booruQueriesDTO
+
+      const result = service.buildApiWithContext(mockParams, queries)
+
+      expect(result.authResolution.source).toBe('query')
+      expect(result.authResolution.selectedCredential).toEqual({
+        user: 'query_user',
+        password: 'query_pass'
+      })
+      expect(mockAuthManager.getAvailableCredential).not.toHaveBeenCalled()
+    })
+
 
   })
 })
