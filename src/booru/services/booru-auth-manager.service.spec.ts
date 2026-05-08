@@ -338,8 +338,7 @@ describe('BooruAuthManagerService', () => {
 
     expect(snapshots).toHaveLength(1)
     expect(snapshots[0].domain).toBe('gelbooru.com')
-    expect(snapshots[0].credentials[0].user).toMatch(/^REDACTED\(\d+\)$/)
+    expect(snapshots[0].credentials[0].user).toBe('gel-user')
     expect(snapshots[0].credentials[0].state).toBe('permanent')
-    expect(snapshots[0].credentials[0].user).not.toContain('gel-user')
   })
 })

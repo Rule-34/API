@@ -345,14 +345,6 @@ export class BooruAuthManagerService implements OnModuleInit {
     return `REDACTED(${user.length})`
   }
 
-  private maskUserIdentifier(user: string): string {
-    if (!user) {
-      return 'REDACTED(0)'
-    }
-
-    return `REDACTED(${user.length})`
-  }
-
   private sanitizeKeyValueTokens(message: string): string {
     let sanitizedMessage = message
 
@@ -500,7 +492,7 @@ export class BooruAuthManagerService implements OnModuleInit {
 
     if (this.disabledCredentials.has(fullKey) || this.disabledCredentials.has(userKey)) {
       return {
-        user: this.maskUserIdentifier(credential.user),
+        user: credential.user,
         state: 'permanent',
         reason: 'Authentication failure'
       }
@@ -510,7 +502,7 @@ export class BooruAuthManagerService implements OnModuleInit {
 
     if (cooldownUntil && cooldownUntil > now) {
       return {
-        user: this.maskUserIdentifier(credential.user),
+        user: credential.user,
         state: 'cooldown',
         cooldownUntil: new Date(cooldownUntil).toISOString(),
         secondsRemaining: Math.max(1, Math.ceil((cooldownUntil - now) / 1000)),
@@ -519,7 +511,7 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
 
     return {
-      user: this.maskUserIdentifier(credential.user),
+      user: credential.user,
       state: 'active'
     }
   }

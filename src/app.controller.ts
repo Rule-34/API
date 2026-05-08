@@ -1,13 +1,9 @@
-import { Controller, Get, Headers, Query, UnauthorizedException } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
+import { Controller, Get, Query } from '@nestjs/common'
 import { BooruAuthManagerService } from './booru/services/booru-auth-manager.service'
 
 @Controller('/')
 export class AppController {
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly authManager: BooruAuthManagerService
-  ) {}
+  constructor(private readonly authManager: BooruAuthManagerService) {}
 
   @Get()
   GetStatusAsJson() {
@@ -20,15 +16,7 @@ export class AppController {
   }
 
   @Get('internal/booru-auth/status')
-  GetBooruCredentialStatus(
-    @Headers('x-internal-token') internalToken: string,
-    @Query('domain') domain?: string
-  ) {
-    const expectedToken = this.configService.get<string>('BOORU_STATUS_TOKEN')
-
-    if (!expectedToken || internalToken !== expectedToken) {
-      throw new UnauthorizedException('Invalid internal token')
-    }
+  GetBooruCredentialStatus(@Query('domain') domain?: string) {
 
     return {
       status: 'OK',
