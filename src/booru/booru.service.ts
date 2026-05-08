@@ -35,7 +35,7 @@ export interface BuiltBooruApi {
 export class ManagedCredentialPoolUnavailableError extends Error {
   constructor(
     public readonly domain: string,
-    public readonly reason: 'cooldown_exhausted' | 'permanent_exhausted' | 'no_credentials',
+    public readonly reason: 'cooldown_exhausted' | 'permanent_exhausted',
     public readonly retryAfterSeconds?: number
   ) {
     super(`Managed credential pool unavailable for ${domain}`)
@@ -237,10 +237,6 @@ export class BooruService {
 
   private createPoolUnavailableError(domain: string): ManagedCredentialPoolUnavailableError {
     const stats = this.authManager.getDomainStats(domain)
-
-    if (stats.total === 0) {
-      return new ManagedCredentialPoolUnavailableError(domain, 'no_credentials')
-    }
 
     if (stats.available === 0 && stats.cooldown > 0) {
       return new ManagedCredentialPoolUnavailableError(

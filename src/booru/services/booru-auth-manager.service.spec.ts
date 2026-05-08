@@ -338,6 +338,39 @@ describe('BooruAuthManagerService', () => {
     expect(minCooldown).toBeLessThanOrEqual(45)
   })
 
+  it('should log low-availability transitions and normalization', () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
+
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => undefined)
+
+    service.reportAuthFailure({
+      domain: 'same-user.test',
+      user: 'shared-user',
+      password: 'first-pass',
+      error: 'HTTP 429: Too Many Requests',
+      failureKind: 'rate_limited',
+      retryAfterSeconds: 1,
+      timestamp: new Date()
+    })
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Low credential availability for same-user.test')
+    )
+
+    jest.advanceTimersByTime(1_100)
+    service.getDomainStats('same-user.test')
+
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Credential availability normalized for same-user.test')
+    )
+
+    warnSpy.mockRestore()
+    logSpy.mockRestore()
+    jest.useRealTimers()
+  })
+
   it('should handle IPC-serialized credentials where Dates become strings (regression: worker crash)', () => {
     // Simulate what happens when a DisabledCredential is sent via process.send():
     // JSON serialization converts Date objects to ISO strings.

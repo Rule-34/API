@@ -25,6 +25,7 @@ export class BooruAuthManagerService implements OnModuleInit {
     { disabledAt: number; cooldownUntil: number; reason: string }
   >()
   private selectionCursorByDomain = new Map<string, number>()
+  private availabilityByDomain = new Map<string, number>()
   private authConfig: BooruAuthConfig = {}
   private readonly domainAliases: Record<string, string> = {
     'www.rule34.xxx': 'rule34.xxx',
@@ -237,13 +238,49 @@ export class BooruAuthManagerService implements OnModuleInit {
 
     const disabled = cooldown + permanentDisabled
 
-    return {
+    const stats: AuthCredentialStats = {
       domain: normalizedDomain,
       total: credentials.length,
       available: credentials.length - disabled,
       disabled,
       cooldown,
       permanentDisabled
+    }
+
+    this.trackAvailabilityTransition(stats)
+
+    return stats
+  }
+
+  private trackAvailabilityTransition(stats: AuthCredentialStats): void {
+    const previousAvailable = this.availabilityByDomain.get(stats.domain)
+    const currentAvailable = stats.available
+
+    this.availabilityByDomain.set(stats.domain, currentAvailable)
+
+    if (previousAvailable === undefined || previousAvailable === currentAvailable) {
+      return
+    }
+
+    if (previousAvailable > 0 && currentAvailable === 0) {
+      console.warn(`🚨 Credential pool exhausted for ${stats.domain} (0/${stats.total} available)`)
+      return
+    }
+
+    if (previousAvailable > 1 && currentAvailable <= 1) {
+      console.warn(`⚠️ Low credential availability for ${stats.domain} (${currentAvailable}/${stats.total} available)`)
+      return
+    }
+
+    if (previousAvailable === 0 && currentAvailable > 0) {
+      console.log(`✅ Credential pool recovered for ${stats.domain} (${currentAvailable}/${stats.total} available)`)
+      return
+    }
+
+    if (previousAvailable <= 1 && currentAvailable > 1) {
+      console.log(
+        `ℹ️ Credential availability normalized for ${stats.domain} (${currentAvailable}/${stats.total} available)`
+      )
     }
   }
 

@@ -12,7 +12,7 @@ interface TestRequestWithAuthContext {
   booruAuthContext?: {
     baseEndpoint: string
     source: string
-    credential: {
+    credential?: {
       user: string
       password: string
     }
@@ -75,6 +75,38 @@ class TestBooruErrorsController {
     request.booruAuthContext = {
       baseEndpoint: 'https://www.gelbooru.com/index.php?page=dapi',
       source: 'env',
+      credential: {
+        user: 'www-gel-user',
+        password: 'www-gel-pass'
+      }
+    }
+
+    throw new HttpError({
+      message: 'Forbidden for https://www.gelbooru.com/index.php?page=dapi&auth_user=www-gel-user&auth_pass=secret123',
+      statusCode: 403,
+      failureKind: 'auth_forbidden'
+    })
+  }
+
+  @Get('managed-none-auth-failure')
+  getManagedNoneAuthFailure(@Request() request: TestRequestWithAuthContext) {
+    request.booruAuthContext = {
+      baseEndpoint: 'https://www.gelbooru.com/index.php?page=dapi',
+      source: 'none'
+    }
+
+    throw new HttpError({
+      message: 'Forbidden for https://www.gelbooru.com/index.php?page=dapi&auth_user=www-gel-user&auth_pass=secret123',
+      statusCode: 403,
+      failureKind: 'auth_forbidden'
+    })
+  }
+
+  @Get('managed-query-auth-failure')
+  getManagedQueryAuthFailure(@Request() request: TestRequestWithAuthContext) {
+    request.booruAuthContext = {
+      baseEndpoint: 'https://www.gelbooru.com/index.php?page=dapi',
+      source: 'query',
       credential: {
         user: 'www-gel-user',
         password: 'www-gel-pass'
@@ -215,6 +247,24 @@ describe('BooruErrorsInterceptor', () => {
 
   it('should skip auth failure reporting when managed failures were handled by service', async () => {
     const response = await request(app.getHttpServer()).get('/test-booru-errors/managed-auth-failure')
+    const disabledCredentials = authManager.getDisabledCredentials()
+
+    expect(response.status).toBe(401)
+    expect(disabledCredentials).toHaveLength(0)
+  })
+
+  it('should skip auth failure reporting when auth context source is none', async () => {
+    const response = await request(app.getHttpServer()).get('/test-booru-errors/managed-none-auth-failure').query({
+      auth_user: 'www-gel-user'
+    })
+    const disabledCredentials = authManager.getDisabledCredentials()
+
+    expect(response.status).toBe(401)
+    expect(disabledCredentials).toHaveLength(0)
+  })
+
+  it('should skip auth failure reporting when auth context source is query', async () => {
+    const response = await request(app.getHttpServer()).get('/test-booru-errors/managed-query-auth-failure')
     const disabledCredentials = authManager.getDisabledCredentials()
 
     expect(response.status).toBe(401)
