@@ -225,6 +225,32 @@ describe('BooruService', () => {
       )
     })
 
+    it('should fallback to unauthenticated execution when no managed credentials are configured', async () => {
+      mockAuthManager.getDomainStats.mockReturnValue({
+        domain: 'rule34.paheal.net',
+        total: 0,
+        available: 0,
+        disabled: 0,
+        cooldown: 0,
+        permanentDisabled: 0
+      })
+      mockAuthManager.getAvailableCredential.mockReturnValue(null)
+
+      const queries = {
+        ...baseQueries,
+        baseEndpoint: 'https://rule34.paheal.net'
+      } as booruQueriesDTO
+
+      const operation = jest.fn().mockResolvedValue('ok-no-auth')
+
+      const result = await service.executeWithAuthStrategy(mockParams, queries, operation)
+
+      expect(result).toBe('ok-no-auth')
+      expect(operation).toHaveBeenCalledTimes(1)
+      expect(mockAuthManager.reportAuthFailure).not.toHaveBeenCalled()
+      expect(mockAuthManager.getAvailableCredential).toHaveBeenCalledWith('https://rule34.paheal.net')
+    })
+
     it('should throw pool unavailable error when managed credentials are exhausted', async () => {
       mockAuthManager.getDomainStats.mockReturnValue({
         domain: 'gelbooru.com',

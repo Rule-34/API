@@ -172,7 +172,9 @@ export class BooruService {
     const domainStats = this.authManager.getDomainStats(queries.baseEndpoint)
 
     if (domainStats.total === 0) {
-      throw new ManagedCredentialPoolUnavailableError(queries.baseEndpoint, 'no_credentials')
+      // No managed credentials configured for this domain: execute once without auth.
+      const context = this.buildApiWithContext(params, queries)
+      return operation(context.api, context.authResolution)
     }
 
     const maxAttempts = Math.min(domainStats.total, this.getManagedRetryCap())
