@@ -19,25 +19,25 @@ class TestBooruErrorsController {
 
   @Get('auth-failure')
   getAuthFailure() {
-    const error = new HttpError(
-      'Forbidden for https://www.gelbooru.com/index.php?page=dapi&auth_user=www-gel-user&auth_pass=secret123'
-    )
-
-    ;(error as any).statusCode = 403
-    ;(error as any).failureKind = 'auth_forbidden'
+    const error = new HttpError({
+      message:
+        'Forbidden for https://www.gelbooru.com/index.php?page=dapi&auth_user=www-gel-user&auth_pass=secret123',
+      statusCode: 403,
+      failureKind: 'auth_forbidden'
+    })
 
     throw error
   }
 
   @Get('rate-limit')
   getRateLimit() {
-    const error = new HttpError(
-      'Too many requests for https://www.gelbooru.com/index.php?page=dapi&auth_user=www-gel-user&auth_pass=secret123'
-    )
-
-    ;(error as any).statusCode = 429
-    ;(error as any).failureKind = 'rate_limited'
-    ;(error as any).retryAfterSeconds = 30
+    const error = new HttpError({
+      message:
+        'Too many requests for https://www.gelbooru.com/index.php?page=dapi&auth_user=www-gel-user&auth_pass=secret123',
+      statusCode: 429,
+      failureKind: 'rate_limited',
+      retryAfterSeconds: 30
+    })
 
     throw error
   }
