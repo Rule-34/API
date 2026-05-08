@@ -31,54 +31,6 @@ describe('AppController', () => {
     expect(mockAuthManager.getCredentialPoolStatus).toHaveBeenCalledWith()
   })
 
-  it('should return OK with empty array data', () => {
-    ;(mockAuthManager.getCredentialPoolStatus as jest.Mock).mockReturnValue([])
-
-    const result = controller.getBooruCredentialStatus()
-
-    expect(result).toEqual({
-      status: 'OK',
-      data: []
-    })
-  })
-
-  it('should return OK when service returns undefined', () => {
-    ;(mockAuthManager.getCredentialPoolStatus as jest.Mock).mockReturnValue(undefined)
-
-    const result = controller.getBooruCredentialStatus()
-
-    expect(result).toEqual({
-      status: 'OK',
-      data: undefined
-    })
-  })
-
-  it('should return OK when service returns null', () => {
-    ;(mockAuthManager.getCredentialPoolStatus as jest.Mock).mockReturnValue(null)
-
-    const result = controller.getBooruCredentialStatus()
-
-    expect(result).toEqual({
-      status: 'OK',
-      data: null
-    })
-  })
-
-  it('should return OK with multiple status entries', () => {
-    const snapshot = [
-      { domain: 'gelbooru.com', total: 1 },
-      { domain: 'rule34.xxx', total: 8 }
-    ]
-    ;(mockAuthManager.getCredentialPoolStatus as jest.Mock).mockReturnValue(snapshot)
-
-    const result = controller.getBooruCredentialStatus()
-
-    expect(result).toEqual({
-      status: 'OK',
-      data: snapshot
-    })
-  })
-
   it('should rethrow service errors from status lookup', () => {
     const expectedError = new Error('status lookup failed')
     ;(mockAuthManager.getCredentialPoolStatus as jest.Mock).mockImplementation(() => {

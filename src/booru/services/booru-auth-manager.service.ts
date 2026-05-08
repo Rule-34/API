@@ -16,6 +16,9 @@ import { createCredentialKey, parseCredentialKey } from './credential-key.util'
 
 @Injectable()
 export class BooruAuthManagerService implements OnModuleInit {
+  private static readonly HTTP_STATUS_PATTERN =
+    /(?:status(?:\s*code|_code)?|http)\s*[:=]?\s*(\d{3})|\b(\d{3})\b/i
+
   private disabledCredentials = new Map<string, { disabledAt: number; reason: string }>()
   private cooldownCredentials = new Map<
     string,
@@ -111,24 +114,23 @@ export class BooruAuthManagerService implements OnModuleInit {
     const isRateLimit = failureKind === 'rate_limited'
     const cooldownSeconds = Math.max(1, authFailure.retryAfterSeconds ?? 60)
     const cooldownUntil = new Date(Date.now() + cooldownSeconds * 1000)
+    const baseCredential = {
+      domain: normalizedDomain,
+      user: authFailure.user,
+      password: authFailure.password,
+      disabledAt: authFailure.timestamp,
+      reason: sanitizedError
+    }
 
     const disabledCredential: DisabledCredential = isRateLimit
       ? {
-          domain: normalizedDomain,
-          user: authFailure.user,
-          password: authFailure.password,
-          disabledAt: authFailure.timestamp,
+          ...baseCredential,
           state: 'cooldown',
-          cooldownUntil,
-          reason: sanitizedError
+          cooldownUntil
         }
       : {
-          domain: normalizedDomain,
-          user: authFailure.user,
-          password: authFailure.password,
-          disabledAt: authFailure.timestamp,
-          state: 'permanent',
-          reason: sanitizedError
+          ...baseCredential,
+          state: 'permanent'
         }
 
     this.disableCredentialLocally(disabledCredential)
@@ -440,7 +442,7 @@ export class BooruAuthManagerService implements OnModuleInit {
 
     const errorMessage = authFailure.error.toLowerCase()
 
-    const statusMatch = errorMessage.match(/(?:status(?:\s*code|_code)?|http)\s*[:=]?\s*(\d{3})|\b(\d{3})\b/i)
+    const statusMatch = errorMessage.match(BooruAuthManagerService.HTTP_STATUS_PATTERN)
     const statusCode = Number(statusMatch?.[1] ?? statusMatch?.[2])
 
     if (statusCode === 429) {

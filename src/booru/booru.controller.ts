@@ -16,7 +16,6 @@ interface BooruAuthContext {
   baseEndpoint: string
   credential?: { user: string; password: string }
   source: ResolvedAuthCredentials['source']
-  handledByService: boolean
 }
 
 interface AuthContextRequest {
@@ -40,8 +39,7 @@ export class BooruController {
     const authContext: BooruAuthContext = {
       baseEndpoint,
       credential: authResolution.selectedCredential,
-      source: authResolution.source,
-      handledByService: authResolution.source === 'env'
+      source: authResolution.source
     }
 
     request.booruAuthContext = authContext

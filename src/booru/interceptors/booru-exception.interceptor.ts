@@ -167,11 +167,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
 
     const request = context.switchToHttp().getRequest()
 
-    if (request.booruAuthContext?.handledByService) {
-      return
-    }
-
-    if (request.booruAuthContext?.source && request.booruAuthContext.source !== 'env') {
+    if (request.booruAuthContext?.source) {
       return
     }
 

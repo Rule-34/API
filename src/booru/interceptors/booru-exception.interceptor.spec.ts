@@ -12,7 +12,6 @@ interface TestRequestWithAuthContext {
   booruAuthContext?: {
     baseEndpoint: string
     source: string
-    handledByService: boolean
     credential: {
       user: string
       password: string
@@ -76,7 +75,6 @@ class TestBooruErrorsController {
     request.booruAuthContext = {
       baseEndpoint: 'https://www.gelbooru.com/index.php?page=dapi',
       source: 'env',
-      handledByService: true,
       credential: {
         user: 'www-gel-user',
         password: 'www-gel-pass'

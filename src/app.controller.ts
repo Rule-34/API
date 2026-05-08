@@ -1,11 +1,6 @@
 import { Controller, Get } from '@nestjs/common'
 import { BooruAuthManagerService } from './booru/services/booru-auth-manager.service'
 
-type BooruCredentialStatusResponse = {
-  status: 'OK'
-  data: ReturnType<BooruAuthManagerService['getCredentialPoolStatus']>
-}
-
 @Controller('/')
 export class AppController {
   constructor(private readonly authManager: BooruAuthManagerService) {}
@@ -21,7 +16,7 @@ export class AppController {
   }
 
   @Get('internal/booru-auth/status')
-  getBooruCredentialStatus(): BooruCredentialStatusResponse {
+  getBooruCredentialStatus() {
     return {
       status: 'OK',
       data: this.authManager.getCredentialPoolStatus()
