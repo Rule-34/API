@@ -338,6 +338,61 @@ describe('BooruAuthManagerService', () => {
     expect(minCooldown).toBeLessThanOrEqual(45)
   })
 
+  it('should handle IPC-serialized credentials where Dates become strings (regression: worker crash)', () => {
+    // Simulate what happens when a DisabledCredential is sent via process.send():
+    // JSON serialization converts Date objects to ISO strings.
+    // The receiving worker must reconstruct them before calling disableCredentialLocally.
+    const cooldownDate = new Date(Date.now() + 60_000)
+    const original = {
+      domain: 'rule34.xxx',
+      user: 'canonical-user',
+      password: 'canonical-pass',
+      state: 'cooldown' as const,
+      disabledAt: new Date(),
+      cooldownUntil: cooldownDate,
+      reason: 'HTTP 429'
+    }
+
+    // JSON roundtrip — same transformation as process.send() / IPC
+    const serialized = JSON.parse(JSON.stringify(original))
+
+    // With fix: reconstruct Dates before calling disableCredentialLocally
+    const reconstructed =
+      serialized.state === 'cooldown'
+        ? { ...serialized, disabledAt: new Date(serialized.disabledAt), cooldownUntil: new Date(serialized.cooldownUntil) }
+        : { ...serialized, disabledAt: new Date(serialized.disabledAt) }
+
+    // Should NOT throw — disabledAt.getTime() and cooldownUntil.getTime() must work
+    expect(() => (service as any).disableCredentialLocally(reconstructed)).not.toThrow()
+
+    // Credential should be on cooldown (pool has 2 total due to api.rule34.xxx alias merge)
+    const stats = service.getDomainStats('rule34.xxx')
+    expect(stats.total).toBe(2)
+    expect(stats.cooldown).toBe(1)
+    expect(stats.available).toBe(1)
+  })
+
+  it('should throw when IPC-serialized Dates are used without reconstruction (proves original bug)', () => {
+    // Without the fix, disableCredentialLocally receives string dates from IPC and crashes
+    const serialized = JSON.parse(
+      JSON.stringify({
+        domain: 'rule34.xxx',
+        user: 'canonical-user',
+        password: 'canonical-pass',
+        state: 'cooldown' as const,
+        disabledAt: new Date(),
+        cooldownUntil: new Date(Date.now() + 60_000),
+        reason: 'HTTP 429'
+      })
+    )
+
+    // disabledAt and cooldownUntil are now strings — calling .getTime() on them throws
+    expect(typeof serialized.disabledAt).toBe('string')
+    expect(typeof serialized.cooldownUntil).toBe('string')
+    expect(() => (serialized.disabledAt as any).getTime()).toThrow(TypeError)
+    expect(() => (serialized.cooldownUntil as any).getTime()).toThrow(TypeError)
+  })
+
   it('should return credential pool status snapshots', () => {
     service.reportAuthFailure({
       domain: 'https://gelbooru.com/index.php?page=dapi',
