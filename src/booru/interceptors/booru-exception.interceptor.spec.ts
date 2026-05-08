@@ -8,6 +8,18 @@ import { BooruErrorsInterceptor } from './booru-exception.interceptor'
 import { BooruAuthManagerService } from '../services/booru-auth-manager.service'
 import { ManagedCredentialPoolUnavailableError } from '../booru.service'
 
+interface TestRequestWithAuthContext {
+  booruAuthContext?: {
+    baseEndpoint: string
+    source: string
+    handledByService: boolean
+    credential: {
+      user: string
+      password: string
+    }
+  }
+}
+
 @Controller('test-booru-errors')
 @UseInterceptors(BooruErrorsInterceptor)
 class TestBooruErrorsController {
@@ -60,7 +72,7 @@ class TestBooruErrorsController {
   }
 
   @Get('managed-auth-failure')
-  getManagedAuthFailure(@Request() request: any) {
+  getManagedAuthFailure(@Request() request: TestRequestWithAuthContext) {
     request.booruAuthContext = {
       baseEndpoint: 'https://www.gelbooru.com/index.php?page=dapi',
       source: 'env',
@@ -158,6 +170,7 @@ describe('BooruErrorsInterceptor', () => {
     const disabledCredentials = authManager.getDisabledCredentials()
 
     expect(response.status).toBe(429)
+    expect(response.headers['retry-after']).toBe('30')
     expect(
       disabledCredentials.some(
         (credential) =>

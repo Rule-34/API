@@ -250,7 +250,7 @@ describe('BooruService', () => {
       )
     })
 
-    it('should cap managed retries using BOORU_MANAGED_RETRY_CAP', async () => {
+    it('should treat BOORU_MANAGED_RETRY_CAP as total attempt cap', async () => {
       mockConfigService.get.mockImplementation((key: string) => {
         if (key === 'BOORU_MANAGED_RETRY_CAP') {
           return '1'

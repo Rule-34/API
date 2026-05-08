@@ -1,5 +1,10 @@
-import { Controller, Get, Query } from '@nestjs/common'
+import { Controller, Get } from '@nestjs/common'
 import { BooruAuthManagerService } from './booru/services/booru-auth-manager.service'
+
+type BooruCredentialStatusResponse = {
+  status: 'OK'
+  data: ReturnType<BooruAuthManagerService['getCredentialPoolStatus']>
+}
 
 @Controller('/')
 export class AppController {
@@ -16,11 +21,10 @@ export class AppController {
   }
 
   @Get('internal/booru-auth/status')
-  GetBooruCredentialStatus(@Query('domain') domain?: string) {
-
+  getBooruCredentialStatus(): BooruCredentialStatusResponse {
     return {
       status: 'OK',
-      data: this.authManager.getCredentialPoolStatus(domain)
+      data: this.authManager.getCredentialPoolStatus()
     }
   }
 }

@@ -256,6 +256,8 @@ describe('BooruAuthManagerService', () => {
   })
 
   it('should apply cooldown state for rate-limited credentials', () => {
+    const now = Date.now()
+
     service.reportAuthFailure({
       domain: 'https://www.gelbooru.com/index.php?page=dapi',
       user: 'www-gel-user',
@@ -285,25 +287,37 @@ describe('BooruAuthManagerService', () => {
           credential.domain === 'www.gelbooru.com' &&
           credential.user === 'www-gel-user' &&
           credential.state === 'cooldown' &&
-          credential.cooldownUntil instanceof Date
+          credential.cooldownUntil instanceof Date &&
+          Math.abs(credential.cooldownUntil.getTime() - (now + 30_000)) <= 1_000
       )
     ).toBe(true)
   })
 
   it('should reactivate credentials after cooldown expiration', () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
+
     service.reportAuthFailure({
       domain: 'https://www.gelbooru.com/index.php?page=dapi',
       user: 'www-gel-user',
       password: 'www-gel-pass',
       error: 'HTTP 429: Too Many Requests',
       failureKind: 'rate_limited',
-      retryAfterSeconds: 0,
+      retryAfterSeconds: 1,
       timestamp: new Date()
     })
 
-    const selected = service.getAvailableCredential('https://www.gelbooru.com/index.php?page=dapi')
+    const selectedDuringCooldown = service.getAvailableCredential('https://www.gelbooru.com/index.php?page=dapi')
 
-    expect(selected).toEqual({ user: 'www-gel-user', password: 'www-gel-pass' })
+    expect(selectedDuringCooldown).toBeNull()
+
+    jest.advanceTimersByTime(1_100)
+
+    const selectedAfterCooldown = service.getAvailableCredential('https://www.gelbooru.com/index.php?page=dapi')
+
+    expect(selectedAfterCooldown).toEqual({ user: 'www-gel-user', password: 'www-gel-pass' })
+
+    jest.useRealTimers()
   })
 
   it('should expose minimum cooldown seconds for a domain', () => {
@@ -324,7 +338,7 @@ describe('BooruAuthManagerService', () => {
     expect(minCooldown).toBeLessThanOrEqual(45)
   })
 
-  it('should return masked credential pool status snapshots', () => {
+  it('should return credential pool status snapshots', () => {
     service.reportAuthFailure({
       domain: 'https://gelbooru.com/index.php?page=dapi',
       user: 'gel-user',

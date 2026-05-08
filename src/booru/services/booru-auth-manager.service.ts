@@ -16,8 +16,11 @@ import { createCredentialKey, parseCredentialKey } from './credential-key.util'
 
 @Injectable()
 export class BooruAuthManagerService implements OnModuleInit {
-  private disabledCredentials = new Set<string>()
-  private cooldownCredentials = new Map<string, number>()
+  private disabledCredentials = new Map<string, { disabledAt: number; reason: string }>()
+  private cooldownCredentials = new Map<
+    string,
+    { disabledAt: number; cooldownUntil: number; reason: string }
+  >()
   private selectionCursorByDomain = new Map<string, number>()
   private authConfig: BooruAuthConfig = {}
   private readonly domainAliases: Record<string, string> = {
@@ -86,14 +89,7 @@ export class BooruAuthManagerService implements OnModuleInit {
       return null
     }
 
-    const selectedCredential = this.selectCredentialRoundRobin(normalizedDomain, credentialsArray)
-
-    if (!selectedCredential) {
-      console.warn(
-        `🚫 No available credentials for domain: ${normalizedDomain} (${credentialsArray.length} total, all unavailable)`
-      )
-      return null
-    }
+    const selectedCredential = this.selectCredentialRoundRobin(normalizedDomain, availableCredentials)
 
     console.log(
       `🔑 Selected credential for ${normalizedDomain}: ${selectedCredential.user} (${availableCredentials.length}/${credentialsArray.length} available)`
@@ -113,18 +109,27 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
 
     const isRateLimit = failureKind === 'rate_limited'
-    const cooldownSeconds = Math.max(0, authFailure.retryAfterSeconds ?? 60)
+    const cooldownSeconds = Math.max(1, authFailure.retryAfterSeconds ?? 60)
     const cooldownUntil = new Date(Date.now() + cooldownSeconds * 1000)
 
-    const disabledCredential: DisabledCredential = {
-      domain: normalizedDomain,
-      user: authFailure.user,
-      password: authFailure.password,
-      disabledAt: authFailure.timestamp,
-      state: isRateLimit ? 'cooldown' : 'permanent',
-      cooldownUntil: isRateLimit ? cooldownUntil : undefined,
-      reason: sanitizedError
-    }
+    const disabledCredential: DisabledCredential = isRateLimit
+      ? {
+          domain: normalizedDomain,
+          user: authFailure.user,
+          password: authFailure.password,
+          disabledAt: authFailure.timestamp,
+          state: 'cooldown',
+          cooldownUntil,
+          reason: sanitizedError
+        }
+      : {
+          domain: normalizedDomain,
+          user: authFailure.user,
+          password: authFailure.password,
+          disabledAt: authFailure.timestamp,
+          state: 'permanent',
+          reason: sanitizedError
+        }
 
     this.disableCredentialLocally(disabledCredential)
     this.broadcastDisabledCredential(disabledCredential)
@@ -143,14 +148,23 @@ export class BooruAuthManagerService implements OnModuleInit {
   private disableCredentialLocally(credential: DisabledCredential): void {
     const normalizedDomain = this.normalizeDomain(credential.domain)
     const credentialKey = createCredentialKey(normalizedDomain, credential.user, credential.password)
+    const disabledAt = credential.disabledAt.getTime()
+    const reason = credential.reason ?? 'Unknown failure'
 
     if (credential.state === 'cooldown') {
-      const cooldownUntilMs = credential.cooldownUntil?.getTime() ?? Date.now() + 60_000
-      this.cooldownCredentials.set(credentialKey, cooldownUntilMs)
+      const cooldownUntilMs = credential.cooldownUntil.getTime()
+      this.cooldownCredentials.set(credentialKey, {
+        disabledAt,
+        cooldownUntil: cooldownUntilMs,
+        reason
+      })
       return
     }
 
-    this.disabledCredentials.add(credentialKey)
+    this.disabledCredentials.set(credentialKey, {
+      disabledAt,
+      reason
+    })
     this.cooldownCredentials.delete(credentialKey)
   }
 
@@ -230,14 +244,17 @@ export class BooruAuthManagerService implements OnModuleInit {
     const normalizedDomain = this.normalizeDomain(domain)
     let minCooldownUntil: number | undefined
 
-    for (const [credentialKey, cooldownUntil] of this.cooldownCredentials.entries()) {
+    for (const [credentialKey, cooldownInfo] of this.cooldownCredentials.entries()) {
       const { domain: keyDomain } = parseCredentialKey(credentialKey)
 
       if (keyDomain !== normalizedDomain) {
         continue
       }
 
+      const cooldownUntil = cooldownInfo.cooldownUntil
+
       if (cooldownUntil <= Date.now()) {
+        this.cooldownCredentials.delete(credentialKey)
         continue
       }
 
@@ -386,30 +403,30 @@ export class BooruAuthManagerService implements OnModuleInit {
   }
 
   public getDisabledCredentials(): DisabledCredential[] {
-    const permanentCredentials = Array.from(this.disabledCredentials).map((key) => {
+    const permanentCredentials = Array.from(this.disabledCredentials.entries()).map(([key, record]) => {
       const { domain, user, password } = parseCredentialKey(key)
 
       return {
         domain,
         user,
         password,
-        disabledAt: new Date(),
+        disabledAt: new Date(record.disabledAt),
         state: 'permanent' as const,
-        reason: 'Authentication failure'
+        reason: record.reason
       }
     })
 
-    const cooldownCredentials = Array.from(this.cooldownCredentials.entries()).map(([key, untilMs]) => {
+    const cooldownCredentials = Array.from(this.cooldownCredentials.entries()).map(([key, record]) => {
       const { domain, user, password } = parseCredentialKey(key)
 
       return {
         domain,
         user,
         password,
-        disabledAt: new Date(),
+        disabledAt: new Date(record.disabledAt),
         state: 'cooldown' as const,
-        cooldownUntil: new Date(untilMs),
-        reason: 'Rate limited'
+        cooldownUntil: new Date(record.cooldownUntil),
+        reason: record.reason
       }
     })
 
@@ -423,15 +440,18 @@ export class BooruAuthManagerService implements OnModuleInit {
 
     const errorMessage = authFailure.error.toLowerCase()
 
-    if (errorMessage.includes('http 429') || errorMessage.includes('status: 429')) {
+    const statusMatch = errorMessage.match(/(?:status(?:\s*code|_code)?|http)\s*[:=]?\s*(\d{3})|\b(\d{3})\b/i)
+    const statusCode = Number(statusMatch?.[1] ?? statusMatch?.[2])
+
+    if (statusCode === 429) {
       return 'rate_limited'
     }
 
-    if (errorMessage.includes('http 403') || errorMessage.includes('status: 403')) {
+    if (statusCode === 403) {
       return 'auth_forbidden'
     }
 
-    if (errorMessage.includes('http 401') || errorMessage.includes('status: 401')) {
+    if (statusCode === 401) {
       return 'auth_invalid'
     }
 
@@ -439,11 +459,13 @@ export class BooruAuthManagerService implements OnModuleInit {
   }
 
   private isCooldownActive(credentialKey: string): boolean {
-    const cooldownUntil = this.cooldownCredentials.get(credentialKey)
+    const cooldownInfo = this.cooldownCredentials.get(credentialKey)
 
-    if (cooldownUntil === undefined) {
+    if (cooldownInfo === undefined) {
       return false
     }
+
+    const cooldownUntil = cooldownInfo.cooldownUntil
 
     if (cooldownUntil <= Date.now()) {
       this.cooldownCredentials.delete(credentialKey)
@@ -456,10 +478,10 @@ export class BooruAuthManagerService implements OnModuleInit {
   private cleanupExpiredCooldowns(domain: string): void {
     const normalizedDomain = this.normalizeDomain(domain)
 
-    for (const [credentialKey, cooldownUntil] of this.cooldownCredentials.entries()) {
+    for (const [credentialKey, cooldownInfo] of this.cooldownCredentials.entries()) {
       const { domain: keyDomain } = parseCredentialKey(credentialKey)
 
-      if (keyDomain === normalizedDomain && cooldownUntil <= Date.now()) {
+      if (keyDomain === normalizedDomain && cooldownInfo.cooldownUntil <= Date.now()) {
         this.cooldownCredentials.delete(credentialKey)
       }
     }
@@ -490,15 +512,18 @@ export class BooruAuthManagerService implements OnModuleInit {
     const userKey = createCredentialKey(domain, credential.user)
     const now = Date.now()
 
-    if (this.disabledCredentials.has(fullKey) || this.disabledCredentials.has(userKey)) {
+    const permanentRecord = this.disabledCredentials.get(fullKey) ?? this.disabledCredentials.get(userKey)
+
+    if (permanentRecord) {
       return {
         user: credential.user,
         state: 'permanent',
-        reason: 'Authentication failure'
+        reason: permanentRecord.reason
       }
     }
 
-    const cooldownUntil = this.cooldownCredentials.get(fullKey) ?? this.cooldownCredentials.get(userKey)
+    const cooldownRecord = this.cooldownCredentials.get(fullKey) ?? this.cooldownCredentials.get(userKey)
+    const cooldownUntil = cooldownRecord?.cooldownUntil
 
     if (cooldownUntil && cooldownUntil > now) {
       return {
@@ -506,7 +531,7 @@ export class BooruAuthManagerService implements OnModuleInit {
         state: 'cooldown',
         cooldownUntil: new Date(cooldownUntil).toISOString(),
         secondsRemaining: Math.max(1, Math.ceil((cooldownUntil - now) / 1000)),
-        reason: 'Rate limited'
+        reason: cooldownRecord.reason
       }
     }
 

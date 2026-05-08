@@ -39,11 +39,12 @@ export class BooruErrorsInterceptor implements NestInterceptor {
         switch (error.constructor) {
           case ManagedCredentialPoolUnavailableError: {
             const poolError = error as ManagedCredentialPoolUnavailableError
+            const retryAfterSeconds = this.getValidatedRetryAfterSeconds(poolError.retryAfterSeconds)
 
-            if (typeof poolError.retryAfterSeconds === 'number') {
+            if (retryAfterSeconds !== undefined) {
               const response = context.switchToHttp().getResponse()
               if (response && typeof response.header === 'function') {
-                response.header('Retry-After', `${poolError.retryAfterSeconds}`)
+                response.header('Retry-After', `${retryAfterSeconds}`)
               }
             }
 
@@ -53,7 +54,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
                   {
                     statusCode: HttpStatus.SERVICE_UNAVAILABLE,
                     message: sanitizedMessage,
-                    retryAfterSeconds: poolError.retryAfterSeconds,
+                    retryAfterSeconds,
                     reason: poolError.reason
                   },
                   HttpStatus.SERVICE_UNAVAILABLE
@@ -74,8 +75,24 @@ export class BooruErrorsInterceptor implements NestInterceptor {
             }
 
             if (this.isRateLimitError(error)) {
+              const retryAfterSeconds = this.getValidatedRetryAfterSeconds(this.getRetryAfterSeconds(error))
+              if (retryAfterSeconds !== undefined) {
+                const response = context.switchToHttp().getResponse()
+                if (response && typeof response.header === 'function') {
+                  response.header('Retry-After', `${retryAfterSeconds}`)
+                }
+              }
+
               return throwError(
-                () => new HttpException(sanitizedMessage, HttpStatus.TOO_MANY_REQUESTS)
+                () =>
+                  new HttpException(
+                    {
+                      statusCode: HttpStatus.TOO_MANY_REQUESTS,
+                      message: sanitizedMessage,
+                      retryAfterSeconds
+                    },
+                    HttpStatus.TOO_MANY_REQUESTS
+                  )
               )
             }
 
@@ -268,6 +285,18 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     }
 
     return undefined
+  }
+
+  private getValidatedRetryAfterSeconds(value: unknown): number | undefined {
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+      return undefined
+    }
+
+    if (value < 0) {
+      return undefined
+    }
+
+    return Math.floor(value)
   }
 
   private extractDomainFromUrl(url: string): string {

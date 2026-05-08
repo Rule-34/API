@@ -177,7 +177,6 @@ export class BooruService {
 
     const maxAttempts = Math.min(domainStats.total, this.getManagedRetryCap())
     const attemptedCredentials = new Set<string>()
-    let lastError: unknown
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const context = this.buildApiWithContext(params, queries)
@@ -196,19 +195,19 @@ export class BooruService {
       try {
         return await operation(context.api, context.authResolution)
       } catch (error) {
-        lastError = error
-
         if (!this.isRetryableManagedCredentialFailure(error)) {
           throw error
         }
+
+        const httpError = error
 
         this.authManager.reportAuthFailure({
           domain: queries.baseEndpoint,
           user: selectedCredential.user,
           password: selectedCredential.password,
-          error: error.message || error.toString(),
-          failureKind: this.getFailureKind(error),
-          retryAfterSeconds: this.getRetryAfterSeconds(error),
+          error: this.stringifyHttpError(httpError),
+          failureKind: this.getFailureKind(httpError),
+          retryAfterSeconds: this.getRetryAfterSeconds(httpError),
           timestamp: new Date()
         })
 
@@ -216,11 +215,7 @@ export class BooruService {
       }
     }
 
-    if (lastError !== undefined) {
-      throw this.createPoolUnavailableError(queries.baseEndpoint)
-    }
-
-    throw new ManagedCredentialPoolUnavailableError(queries.baseEndpoint, 'no_credentials')
+    throw this.createPoolUnavailableError(queries.baseEndpoint)
   }
 
   private getManagedRetryCap(): number {
@@ -256,13 +251,21 @@ export class BooruService {
     return new ManagedCredentialPoolUnavailableError(domain, 'permanent_exhausted')
   }
 
-  private isRetryableManagedCredentialFailure(error: any): boolean {
+  private isRetryableManagedCredentialFailure(error: unknown): error is HttpError {
     if (!(error instanceof HttpError)) {
       return false
     }
 
     const kind = this.getFailureKind(error)
     return kind === 'auth_invalid' || kind === 'auth_forbidden' || kind === 'rate_limited'
+  }
+
+  private stringifyHttpError(error: HttpError): string {
+    if (typeof error.message === 'string' && error.message.length > 0) {
+      return error.message
+    }
+
+    return error.toString()
   }
 
   private getFailureKind(error: any):

@@ -2,6 +2,7 @@ import { EmptyDataError, IBooruQueryValues } from '@alejandroakbal/universal-boo
 import { Controller, Get, Header, Param, Query, Request, UseInterceptors } from '@nestjs/common'
 import { ResponseDto } from '../lib/dto/response.dto'
 import { BooruService } from './booru.service'
+import { ResolvedAuthCredentials } from './booru.service'
 import {
   booruQueryValuesPostsDTO,
   booruQueryValuesRandomPostsDTO,
@@ -10,6 +11,17 @@ import {
 } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import { BooruErrorsInterceptor } from './interceptors/booru-exception.interceptor'
+
+interface BooruAuthContext {
+  baseEndpoint: string
+  credential?: { user: string; password: string }
+  source: ResolvedAuthCredentials['source']
+  handledByService: boolean
+}
+
+interface AuthContextRequest {
+  booruAuthContext?: BooruAuthContext
+}
 
 @Controller('booru')
 @UseInterceptors(BooruErrorsInterceptor)
@@ -20,13 +32,19 @@ export class BooruController {
     return Object.assign(Object.create(Object.getPrototypeOf(queries)), queries, { pageID })
   }
 
-  private attachAuthContext(request: any, baseEndpoint: string, authResolution: any): void {
-    request.booruAuthContext = {
+  private attachAuthContext(
+    request: AuthContextRequest,
+    baseEndpoint: string,
+    authResolution: ResolvedAuthCredentials
+  ): void {
+    const authContext: BooruAuthContext = {
       baseEndpoint,
       credential: authResolution.selectedCredential,
       source: authResolution.source,
       handledByService: authResolution.source === 'env'
     }
+
+    request.booruAuthContext = authContext
   }
 
   @Get(':booruType/posts')

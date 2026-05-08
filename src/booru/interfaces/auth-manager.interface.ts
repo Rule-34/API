@@ -7,40 +7,73 @@ export interface BooruAuthConfig {
   [domain: string]: BooruAuthCredential[]
 }
 
-export interface DisabledCredential {
+interface DisabledCredentialBase {
   domain: string
   user: string
   password?: string
   disabledAt: Date
-  state?: 'permanent' | 'cooldown'
-  cooldownUntil?: Date
   reason?: string
 }
+
+export interface PermanentDisabledCredential extends DisabledCredentialBase {
+  state: 'permanent'
+}
+
+export interface CooldownDisabledCredential extends DisabledCredentialBase {
+  state: 'cooldown'
+  cooldownUntil: Date
+}
+
+export type DisabledCredential = PermanentDisabledCredential | CooldownDisabledCredential
 
 export interface AuthCredentialStats {
   domain: string
   total: number
   available: number
+  /**
+   * Total unavailable credentials for the domain.
+   * Invariant: disabled === cooldown + permanentDisabled
+   */
   disabled: number
+  /**
+   * Credentials currently unavailable due to temporary rate-limit cooldown.
+   */
   cooldown: number
+  /**
+   * Credentials permanently disabled due to authentication failures.
+   */
   permanentDisabled: number
 }
 
-export interface MaskedCredentialStatus {
+export interface ActiveMaskedCredentialStatus {
   user: string
-  state: 'active' | 'cooldown' | 'permanent'
-  cooldownUntil?: string
+  state: 'active'
+  reason?: string
+}
+
+export interface CooldownMaskedCredentialStatus {
+  user: string
+  state: 'cooldown'
+  /**
+   * Serialized timestamp for API responses.
+   */
+  cooldownUntil: string
   secondsRemaining?: number
   reason?: string
 }
 
-export interface DomainCredentialStatus {
-  domain: string
-  total: number
-  available: number
-  disabled: number
-  cooldown: number
-  permanentDisabled: number
+export interface PermanentMaskedCredentialStatus {
+  user: string
+  state: 'permanent'
+  reason?: string
+}
+
+export type MaskedCredentialStatus =
+  | ActiveMaskedCredentialStatus
+  | CooldownMaskedCredentialStatus
+  | PermanentMaskedCredentialStatus
+
+export interface DomainCredentialStatus extends AuthCredentialStats {
   minCooldownSeconds?: number
   credentials: MaskedCredentialStatus[]
 }
