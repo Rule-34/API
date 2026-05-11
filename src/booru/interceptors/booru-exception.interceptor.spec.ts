@@ -32,8 +32,7 @@ class TestBooruErrorsController {
   @Get('auth-failure')
   getAuthFailure() {
     const error = new HttpError({
-      message:
-        'Forbidden for https://www.gelbooru.com/index.php?page=dapi&auth_user=www-gel-user&auth_pass=secret123',
+      message: 'Forbidden for https://www.gelbooru.com/index.php?page=dapi&auth_user=www-gel-user&auth_pass=secret123',
       statusCode: 403,
       failureKind: 'auth_forbidden'
     })
@@ -269,5 +268,37 @@ describe('BooruErrorsInterceptor', () => {
 
     expect(response.status).toBe(401)
     expect(disabledCredentials).toHaveLength(0)
+  })
+
+  describe('Cache-Control on errors', () => {
+    it('should set Cache-Control: no-store on EmptyDataError responses', async () => {
+      const response = await request(app.getHttpServer()).get('/test-booru-errors/empty')
+      expect(response.status).toBe(404)
+      expect(response.headers['cache-control']).toBe('no-store, no-cache, must-revalidate')
+    })
+
+    it('should set Cache-Control: no-store on auth failure responses', async () => {
+      const response = await request(app.getHttpServer()).get('/test-booru-errors/auth-failure').query({
+        baseEndpoint: 'https://www.gelbooru.com/index.php?page=dapi',
+        auth_user: 'www-gel-user'
+      })
+      expect(response.status).toBe(401)
+      expect(response.headers['cache-control']).toBe('no-store, no-cache, must-revalidate')
+    })
+
+    it('should set Cache-Control: no-store on rate-limit responses', async () => {
+      const response = await request(app.getHttpServer()).get('/test-booru-errors/rate-limit').query({
+        baseEndpoint: 'https://www.gelbooru.com/index.php?page=dapi',
+        auth_user: 'www-gel-user'
+      })
+      expect(response.status).toBe(429)
+      expect(response.headers['cache-control']).toBe('no-store, no-cache, must-revalidate')
+    })
+
+    it('should set Cache-Control: no-store on pool unavailable responses', async () => {
+      const response = await request(app.getHttpServer()).get('/test-booru-errors/pool-unavailable')
+      expect(response.status).toBe(503)
+      expect(response.headers['cache-control']).toBe('no-store, no-cache, must-revalidate')
+    })
   })
 })

@@ -1,8 +1,10 @@
 import { EmptyDataError, IBooruQueryValues } from '@alejandroakbal/universal-booru-wrapper'
-import { Controller, Get, Header, Param, Query, Request, UseInterceptors } from '@nestjs/common'
+import { Controller, Get, Param, Query, Request, UseInterceptors } from '@nestjs/common'
 import { ResponseDto } from '../lib/dto/response.dto'
 import { BooruService } from './booru.service'
 import { ResolvedAuthCredentials } from './booru.service'
+import { BOORU_CACHE_CONTROL_POLICIES } from './constants/cache-control-policies'
+import { BooruCachePolicy } from './decorators/booru-cache-policy.decorator'
 import {
   booruQueryValuesPostsDTO,
   booruQueryValuesRandomPostsDTO,
@@ -10,6 +12,7 @@ import {
   booruQueryValuesTagsDTO
 } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
+import { BooruCacheControlInterceptor } from './interceptors/booru-cache-control.interceptor'
 import { BooruErrorsInterceptor } from './interceptors/booru-exception.interceptor'
 
 interface BooruAuthContext {
@@ -22,8 +25,11 @@ interface AuthContextRequest {
   booruAuthContext?: BooruAuthContext
 }
 
+// Successful responses use the route policy from BooruCacheControlInterceptor.
+// Thrown responses are intentionally left to BooruErrorsInterceptor so they
+// always fall back to the strict error cache policy.
 @Controller('booru')
-@UseInterceptors(BooruErrorsInterceptor)
+@UseInterceptors(BooruCacheControlInterceptor, BooruErrorsInterceptor)
 export class BooruController {
   constructor(private readonly booruService: BooruService) {}
 
@@ -46,7 +52,7 @@ export class BooruController {
   }
 
   @Get(':booruType/posts')
-  @Header('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600, stale-if-error=0') // 5 minutes, 1 hour
+  @BooruCachePolicy(BOORU_CACHE_CONTROL_POLICIES.POSTS)
   async GetPosts(
     @Request()
     request,
@@ -69,8 +75,8 @@ export class BooruController {
     }
 
     try {
-      const posts = await this.booruService.executeWithAuthStrategy(params, queries, async (Api, authResolution) => {
-        this.attachAuthContext(request, queries.baseEndpoint, authResolution)
+      const posts = await this.booruService.executeWithAuthStrategy(params, queries, async (Api, authRes) => {
+        this.attachAuthContext(request, queries.baseEndpoint, authRes)
         return Api.getPosts(postQueryValues)
       })
 
@@ -88,7 +94,7 @@ export class BooruController {
   }
 
   @Get(':booruType/random-posts')
-  @Header('Cache-Control', 'no-cache')
+  @BooruCachePolicy(BOORU_CACHE_CONTROL_POLICIES.RANDOM_POSTS)
   async GetRandomPosts(
     @Request()
     request,
@@ -111,8 +117,8 @@ export class BooruController {
     }
 
     try {
-      const posts = await this.booruService.executeWithAuthStrategy(params, queries, async (Api, authResolution) => {
-        this.attachAuthContext(request, queries.baseEndpoint, authResolution)
+      const posts = await this.booruService.executeWithAuthStrategy(params, queries, async (Api, authRes) => {
+        this.attachAuthContext(request, queries.baseEndpoint, authRes)
         return Api.getRandomPosts(postQueryValues)
       })
 
@@ -130,7 +136,7 @@ export class BooruController {
   }
 
   @Get(':booruType/single-post')
-  @Header('Cache-Control', 'public, max-age=604800, immutable') // 1 week
+  @BooruCachePolicy(BOORU_CACHE_CONTROL_POLICIES.SINGLE_POST)
   async GetSinglePost(
     @Request()
     request,
@@ -145,8 +151,8 @@ export class BooruController {
 
     const initialApi = this.booruService.buildApiClass(params, queries)
 
-    const posts = await this.booruService.executeWithAuthStrategy(params, queries, async (Api, authResolution) => {
-      this.attachAuthContext(request, queries.baseEndpoint, authResolution)
+    const posts = await this.booruService.executeWithAuthStrategy(params, queries, async (Api, authRes) => {
+      this.attachAuthContext(request, queries.baseEndpoint, authRes)
       return Api.getSinglePost(postQueryValues)
     })
 
@@ -154,7 +160,7 @@ export class BooruController {
   }
 
   @Get(':booruType/tags')
-  @Header('Cache-Control', 'public, max-age=86400, stale-while-revalidate=86400, stale-if-error=0') // 1 day, 1 day
+  @BooruCachePolicy(BOORU_CACHE_CONTROL_POLICIES.TAGS)
   async GetTags(
     @Request()
     request,
@@ -176,8 +182,8 @@ export class BooruController {
     }
 
     try {
-      const tags = await this.booruService.executeWithAuthStrategy(params, queries, async (Api, authResolution) => {
-        this.attachAuthContext(request, queries.baseEndpoint, authResolution)
+      const tags = await this.booruService.executeWithAuthStrategy(params, queries, async (Api, authRes) => {
+        this.attachAuthContext(request, queries.baseEndpoint, authRes)
         return Api.getTags(postQueryValues)
       })
 
