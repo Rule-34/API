@@ -78,7 +78,9 @@ describe('BooruController', () => {
         .query({ baseEndpoint: 'gelbooru.com' })
 
       expect(res.status).toBe(200)
-      expect(res.headers['cache-control']).toBe('public, max-age=300, s-maxage=14400, stale-while-revalidate=3600')
+      expect(res.headers['cache-control']).toBe(
+        'public, max-age=300, s-maxage=14400, stale-while-revalidate=3600, stale-if-error=0'
+      )
     })
 
     it('single-post endpoint returns public cache header', async () => {
@@ -87,7 +89,9 @@ describe('BooruController', () => {
         .query({ baseEndpoint: 'gelbooru.com' })
 
       expect(res.status).toBe(200)
-      expect(res.headers['cache-control']).toBe('public, max-age=21600, s-maxage=604800, stale-while-revalidate=86400')
+      expect(res.headers['cache-control']).toBe(
+        'public, max-age=21600, s-maxage=604800, stale-while-revalidate=86400, stale-if-error=0'
+      )
     })
 
     it('tags endpoint returns public cache header', async () => {
@@ -96,7 +100,9 @@ describe('BooruController', () => {
         .query({ baseEndpoint: 'gelbooru.com', tag: 'test' })
 
       expect(res.status).toBe(200)
-      expect(res.headers['cache-control']).toBe('public, max-age=21600, s-maxage=604800, stale-while-revalidate=86400')
+      expect(res.headers['cache-control']).toBe(
+        'public, max-age=21600, s-maxage=604800, stale-while-revalidate=86400, stale-if-error=0'
+      )
     })
 
     it('random-posts endpoint returns no-store header', async () => {
@@ -133,7 +139,9 @@ describe('BooruController', () => {
         .query({ baseEndpoint: 'gelbooru.com' })
 
       expect(res.status).toBe(200)
-      expect(res.headers['cache-control']).toBe('public, max-age=300, s-maxage=14400, stale-while-revalidate=3600')
+      expect(res.headers['cache-control']).toBe(
+        'public, max-age=300, s-maxage=14400, stale-while-revalidate=3600, stale-if-error=0'
+      )
     })
 
     it('posts endpoint with partial auth query returns private, no-store', async () => {
@@ -156,7 +164,9 @@ describe('BooruController', () => {
         .query({ baseEndpoint: 'gelbooru.com' })
 
       expect(res.status).toBe(200)
-      expect(res.headers['cache-control']).toBe('public, max-age=300, s-maxage=14400, stale-while-revalidate=3600')
+      expect(res.headers['cache-control']).toBe(
+        'public, max-age=300, s-maxage=14400, stale-while-revalidate=3600, stale-if-error=0'
+      )
     })
 
     it('posts endpoint with auth keeps empty results private and non-cacheable', async () => {
