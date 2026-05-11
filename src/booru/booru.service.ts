@@ -223,10 +223,7 @@ export class BooruService {
   private getManagedRetryCap(): number {
     const configuredCap = this.configService.get<string | number>('BOORU_MANAGED_RETRY_CAP')
 
-    const parsedCap =
-      typeof configuredCap === 'number'
-        ? configuredCap
-        : parseInt(configuredCap ?? '', 10)
+    const parsedCap = typeof configuredCap === 'number' ? configuredCap : parseInt(configuredCap ?? '', 10)
 
     if (!Number.isFinite(parsedCap) || parsedCap < 1) {
       return 5
@@ -266,13 +263,9 @@ export class BooruService {
     return error.toString()
   }
 
-  private getFailureKind(error: any):
-    | 'auth_invalid'
-    | 'auth_forbidden'
-    | 'rate_limited'
-    | 'upstream_error'
-    | 'network_error'
-    | 'unknown' {
+  private getFailureKind(
+    error: any
+  ): 'auth_invalid' | 'auth_forbidden' | 'rate_limited' | 'upstream_error' | 'network_error' | 'unknown' {
     if (error.failureKind) {
       return error.failureKind
     }

@@ -15,6 +15,7 @@ import { EmptyDataError, EndpointError, HttpError } from '@alejandroakbal/univer
 import { NoContentException } from '../../common/exceptions/no-content.exception'
 import { BooruAuthManagerService } from '../services/booru-auth-manager.service'
 import { AuthFailureEvent } from '../interfaces/auth-manager.interface'
+import { BOORU_CACHE_CONTROL_POLICIES } from '../constants/cache-control-policies'
 import { SENSITIVE_AUTH_PARAMS } from '../constants/sensitive-auth-params'
 import { ManagedCredentialPoolUnavailableError } from '../booru.service'
 
@@ -28,6 +29,11 @@ export class BooruErrorsInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       catchError((error) => {
+        const response = context.switchToHttp().getResponse()
+        if (response && typeof response.header === 'function') {
+          response.header('Cache-Control', BOORU_CACHE_CONTROL_POLICIES.ERROR)
+        }
+
         // Check for authentication failures before processing other errors
         this.checkForAuthFailure(error, context)
 

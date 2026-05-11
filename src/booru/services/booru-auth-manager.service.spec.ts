@@ -355,9 +355,7 @@ describe('BooruAuthManagerService', () => {
       timestamp: new Date()
     })
 
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Low credential availability for same-user.test')
-    )
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Low credential availability for same-user.test'))
 
     jest.advanceTimersByTime(1_100)
     service.getDomainStats('same-user.test')
@@ -392,7 +390,11 @@ describe('BooruAuthManagerService', () => {
     // With fix: reconstruct Dates before calling disableCredentialLocally
     const reconstructed =
       serialized.state === 'cooldown'
-        ? { ...serialized, disabledAt: new Date(serialized.disabledAt), cooldownUntil: new Date(serialized.cooldownUntil) }
+        ? {
+            ...serialized,
+            disabledAt: new Date(serialized.disabledAt),
+            cooldownUntil: new Date(serialized.cooldownUntil)
+          }
         : { ...serialized, disabledAt: new Date(serialized.disabledAt) }
 
     // Should NOT throw — disabledAt.getTime() and cooldownUntil.getTime() must work
