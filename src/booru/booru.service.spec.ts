@@ -163,8 +163,6 @@ describe('BooruService', () => {
       })
       expect(mockAuthManager.getAvailableCredential).not.toHaveBeenCalled()
     })
-
-
   })
 
   describe('Managed Strategy Execution', () => {
@@ -265,9 +263,7 @@ describe('BooruService', () => {
 
       const queries = { ...baseQueries } as booruQueriesDTO
 
-      await expect(
-        service.executeWithAuthStrategy(mockParams, queries, async () => 'unused')
-      ).rejects.toEqual(
+      await expect(service.executeWithAuthStrategy(mockParams, queries, async () => 'unused')).rejects.toEqual(
         expect.objectContaining<Partial<ManagedCredentialPoolUnavailableError>>({
           name: 'ManagedCredentialPoolUnavailableError',
           retryAfterSeconds: 42,

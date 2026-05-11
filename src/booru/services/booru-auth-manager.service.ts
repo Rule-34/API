@@ -16,14 +16,10 @@ import { createCredentialKey, parseCredentialKey } from './credential-key.util'
 
 @Injectable()
 export class BooruAuthManagerService implements OnModuleInit {
-  private static readonly HTTP_STATUS_PATTERN =
-    /(?:status(?:\s*code|_code)?|http)\s*[:=]?\s*(\d{3})|\b(\d{3})\b/i
+  private static readonly HTTP_STATUS_PATTERN = /(?:status(?:\s*code|_code)?|http)\s*[:=]?\s*(\d{3})|\b(\d{3})\b/i
 
   private disabledCredentials = new Map<string, { disabledAt: number; reason: string }>()
-  private cooldownCredentials = new Map<
-    string,
-    { disabledAt: number; cooldownUntil: number; reason: string }
-  >()
+  private cooldownCredentials = new Map<string, { disabledAt: number; cooldownUntil: number; reason: string }>()
   private selectionCursorByDomain = new Map<string, number>()
   private availabilityByDomain = new Map<string, number>()
   private authConfig: BooruAuthConfig = {}
@@ -143,9 +139,7 @@ export class BooruAuthManagerService implements OnModuleInit {
     this.broadcastDisabledCredential(disabledCredential)
 
     const stats = this.getDomainStats(normalizedDomain)
-    const action = isRateLimit
-      ? `cooldown for ${cooldownSeconds}s`
-      : 'permanently disabled'
+    const action = isRateLimit ? `cooldown for ${cooldownSeconds}s` : 'permanently disabled'
 
     console.error(`❌ Auth failure for ${normalizedDomain}:${sanitizedUser} - ${sanitizedError} (${action})`)
     console.warn(
@@ -319,9 +313,7 @@ export class BooruAuthManagerService implements OnModuleInit {
     this.cleanupExpiredCooldowns(normalizedDomain)
 
     const credentials = this.authConfig[normalizedDomain] || []
-    const status = credentials.map((credential) =>
-      this.getMaskedCredentialStatus(normalizedDomain, credential)
-    )
+    const status = credentials.map((credential) => this.getMaskedCredentialStatus(normalizedDomain, credential))
     const stats = this.getDomainStats(normalizedDomain)
 
     return {
