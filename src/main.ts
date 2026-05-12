@@ -16,7 +16,7 @@ function buildAllowedOrigins(originConfig: string): RegExp[] {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
-    .map((pattern) => new RegExp('^' + escapeRegExp(pattern).replace(/\\\*/g, '.*') + '$'))
+    .map((pattern) => new RegExp('^https?://' + escapeRegExp(pattern).replace(/\\\*/g, '.*') + '$'))
 }
 
 async function bootstrap() {
