@@ -5,11 +5,19 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import helmet from '@fastify/helmet'
 import fastifyStatic from '@fastify/static'
 import * as Sentry from '@sentry/node'
-import { AppModule } from './app.module'
 import { escapeRegExp } from 'lodash'
+import { AppModule } from './app.module'
 import { AppClusterService } from './cluster.service'
 import { join } from 'path'
 import { createAppValidationPipe } from './common/validation'
+
+function buildAllowedOrigins(originConfig: string): RegExp[] {
+  return originConfig
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((pattern) => new RegExp('^' + escapeRegExp(pattern).replace(/\\\*/g, '.*') + '$'))
+}
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter())
@@ -30,11 +38,12 @@ async function bootstrap() {
 
   await app.register(helmet)
 
-  const allowedOrigin = configService.get<string>('ALLOWED_ORIGIN')
-  const allowedOriginRegex = new RegExp(escapeRegExp(allowedOrigin) + '$')
+  const allowedOrigins = buildAllowedOrigins(configService.get<string>('ALLOWED_ORIGINS', ''))
 
   const corsOptions: CorsOptions = {
-    origin: configService.get<string>('NODE_ENV') === 'development' ? '*' : allowedOriginRegex,
+    origin: (origin, callback) => {
+      callback(null, !origin || allowedOrigins.some((pattern) => pattern.test(origin)))
+    },
     credentials: true
   }
 
