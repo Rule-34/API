@@ -6,7 +6,7 @@ import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import { BooruAuthManagerService } from './services/booru-auth-manager.service'
 
-type MockAuthManager = {
+interface MockAuthManager {
   getAvailableCredential: jest.MockedFunction<BooruAuthManagerService['getAvailableCredential']>
   getDomainStats: jest.MockedFunction<BooruAuthManagerService['getDomainStats']>
   reportAuthFailure: jest.MockedFunction<BooruAuthManagerService['reportAuthFailure']>

@@ -3,9 +3,7 @@ export interface BooruAuthCredential {
   password: string
 }
 
-export interface BooruAuthConfig {
-  [domain: string]: BooruAuthCredential[]
-}
+export type BooruAuthConfig = Record<string, BooruAuthCredential[]>
 
 interface DisabledCredentialBase {
   domain: string

@@ -11,7 +11,7 @@ import { ResponseDto } from '../lib/dto/response.dto'
 import { Reflector } from '@nestjs/core'
 import { BooruTypes, EmptyDataError } from '@alejandroakbal/universal-booru-wrapper'
 
-type MockBooruService = {
+interface MockBooruService {
   buildApiClass: jest.MockedFunction<BooruService['buildApiClass']>
   executeWithAuthStrategy: jest.MockedFunction<BooruService['executeWithAuthStrategy']>
 }

@@ -218,7 +218,7 @@ export class BooruAuthManagerService implements OnModuleInit {
 
   public getDomainStats(domain: string): AuthCredentialStats {
     const normalizedDomain = this.normalizeDomain(domain)
-    const credentials = this.authConfig[normalizedDomain] || []
+    const credentials = this.authConfig[normalizedDomain] ?? []
     let cooldown = 0
     let permanentDisabled = 0
 
@@ -318,7 +318,7 @@ export class BooruAuthManagerService implements OnModuleInit {
     const normalizedDomain = this.normalizeDomain(domain)
     this.cleanupExpiredCooldowns(normalizedDomain)
 
-    const credentials = this.authConfig[normalizedDomain] || []
+    const credentials = this.authConfig[normalizedDomain] ?? []
     const credentialStatuses = credentials.map((credential) =>
       this.getMaskedCredentialStatus(normalizedDomain, credential)
     )
@@ -353,7 +353,7 @@ export class BooruAuthManagerService implements OnModuleInit {
 
     for (const [domain, credentials] of Object.entries(authConfig)) {
       const normalizedDomain = this.normalizeDomain(domain)
-      const mergedCredentials = [...(normalizedAuthConfig[normalizedDomain] || []), ...credentials]
+      const mergedCredentials = [...(normalizedAuthConfig[normalizedDomain] ?? []), ...credentials]
 
       normalizedAuthConfig[normalizedDomain] = this.dedupeCredentials(mergedCredentials)
     }
@@ -377,7 +377,7 @@ export class BooruAuthManagerService implements OnModuleInit {
 
   private normalizeDomain(domain: string): string {
     const extractedDomain = this.extractDomainFromUrl(domain)
-    return this.domainAliases[extractedDomain] || extractedDomain
+    return this.domainAliases[extractedDomain] ?? extractedDomain
   }
 
   private extractDomainFromUrl(url: string): string {

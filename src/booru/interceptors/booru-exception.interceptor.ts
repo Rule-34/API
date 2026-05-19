@@ -184,9 +184,9 @@ export class BooruErrorsInterceptor implements NestInterceptor {
 
     const contextCredential = request.booruAuthContext?.credential
     const baseEndpoint =
-      request.booruAuthContext?.baseEndpoint || request.query?.baseEndpoint || request.body?.baseEndpoint
-    const authUser = contextCredential?.user || request.query?.auth_user || request.body?.auth_user
-    const authPass = contextCredential?.password || request.query?.auth_pass || request.body?.auth_pass
+      request.booruAuthContext?.baseEndpoint ?? request.query?.baseEndpoint ?? request.body?.baseEndpoint
+    const authUser = contextCredential?.user ?? request.query?.auth_user ?? request.body?.auth_user
+    const authPass = contextCredential?.password ?? request.query?.auth_pass ?? request.body?.auth_pass
 
     if (!baseEndpoint || !authUser) {
       return
@@ -267,7 +267,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
 
   private getAuthErrorMessage(error: unknown): string {
     if (error instanceof HttpError) {
-      return `HTTP ${error.statusCode}: ${error.message || 'Authentication error'}`
+      return `HTTP ${error.statusCode ?? 'unknown'}: ${error.message || 'Authentication error'}`
     }
 
     return getErrorMessage(error) || 'Unknown authentication error'

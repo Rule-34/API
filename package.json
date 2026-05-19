@@ -12,7 +12,7 @@
     "debug": "nest start --debug --watch",
     "format": "prettier --write \"src/**/*.ts\" \"!src/external/**\" \"*.{js,json}\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"!src/external/**\" \"*.{js,json}\"",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --max-warnings=0",
     "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "typecheck": "pnpm typecheck:build && pnpm typecheck:spec",
     "typecheck:build": "tsc -p tsconfig.build.json --noEmit",

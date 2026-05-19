@@ -37,7 +37,7 @@ export class BooruCacheControlInterceptor implements NestInterceptor {
         // Keep both checks on purpose:
         // - raw query params catch partial auth URLs that should never be shared-cacheable
         // - resolved auth context catches requests that actually used query credentials
-        if (this.hasAuthQueryParams(request) || request?.booruAuthContext?.source === 'query') {
+        if (this.hasAuthQueryParams(request) || request.booruAuthContext?.source === 'query') {
           response.header('Cache-Control', BOORU_CACHE_CONTROL_POLICIES.PRIVATE_AUTH)
           return
         }
@@ -48,6 +48,6 @@ export class BooruCacheControlInterceptor implements NestInterceptor {
   }
 
   private hasAuthQueryParams(request: BooruHttpRequest): boolean {
-    return Boolean(request?.query?.auth_user || request?.query?.auth_pass)
+    return request.query?.auth_user !== undefined || request.query?.auth_pass !== undefined
   }
 }

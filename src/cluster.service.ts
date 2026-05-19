@@ -22,7 +22,7 @@ export class AppClusterService {
       }
 
       cluster.on('exit', (worker) => {
-        console.log(`Worker ${worker.process.pid} died. Restarting...`)
+        console.log(`Worker ${worker.process.pid ?? 'unknown'} died. Restarting...`)
         cluster.fork()
       })
     } else {
@@ -41,7 +41,7 @@ export class AppClusterService {
         this.disabledCredentials.add(credentialKey)
 
         // Broadcast to all other workers
-        Object.values(cluster.workers || {}).forEach((w) => {
+        Object.values(cluster.workers ?? {}).forEach((w) => {
           if (w && w.id !== worker.id && w.process.pid !== worker.process.pid) {
             w.send(message)
           }
@@ -50,7 +50,7 @@ export class AppClusterService {
         const scope = credential.password === undefined ? 'user-scoped' : 'password-scoped'
 
         console.log(
-          `🔄 Broadcasting disabled ${scope} credential for ${credential.domain} to ${Object.keys(cluster.workers || {}).length - 1} other workers`
+          `🔄 Broadcasting disabled ${scope} credential for ${credential.domain} to ${Object.keys(cluster.workers ?? {}).length - 1} other workers`
         )
       }
     })

@@ -33,7 +33,7 @@ export interface BuiltBooruApi {
   authResolution: ResolvedAuthCredentials
 }
 
-type BooruQueryIdentifierDefaults = {
+interface BooruQueryIdentifierDefaults {
   posts?: Partial<NonNullable<IBooruQueryIdentifiers['posts']>>
   randomPosts?: Partial<NonNullable<IBooruQueryIdentifiers['randomPosts']>>
   singlePost?: Partial<NonNullable<IBooruQueryIdentifiers['singlePost']>>
@@ -327,25 +327,7 @@ export class BooruService {
   private getFailureKind(
     error: HttpError
   ): 'auth_invalid' | 'auth_forbidden' | 'rate_limited' | 'upstream_error' | 'network_error' | 'unknown' {
-    if (error.failureKind) {
-      return error.failureKind
-    }
-
-    const statusCode = error.statusCode
-
-    if (statusCode === 429) {
-      return 'rate_limited'
-    }
-
-    if (statusCode === 403) {
-      return 'auth_forbidden'
-    }
-
-    if (statusCode === 401) {
-      return 'auth_invalid'
-    }
-
-    return 'unknown'
+    return error.failureKind
   }
 
   private getRetryAfterSeconds(error: HttpError): number | undefined {
