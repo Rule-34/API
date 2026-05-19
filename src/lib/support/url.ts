@@ -5,7 +5,7 @@ export function createUrlFromRequest(request: BooruHttpRequest): string {
   const originalUrl = request.url
 
   // TODO: Do not hardcode protocol
-  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
+  const protocol = process.env['NODE_ENV'] === 'development' ? 'http' : 'https'
 
   return `${protocol}://${hostname}${originalUrl}`
 }

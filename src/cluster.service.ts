@@ -4,7 +4,7 @@ import cluster from 'cluster'
 import { IpcAuthMessage, DisabledCredential } from './booru/interfaces/auth-manager.interface'
 import { createCredentialKey } from './booru/services/credential-key.util'
 
-const numCPUs = process.env.NODE_ENV === 'development' ? 1 : availableParallelism()
+const numCPUs = process.env['NODE_ENV'] === 'development' ? 1 : availableParallelism()
 
 @Injectable()
 export class AppClusterService {

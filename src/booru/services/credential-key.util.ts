@@ -19,9 +19,14 @@ export function createCredentialKey(domain: string, user: string, password?: str
 export function parseCredentialKey(key: string): ParsedCredentialKey {
   const [encodedDomain = '', encodedUser = '', ...encodedPasswordParts] = key.split(':')
 
-  return {
+  const parsedCredentialKey: ParsedCredentialKey = {
     domain: decodeURIComponent(encodedDomain),
-    user: decodeURIComponent(encodedUser),
-    password: encodedPasswordParts.length > 0 ? decodeURIComponent(encodedPasswordParts.join(':')) : undefined
+    user: decodeURIComponent(encodedUser)
   }
+
+  if (encodedPasswordParts.length > 0) {
+    parsedCredentialKey.password = decodeURIComponent(encodedPasswordParts.join(':'))
+  }
+
+  return parsedCredentialKey
 }

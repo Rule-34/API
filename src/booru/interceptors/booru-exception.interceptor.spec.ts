@@ -124,10 +124,10 @@ describe('BooruErrorsInterceptor', () => {
   let app: NestFastifyApplication
   let authManager: BooruAuthManagerService
 
-  const originalAuthConfig = process.env.BOORU_AUTH_CONFIG
+  const originalAuthConfig = process.env['BOORU_AUTH_CONFIG']
 
   beforeEach(async () => {
-    process.env.BOORU_AUTH_CONFIG = JSON.stringify({
+    process.env['BOORU_AUTH_CONFIG'] = JSON.stringify({
       'www.gelbooru.com': [{ user: 'www-gel-user', password: 'www-gel-pass' }]
     })
 
@@ -150,11 +150,11 @@ describe('BooruErrorsInterceptor', () => {
 
   afterAll(() => {
     if (originalAuthConfig === undefined) {
-      delete process.env.BOORU_AUTH_CONFIG
+      delete process.env['BOORU_AUTH_CONFIG']
       return
     }
 
-    process.env.BOORU_AUTH_CONFIG = originalAuthConfig
+    process.env['BOORU_AUTH_CONFIG'] = originalAuthConfig
   })
 
   it('should sanitize EmptyDataError responses from a real request', async () => {

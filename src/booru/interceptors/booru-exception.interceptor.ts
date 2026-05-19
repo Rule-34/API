@@ -196,11 +196,22 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     const authFailure: AuthFailureEvent = {
       domain,
       user: authUser,
-      password: authPass,
       error: this.getAuthErrorMessage(error),
-      failureKind: this.getFailureKind(error),
-      retryAfterSeconds: this.getRetryAfterSeconds(error),
       timestamp: new Date()
+    }
+
+    if (authPass !== undefined) {
+      authFailure.password = authPass
+    }
+
+    const failureKind = this.getFailureKind(error)
+    if (failureKind !== undefined) {
+      authFailure.failureKind = failureKind
+    }
+
+    const retryAfterSeconds = this.getRetryAfterSeconds(error)
+    if (retryAfterSeconds !== undefined) {
+      authFailure.retryAfterSeconds = retryAfterSeconds
     }
 
     this.authManager.reportAuthFailure(authFailure)
@@ -305,11 +316,10 @@ export class BooruErrorsInterceptor implements NestInterceptor {
       const urlObj = new URL(normalizedUrl)
       return urlObj.hostname.toLowerCase()
     } catch {
-      return url
-        .replace(/^(https?:\/\/)?/i, '')
-        .split(/[?#]/)[0]
-        .split('/')[0]
-        .toLowerCase()
+      const [urlWithoutQuery = ''] = url.replace(/^(https?:\/\/)?/i, '').split(/[?#]/)
+      const [domain = ''] = urlWithoutQuery.split('/')
+
+      return domain.toLowerCase()
     }
   }
 }

@@ -19,6 +19,7 @@ import {
 } from '@alejandroakbal/universal-booru-wrapper'
 import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
+import type { AuthFailureEvent } from './interfaces/auth-manager.interface'
 import { BooruAuthManagerService } from './services/booru-auth-manager.service'
 
 export interface ResolvedAuthCredentials {
@@ -79,41 +80,77 @@ export class BooruService {
 
     const endpoints: IBooruEndpoints = {
       base: queries.baseEndpoint,
-      posts: queries.postsEndpoint,
-      randomPosts: queries.randomPostsEndpoint,
-      singlePost: queries.singlePostEndpoint,
-      tags: queries.tagsEndpoint
+      ...(queries.postsEndpoint !== undefined ? { posts: queries.postsEndpoint } : {}),
+      ...(queries.randomPostsEndpoint !== undefined ? { randomPosts: queries.randomPostsEndpoint } : {}),
+      ...(queries.singlePostEndpoint !== undefined ? { singlePost: queries.singlePostEndpoint } : {}),
+      ...(queries.tagsEndpoint !== undefined ? { tags: queries.tagsEndpoint } : {})
     }
 
     const defaultQueryIdentifiers: BooruQueryIdentifierDefaults = {
       posts: {
-        limit: queries.defaultQueryIdentifiersPostsLimit,
-        pageID: queries.defaultQueryIdentifiersPostsPageID,
-        tags: queries.defaultQueryIdentifiersPostsTags,
-        rating: queries.defaultQueryIdentifiersPostsRating,
-        score: queries.defaultQueryIdentifiersPostsScore,
-        order: queries.defaultQueryIdentifiersPostsOrder
+        ...(queries.defaultQueryIdentifiersPostsLimit !== undefined
+          ? { limit: queries.defaultQueryIdentifiersPostsLimit }
+          : {}),
+        ...(queries.defaultQueryIdentifiersPostsPageID !== undefined
+          ? { pageID: queries.defaultQueryIdentifiersPostsPageID }
+          : {}),
+        ...(queries.defaultQueryIdentifiersPostsTags !== undefined
+          ? { tags: queries.defaultQueryIdentifiersPostsTags }
+          : {}),
+        ...(queries.defaultQueryIdentifiersPostsRating !== undefined
+          ? { rating: queries.defaultQueryIdentifiersPostsRating }
+          : {}),
+        ...(queries.defaultQueryIdentifiersPostsScore !== undefined
+          ? { score: queries.defaultQueryIdentifiersPostsScore }
+          : {}),
+        ...(queries.defaultQueryIdentifiersPostsOrder !== undefined
+          ? { order: queries.defaultQueryIdentifiersPostsOrder }
+          : {})
       },
 
       randomPosts: {
-        limit: queries.defaultQueryIdentifiersRandomPostsLimit,
-        pageID: queries.defaultQueryIdentifiersRandomPostsPageID,
-        tags: queries.defaultQueryIdentifiersRandomPostsTags,
-        rating: queries.defaultQueryIdentifiersRandomPostsRating,
-        score: queries.defaultQueryIdentifiersRandomPostsScore,
-        order: queries.defaultQueryIdentifiersRandomPostsOrder
+        ...(queries.defaultQueryIdentifiersRandomPostsLimit !== undefined
+          ? { limit: queries.defaultQueryIdentifiersRandomPostsLimit }
+          : {}),
+        ...(queries.defaultQueryIdentifiersRandomPostsPageID !== undefined
+          ? { pageID: queries.defaultQueryIdentifiersRandomPostsPageID }
+          : {}),
+        ...(queries.defaultQueryIdentifiersRandomPostsTags !== undefined
+          ? { tags: queries.defaultQueryIdentifiersRandomPostsTags }
+          : {}),
+        ...(queries.defaultQueryIdentifiersRandomPostsRating !== undefined
+          ? { rating: queries.defaultQueryIdentifiersRandomPostsRating }
+          : {}),
+        ...(queries.defaultQueryIdentifiersRandomPostsScore !== undefined
+          ? { score: queries.defaultQueryIdentifiersRandomPostsScore }
+          : {}),
+        ...(queries.defaultQueryIdentifiersRandomPostsOrder !== undefined
+          ? { order: queries.defaultQueryIdentifiersRandomPostsOrder }
+          : {})
       },
 
       singlePost: {
-        id: queries.defaultQueryIdentifiersSinglePostID
+        ...(queries.defaultQueryIdentifiersSinglePostID !== undefined
+          ? { id: queries.defaultQueryIdentifiersSinglePostID }
+          : {})
       },
 
       tags: {
-        tag: queries.defaultQueryIdentifiersTagsTag,
-        tagEnding: queries.defaultQueryIdentifiersTagsTagEnding,
-        limit: queries.defaultQueryIdentifiersTagsLimit,
-        pageID: queries.defaultQueryIdentifiersTagsPageID,
-        order: queries.defaultQueryIdentifiersTagsOrder
+        ...(queries.defaultQueryIdentifiersTagsTag !== undefined
+          ? { tag: queries.defaultQueryIdentifiersTagsTag }
+          : {}),
+        ...(queries.defaultQueryIdentifiersTagsTagEnding !== undefined
+          ? { tagEnding: queries.defaultQueryIdentifiersTagsTagEnding }
+          : {}),
+        ...(queries.defaultQueryIdentifiersTagsLimit !== undefined
+          ? { limit: queries.defaultQueryIdentifiersTagsLimit }
+          : {}),
+        ...(queries.defaultQueryIdentifiersTagsPageID !== undefined
+          ? { pageID: queries.defaultQueryIdentifiersTagsPageID }
+          : {}),
+        ...(queries.defaultQueryIdentifiersTagsOrder !== undefined
+          ? { order: queries.defaultQueryIdentifiersTagsOrder }
+          : {})
       }
     }
 
@@ -122,12 +159,14 @@ export class BooruService {
     // Resolve authentication credentials
     const authResolution = this.resolveAuthCredentials(queries)
 
-    const options: Partial<IBooruOptions> = {
-      auth: authResolution.auth
-    }
+    const options: Partial<IBooruOptions> = {}
 
     if (queries.httpScheme) {
       options.HTTPScheme = queries.httpScheme
+    }
+
+    if (authResolution.auth) {
+      options.auth = authResolution.auth
     }
 
     const Api = new booruClass(
@@ -218,15 +257,22 @@ export class BooruService {
 
         const httpError = error
 
-        this.authManager.reportAuthFailure({
+        const authFailure: AuthFailureEvent = {
           domain: queries.baseEndpoint,
           user: selectedCredential.user,
           password: selectedCredential.password,
           error: this.stringifyHttpError(httpError),
           failureKind: this.getFailureKind(httpError),
-          retryAfterSeconds: this.getRetryAfterSeconds(httpError),
           timestamp: new Date()
-        })
+        }
+
+        const retryAfterSeconds = this.getRetryAfterSeconds(httpError)
+
+        if (retryAfterSeconds !== undefined) {
+          authFailure.retryAfterSeconds = retryAfterSeconds
+        }
+
+        this.authManager.reportAuthFailure(authFailure)
 
         attemptedCredentials.add(credentialKey)
       }

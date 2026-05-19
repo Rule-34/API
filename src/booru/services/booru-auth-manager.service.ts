@@ -125,9 +125,9 @@ export class BooruAuthManagerService implements OnModuleInit {
     const baseCredential = {
       domain: normalizedDomain,
       user: authFailure.user,
-      password: authFailure.password,
       disabledAt: authFailure.timestamp,
-      reason: sanitizedError
+      reason: sanitizedError,
+      ...(authFailure.password !== undefined ? { password: authFailure.password } : {})
     }
 
     const disabledCredential: DisabledCredential = isRateLimit
@@ -319,14 +319,23 @@ export class BooruAuthManagerService implements OnModuleInit {
     this.cleanupExpiredCooldowns(normalizedDomain)
 
     const credentials = this.authConfig[normalizedDomain] || []
-    const status = credentials.map((credential) => this.getMaskedCredentialStatus(normalizedDomain, credential))
+    const credentialStatuses = credentials.map((credential) =>
+      this.getMaskedCredentialStatus(normalizedDomain, credential)
+    )
     const stats = this.getDomainStats(normalizedDomain)
 
-    return {
+    const domainStatus: DomainCredentialStatus = {
       ...stats,
-      minCooldownSeconds: this.getMinCooldownSeconds(normalizedDomain),
-      credentials: status
+      credentials: credentialStatuses
     }
+
+    const minCooldownSeconds = this.getMinCooldownSeconds(normalizedDomain)
+
+    if (minCooldownSeconds !== undefined) {
+      domainStatus.minCooldownSeconds = minCooldownSeconds
+    }
+
+    return domainStatus
   }
 
   public getCredentialPoolStatus(domain?: string): DomainCredentialStatus[] {
@@ -378,11 +387,10 @@ export class BooruAuthManagerService implements OnModuleInit {
       const urlObj = new URL(normalizedUrl)
       return urlObj.hostname.toLowerCase()
     } catch {
-      return url
-        .replace(/^(https?:\/\/)?/i, '')
-        .split(/[?#]/)[0]
-        .split('/')[0]
-        .toLowerCase()
+      const [urlWithoutQuery = ''] = url.replace(/^(https?:\/\/)?/i, '').split(/[?#]/)
+      const [domain = ''] = urlWithoutQuery.split('/')
+
+      return domain.toLowerCase()
     }
   }
 
@@ -451,7 +459,7 @@ export class BooruAuthManagerService implements OnModuleInit {
       return {
         domain,
         user,
-        password,
+        ...(password !== undefined ? { password } : {}),
         disabledAt: new Date(record.disabledAt),
         state: 'permanent' as const,
         reason: record.reason
@@ -464,7 +472,7 @@ export class BooruAuthManagerService implements OnModuleInit {
       return {
         domain,
         user,
-        password,
+        ...(password !== undefined ? { password } : {}),
         disabledAt: new Date(record.disabledAt),
         state: 'cooldown' as const,
         cooldownUntil: new Date(record.cooldownUntil),
@@ -483,7 +491,8 @@ export class BooruAuthManagerService implements OnModuleInit {
     const errorMessage = authFailure.error.toLowerCase()
 
     const statusMatch = errorMessage.match(BooruAuthManagerService.HTTP_STATUS_PATTERN)
-    const statusCode = Number(statusMatch?.[1] ?? statusMatch?.[2])
+    const [, statusFromLabel, statusFromBare] = statusMatch ?? []
+    const statusCode = Number(statusFromLabel ?? statusFromBare)
 
     if (statusCode === 429) {
       return 'rate_limited'
@@ -539,6 +548,10 @@ export class BooruAuthManagerService implements OnModuleInit {
     for (let offset = 0; offset < credentials.length; offset++) {
       const index = (currentCursor + offset) % credentials.length
       const candidate = credentials[index]
+
+      if (candidate === undefined) {
+        continue
+      }
 
       if (!this.isCredentialUnavailable(domain, candidate.user, candidate.password)) {
         this.selectionCursorByDomain.set(domain, (index + 1) % credentials.length)

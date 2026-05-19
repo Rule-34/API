@@ -5,10 +5,10 @@ import { BooruAuthManagerService } from './booru-auth-manager.service'
 describe('BooruAuthManagerService', () => {
   let service: BooruAuthManagerService
 
-  const originalAuthConfig = process.env.BOORU_AUTH_CONFIG
+  const originalAuthConfig = process.env['BOORU_AUTH_CONFIG']
 
   beforeEach(async () => {
-    process.env.BOORU_AUTH_CONFIG = JSON.stringify({
+    process.env['BOORU_AUTH_CONFIG'] = JSON.stringify({
       'rule34.xxx': [{ user: 'canonical-user', password: 'canonical-pass' }],
       'api.rule34.xxx': [
         { user: 'canonical-user', password: 'canonical-pass' },
@@ -37,11 +37,11 @@ describe('BooruAuthManagerService', () => {
 
   afterEach(() => {
     if (originalAuthConfig === undefined) {
-      delete process.env.BOORU_AUTH_CONFIG
+      delete process.env['BOORU_AUTH_CONFIG']
       return
     }
 
-    process.env.BOORU_AUTH_CONFIG = originalAuthConfig
+    process.env['BOORU_AUTH_CONFIG'] = originalAuthConfig
   })
 
   it('should normalize rule34 aliases into canonical deduplicated domain config', () => {
@@ -112,7 +112,7 @@ describe('BooruAuthManagerService', () => {
       timestamp: new Date()
     })
 
-    const loggedMessage = errorSpy.mock.calls[0][0]
+    const loggedMessage = String(errorSpy.mock.calls.at(0)?.at(0) ?? '')
 
     expect(loggedMessage).toContain('auth_user=REDACTED')
     expect(loggedMessage).toContain('auth_pass=REDACTED')
@@ -136,7 +136,7 @@ describe('BooruAuthManagerService', () => {
       timestamp: new Date()
     })
 
-    const loggedMessage = errorSpy.mock.calls[0][0]
+    const loggedMessage = String(errorSpy.mock.calls.at(0)?.at(0) ?? '')
 
     expect(loggedMessage).toContain('auth_user=REDACTED')
     expect(loggedMessage).toContain('auth_pass=REDACTED')
@@ -167,7 +167,7 @@ describe('BooruAuthManagerService', () => {
       timestamp: new Date()
     })
 
-    const loggedMessage = errorSpy.mock.calls[0][0]
+    const loggedMessage = String(errorSpy.mock.calls.at(0)?.at(0) ?? '')
 
     expect(loggedMessage).toContain('AUTH_USER=REDACTED')
     expect(loggedMessage).toContain('AUTH_PASS=REDACTED')
@@ -439,10 +439,12 @@ describe('BooruAuthManagerService', () => {
     })
 
     const snapshots = service.getCredentialPoolStatus('gelbooru.com')
+    const snapshot = snapshots.at(0)
+    const credential = snapshot?.credentials.at(0)
 
     expect(snapshots).toHaveLength(1)
-    expect(snapshots[0].domain).toBe('gelbooru.com')
-    expect(snapshots[0].credentials[0].user).toBe('gel-user')
-    expect(snapshots[0].credentials[0].state).toBe('permanent')
+    expect(snapshot?.domain).toBe('gelbooru.com')
+    expect(credential?.user).toBe('gel-user')
+    expect(credential?.state).toBe('permanent')
   })
 })

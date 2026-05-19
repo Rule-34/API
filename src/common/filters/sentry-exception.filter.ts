@@ -8,7 +8,7 @@ export class SentryExceptionFilter extends BaseExceptionFilter {
     super(httpAdapterHost.httpAdapter)
   }
 
-  catch(exception: unknown, host: ArgumentsHost): void {
+  override catch(exception: unknown, host: ArgumentsHost): void {
     if (this.shouldCapture(exception)) {
       Sentry.captureException(exception, {
         mechanism: {

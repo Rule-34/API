@@ -49,8 +49,11 @@ export class BooruController {
   ): void {
     const authContext: BooruAuthContext = {
       baseEndpoint,
-      credential: authResolution.selectedCredential,
       source: authResolution.source
+    }
+
+    if (authResolution.selectedCredential) {
+      authContext.credential = authResolution.selectedCredential
     }
 
     request.booruAuthContext = authContext
@@ -71,12 +74,12 @@ export class BooruController {
     const responseQueries = this.withEffectivePageId(queries, effectivePageId)
 
     const postQueryValues: IBooruQueryValues['posts'] = {
-      limit: queries.limit,
       pageID: effectivePageId,
-      tags: queries.tags,
-      rating: queries.rating,
-      score: queries.score,
-      order: queries.order
+      ...(queries.limit !== undefined ? { limit: queries.limit } : {}),
+      ...(queries.tags !== undefined ? { tags: queries.tags } : {}),
+      ...(queries.rating !== undefined ? { rating: queries.rating } : {}),
+      ...(queries.score !== undefined ? { score: queries.score } : {}),
+      ...(queries.order !== undefined ? { order: queries.order } : {})
     }
 
     try {
@@ -113,12 +116,12 @@ export class BooruController {
     const responseQueries = this.withEffectivePageId(queries, effectivePageId)
 
     const postQueryValues: IBooruQueryValues['randomPosts'] = {
-      limit: queries.limit,
       pageID: effectivePageId,
-      tags: queries.tags,
-      rating: queries.rating,
-      score: queries.score,
-      order: queries.order
+      ...(queries.limit !== undefined ? { limit: queries.limit } : {}),
+      ...(queries.tags !== undefined ? { tags: queries.tags } : {}),
+      ...(queries.rating !== undefined ? { rating: queries.rating } : {}),
+      ...(queries.score !== undefined ? { score: queries.score } : {}),
+      ...(queries.order !== undefined ? { order: queries.order } : {})
     }
 
     try {
@@ -183,10 +186,10 @@ export class BooruController {
 
     const postQueryValues: IBooruQueryValues['tags'] = {
       tag: queries.tag,
-      tagEnding: queries.tagEnding,
-      limit: queries.limit,
       pageID: effectivePageId,
-      order: queries.order
+      ...(queries.tagEnding !== undefined ? { tagEnding: queries.tagEnding } : {}),
+      ...(queries.limit !== undefined ? { limit: queries.limit } : {}),
+      ...(queries.order !== undefined ? { order: queries.order } : {})
     }
 
     try {
