@@ -262,7 +262,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
   }
 
   private getFailureKind(error: any): AuthFailureEvent['failureKind'] {
-    const httpError = error as any
+    const httpError = error
 
     if (httpError.failureKind) {
       return httpError.failureKind
@@ -280,7 +280,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
   }
 
   private getRetryAfterSeconds(error: any): number | undefined {
-    const httpError = error as any
+    const httpError = error
 
     if (typeof httpError.retryAfterSeconds === 'number') {
       return httpError.retryAfterSeconds

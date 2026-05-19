@@ -10,7 +10,7 @@ const numCPUs = process.env.NODE_ENV === 'development' ? 1 : availableParallelis
 export class AppClusterService {
   private static disabledCredentials = new Set<string>()
 
-  static clusterize(callback: () => void): void {
+  static clusterize(callback: () => void | Promise<void>): void {
     if (cluster.isPrimary) {
       console.log(`Primary ${process.pid} is running`)
 
@@ -27,7 +27,7 @@ export class AppClusterService {
       })
     } else {
       console.log(`Worker ${process.pid} started`)
-      callback()
+      void callback()
     }
   }
 

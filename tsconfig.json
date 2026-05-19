@@ -1,18 +1,23 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "bundler",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolvePackageJsonExports": true,
     //
     "target": "ES2025",
     //
     "rootDir": "./src",
     "strict": false,
-    "types": ["node"],
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "noFallthroughCasesInSwitch": false,
+    "forceConsistentCasingInFileNames": true,
     //
     "incremental": true,
     "declaration": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
     //
-    "allowJs": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

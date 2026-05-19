@@ -1,38 +1,50 @@
 const js = require('@eslint/js')
-const tsParser = require('@typescript-eslint/parser')
-const tsPlugin = require('@typescript-eslint/eslint-plugin')
-const prettierRecommended = require('eslint-plugin-prettier/recommended')
+const eslintConfigPrettier = require('eslint-config-prettier/flat')
 const globals = require('globals')
+const tseslint = require('typescript-eslint')
 
-module.exports = [
+module.exports = tseslint.config(
   {
-    ignores: ['dist/**', 'coverage/**', 'node_modules/**']
+    ignores: ['dist/**', 'coverage/**', 'node_modules/**', 'src/external/**']
   },
   js.configs.recommended,
-  ...tsPlugin.configs['flat/recommended'],
+  ...tseslint.configs.recommendedTypeChecked,
+  eslintConfigPrettier,
   {
-    files: ['**/*.ts'],
+    files: ['{src,apps,libs,test}/**/*.ts'],
     languageOptions: {
-      parser: tsParser,
       parserOptions: {
-        project: ['./tsconfig.json', './tsconfig.spec.json'],
+        projectService: true,
         tsconfigRootDir: __dirname,
-        sourceType: 'module'
+        sourceType: 'commonjs'
       },
       globals: {
-        ...globals.node,
-        ...globals.jest
+        ...globals.node
       }
-    },
-    plugins: {
-      '@typescript-eslint': tsPlugin
     },
     rules: {
       '@typescript-eslint/interface-name-prefix': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-explicit-any': 'off'
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off'
     }
   },
-  prettierRecommended
-]
+  {
+    files: ['**/*.spec.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.jest
+      }
+    },
+    rules: {
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off'
+    }
+  }
+)
