@@ -4,14 +4,19 @@ import { Observable } from 'rxjs'
 import { tap } from 'rxjs/operators'
 import { BOORU_CACHE_CONTROL_POLICIES } from '../constants/cache-control-policies'
 import { BOORU_CACHE_POLICY_METADATA_KEY } from '../decorators/booru-cache-policy.decorator'
+import type { BooruHttpRequest } from '../interfaces/booru-http.interface'
+
+interface HeaderResponse {
+  header(name: string, value: string): void
+}
 
 @Injectable()
 export class BooruCacheControlInterceptor implements NestInterceptor {
   constructor(private readonly reflector: Reflector) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const response = context.switchToHttp().getResponse()
-    const request = context.switchToHttp().getRequest()
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+    const response = context.switchToHttp().getResponse<HeaderResponse | undefined>()
+    const request = context.switchToHttp().getRequest<BooruHttpRequest>()
     const cachePolicy = this.reflector.getAllAndOverride<string | undefined>(BOORU_CACHE_POLICY_METADATA_KEY, [
       context.getHandler(),
       context.getClass()
@@ -42,7 +47,7 @@ export class BooruCacheControlInterceptor implements NestInterceptor {
     )
   }
 
-  private hasAuthQueryParams(request: any): boolean {
+  private hasAuthQueryParams(request: BooruHttpRequest): boolean {
     return Boolean(request?.query?.auth_user || request?.query?.auth_pass)
   }
 }

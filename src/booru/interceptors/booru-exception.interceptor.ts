@@ -18,6 +18,19 @@ import { AuthFailureEvent } from '../interfaces/auth-manager.interface'
 import { BOORU_CACHE_CONTROL_POLICIES } from '../constants/cache-control-policies'
 import { SENSITIVE_AUTH_PARAMS } from '../constants/sensitive-auth-params'
 import { ManagedCredentialPoolUnavailableError } from '../booru.service'
+import type { BooruHttpRequest } from '../interfaces/booru-http.interface'
+
+interface HeaderResponse {
+  header(name: string, value: string): void
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message || error.toString()
+  }
+
+  return String(error)
+}
 
 @Injectable()
 export class BooruErrorsInterceptor implements NestInterceptor {
@@ -26,10 +39,10 @@ export class BooruErrorsInterceptor implements NestInterceptor {
   // Common booru authentication parameters that should be redacted from error messages
   private readonly sensitiveParams = SENSITIVE_AUTH_PARAMS
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     return next.handle().pipe(
-      catchError((error) => {
-        const response = context.switchToHttp().getResponse()
+      catchError((error: unknown) => {
+        const response = context.switchToHttp().getResponse<HeaderResponse | undefined>()
         if (response && typeof response.header === 'function') {
           response.header('Cache-Control', BOORU_CACHE_CONTROL_POLICIES.ERROR)
         }
@@ -38,85 +51,77 @@ export class BooruErrorsInterceptor implements NestInterceptor {
         this.checkForAuthFailure(error, context)
 
         // Sanitize error messages to remove authentication data
-        const originalMessage = error.message !== undefined ? error.message : error.toString()
-        const sanitizedMessage = this.sanitizeErrorMessage(originalMessage)
+        const sanitizedMessage = this.sanitizeErrorMessage(getErrorMessage(error))
 
-        // Throw better errors with sanitized messages
-        switch (error.constructor) {
-          case ManagedCredentialPoolUnavailableError: {
-            const poolError = error as ManagedCredentialPoolUnavailableError
-            const retryAfterSeconds = this.getValidatedRetryAfterSeconds(poolError.retryAfterSeconds)
+        if (error instanceof ManagedCredentialPoolUnavailableError) {
+          const retryAfterSeconds = this.getValidatedRetryAfterSeconds(error.retryAfterSeconds)
 
+          if (retryAfterSeconds !== undefined) {
+            response?.header('Retry-After', `${retryAfterSeconds}`)
+          }
+
+          return throwError(
+            () =>
+              new HttpException(
+                {
+                  statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+                  message: sanitizedMessage,
+                  retryAfterSeconds,
+                  reason: error.reason
+                },
+                HttpStatus.SERVICE_UNAVAILABLE
+              )
+          )
+        }
+
+        if (error instanceof EmptyDataError) {
+          return throwError(() => new NoContentException(undefined, sanitizedMessage))
+        }
+
+        if (error instanceof EndpointError) {
+          return throwError(() => new MethodNotAllowedException(undefined, sanitizedMessage))
+        }
+
+        if (error instanceof HttpError) {
+          // Check if this is an auth-related HTTP error
+          if (this.isCredentialFailure(error)) {
+            return throwError(() => new UnauthorizedException(undefined, sanitizedMessage))
+          }
+
+          if (this.isRateLimitError(error)) {
+            const retryAfterSeconds = this.getValidatedRetryAfterSeconds(this.getRetryAfterSeconds(error))
             if (retryAfterSeconds !== undefined) {
-              const response = context.switchToHttp().getResponse()
-              if (response && typeof response.header === 'function') {
-                response.header('Retry-After', `${retryAfterSeconds}`)
-              }
+              response?.header('Retry-After', `${retryAfterSeconds}`)
             }
 
             return throwError(
               () =>
                 new HttpException(
                   {
-                    statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+                    statusCode: HttpStatus.TOO_MANY_REQUESTS,
                     message: sanitizedMessage,
-                    retryAfterSeconds,
-                    reason: poolError.reason
+                    retryAfterSeconds
                   },
-                  HttpStatus.SERVICE_UNAVAILABLE
+                  HttpStatus.TOO_MANY_REQUESTS
                 )
             )
           }
 
-          case EmptyDataError:
-            return throwError(() => new NoContentException(undefined, sanitizedMessage))
+          return throwError(() => new ServiceUnavailableException(undefined, sanitizedMessage))
+        }
 
-          case EndpointError:
-            return throwError(() => new MethodNotAllowedException(undefined, sanitizedMessage))
+        // For unknown errors, also sanitize the message
+        const sanitizedError = new Error(sanitizedMessage)
 
-          case HttpError:
-            // Check if this is an auth-related HTTP error
-            if (this.isCredentialFailure(error)) {
-              return throwError(() => new UnauthorizedException(undefined, sanitizedMessage))
-            }
+        if (error instanceof Error) {
+          sanitizedError.name = error.name
 
-            if (this.isRateLimitError(error)) {
-              const retryAfterSeconds = this.getValidatedRetryAfterSeconds(this.getRetryAfterSeconds(error))
-              if (retryAfterSeconds !== undefined) {
-                const response = context.switchToHttp().getResponse()
-                if (response && typeof response.header === 'function') {
-                  response.header('Retry-After', `${retryAfterSeconds}`)
-                }
-              }
-
-              return throwError(
-                () =>
-                  new HttpException(
-                    {
-                      statusCode: HttpStatus.TOO_MANY_REQUESTS,
-                      message: sanitizedMessage,
-                      retryAfterSeconds
-                    },
-                    HttpStatus.TOO_MANY_REQUESTS
-                  )
-              )
-            }
-
-            return throwError(() => new ServiceUnavailableException(undefined, sanitizedMessage))
-
-          default: {
-            // For unknown errors, also sanitize the message
-            const sanitizedError = new Error(sanitizedMessage)
-
-            sanitizedError.name = error.name
-
-            if (error.stack) {
-              sanitizedError.stack = this.sanitizeErrorMessage(error.stack)
-            }
-
-            return throwError(() => sanitizedError)
+          if (error.stack) {
+            sanitizedError.stack = this.sanitizeErrorMessage(error.stack)
           }
         }
+
+        return throwError(() => sanitizedError)
       })
     )
   }
@@ -166,12 +171,12 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     return sanitizedUrl
   }
 
-  private checkForAuthFailure(error: any, context: ExecutionContext): void {
+  private checkForAuthFailure(error: unknown, context: ExecutionContext): void {
     if (!this.isCredentialFailure(error) && !this.isRateLimitError(error)) {
       return
     }
 
-    const request = context.switchToHttp().getRequest()
+    const request = context.switchToHttp().getRequest<BooruHttpRequest>()
 
     if (request.booruAuthContext?.source) {
       return
@@ -201,11 +206,10 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     this.authManager.reportAuthFailure(authFailure)
   }
 
-  private isCredentialFailure(error: any): boolean {
-    if (error.constructor === HttpError) {
-      const httpError = error as any
-      const failureKind = httpError.failureKind
-      const statusCode = httpError.statusCode || httpError.status
+  private isCredentialFailure(error: unknown): boolean {
+    if (error instanceof HttpError) {
+      const failureKind = error.failureKind
+      const statusCode = error.statusCode
 
       if (failureKind === 'auth_invalid' || failureKind === 'auth_forbidden') {
         return true
@@ -216,7 +220,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
       }
     }
 
-    const errorMessage = (error.message || error.toString()).toLowerCase()
+    const errorMessage = getErrorMessage(error).toLowerCase()
     const authErrorPatterns = [
       'unauthorized',
       'forbidden',
@@ -232,11 +236,10 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     return authErrorPatterns.some((pattern) => errorMessage.includes(pattern))
   }
 
-  private isRateLimitError(error: any): boolean {
-    if (error.constructor === HttpError) {
-      const httpError = error as any
-      const failureKind = httpError.failureKind
-      const statusCode = httpError.statusCode || httpError.status
+  private isRateLimitError(error: unknown): boolean {
+    if (error instanceof HttpError) {
+      const failureKind = error.failureKind
+      const statusCode = error.statusCode
 
       if (failureKind === 'rate_limited') {
         return true
@@ -247,25 +250,21 @@ export class BooruErrorsInterceptor implements NestInterceptor {
       }
     }
 
-    const errorMessage = (error.message || error.toString()).toLowerCase()
+    const errorMessage = getErrorMessage(error).toLowerCase()
     return errorMessage.includes('status: 429') || errorMessage.includes('http 429')
   }
 
-  private getAuthErrorMessage(error: any): string {
-    if (error.constructor === HttpError) {
-      const httpError = error as any
-      const statusCode = httpError.statusCode || httpError.status
-      return `HTTP ${statusCode}: ${error.message || 'Authentication error'}`
+  private getAuthErrorMessage(error: unknown): string {
+    if (error instanceof HttpError) {
+      return `HTTP ${error.statusCode}: ${error.message || 'Authentication error'}`
     }
 
-    return error.message || error.toString() || 'Unknown authentication error'
+    return getErrorMessage(error) || 'Unknown authentication error'
   }
 
-  private getFailureKind(error: any): AuthFailureEvent['failureKind'] {
-    const httpError = error
-
-    if (httpError.failureKind) {
-      return httpError.failureKind
+  private getFailureKind(error: unknown): AuthFailureEvent['failureKind'] {
+    if (error instanceof HttpError) {
+      return error.failureKind
     }
 
     if (this.isRateLimitError(error)) {
@@ -279,11 +278,9 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     return 'unknown'
   }
 
-  private getRetryAfterSeconds(error: any): number | undefined {
-    const httpError = error
-
-    if (typeof httpError.retryAfterSeconds === 'number') {
-      return httpError.retryAfterSeconds
+  private getRetryAfterSeconds(error: unknown): number | undefined {
+    if (error instanceof HttpError && typeof error.retryAfterSeconds === 'number') {
+      return error.retryAfterSeconds
     }
 
     return undefined

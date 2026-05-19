@@ -1,4 +1,6 @@
-export function createUrlFromRequest(request: any) {
+import type { BooruHttpRequest } from '../../booru/interfaces/booru-http.interface'
+
+export function createUrlFromRequest(request: BooruHttpRequest): string {
   const hostname = request.hostname
   const originalUrl = request.url
 
@@ -8,7 +10,11 @@ export function createUrlFromRequest(request: any) {
   return `${protocol}://${hostname}${originalUrl}`
 }
 
-export function createPreviousPageUrl(request: any, pageID: number, initialPageID: number) {
+export function createPreviousPageUrl(
+  request: BooruHttpRequest,
+  pageID: number | null | undefined,
+  initialPageID: number
+): string | null {
   const url = new URL(createUrlFromRequest(request))
 
   if (pageID == null) {
@@ -26,7 +32,7 @@ export function createPreviousPageUrl(request: any, pageID: number, initialPageI
   return url.toString()
 }
 
-export function createNextPageUrl(request: any, pageID: number) {
+export function createNextPageUrl(request: BooruHttpRequest, pageID: number | null | undefined): string | null {
   const url = new URL(createUrlFromRequest(request))
 
   if (pageID == null) {
@@ -40,7 +46,7 @@ export function createNextPageUrl(request: any, pageID: number) {
   return url.toString()
 }
 
-export function createFirstPageUrl(request: any, initialPageID: number) {
+export function createFirstPageUrl(request: BooruHttpRequest, initialPageID: number | null | undefined): string | null {
   const url = new URL(createUrlFromRequest(request))
 
   if (initialPageID == null) {

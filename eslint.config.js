@@ -36,6 +36,17 @@ module.exports = tseslint.config(
     }
   },
   {
+    files: ['src/**/*.ts'],
+    ignores: ['**/*.spec.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-argument': 'error',
+      '@typescript-eslint/no-unsafe-assignment': 'error',
+      '@typescript-eslint/no-unsafe-call': 'error',
+      '@typescript-eslint/no-unsafe-member-access': 'error',
+      '@typescript-eslint/no-unsafe-return': 'error'
+    }
+  },
+  {
     files: ['**/*.spec.ts'],
     languageOptions: {
       globals: {

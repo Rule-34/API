@@ -19,30 +19,60 @@ import {
 } from 'class-validator'
 import { Transform } from 'class-transformer'
 
+type PostsQueryIdentifiers = NonNullable<IBooruQueryIdentifiers['posts']>
+type RandomPostsQueryIdentifiers = NonNullable<IBooruQueryIdentifiers['randomPosts']>
+type SinglePostQueryIdentifiers = NonNullable<IBooruQueryIdentifiers['singlePost']>
+type TagsQueryIdentifiers = NonNullable<IBooruQueryIdentifiers['tags']>
+type PostsQueryValues = NonNullable<IBooruQueryValues['posts']>
+type SinglePostQueryValues = NonNullable<IBooruQueryValues['singlePost']>
+type TagsQueryValues = NonNullable<IBooruQueryValues['tags']>
+
+function parseIntegerQueryValue(value: unknown): unknown {
+  if (typeof value === 'string') {
+    return Number.parseInt(value, 10)
+  }
+
+  return value
+}
+
+function isUnknownArray(value: unknown): value is unknown[] {
+  return Array.isArray(value)
+}
+
+function transformTagsQueryValue(value: unknown): unknown {
+  if (value === undefined || value === null) {
+    return value
+  }
+
+  const values = isUnknownArray(value) ? value : [value]
+
+  return values.flatMap((tag) => (typeof tag === 'string' ? tag.trim().split('|') : [tag]))
+}
+
 abstract class booruEndpointsDTO {
   @IsFQDN()
   @IsNotEmpty()
-  readonly baseEndpoint: IBooruEndpoints['base']
+  readonly baseEndpoint!: IBooruEndpoints['base']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly postsEndpoint: IBooruEndpoints['posts']
+  readonly postsEndpoint?: IBooruEndpoints['posts']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly randomPostsEndpoint: IBooruEndpoints['randomPosts']
+  readonly randomPostsEndpoint?: IBooruEndpoints['randomPosts']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly singlePostEndpoint: IBooruEndpoints['singlePost']
+  readonly singlePostEndpoint?: IBooruEndpoints['singlePost']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly tagsEndpoint: IBooruEndpoints['tags']
+  readonly tagsEndpoint?: IBooruEndpoints['tags']
 }
 
 abstract class booruOptionsDTO extends booruEndpointsDTO {
@@ -50,102 +80,102 @@ abstract class booruOptionsDTO extends booruEndpointsDTO {
   @IsNotEmpty()
   @IsIn(['http', 'https'])
   @IsOptional()
-  readonly httpScheme: IBooruOptions['HTTPScheme']
+  readonly httpScheme?: IBooruOptions['HTTPScheme']
 }
 
 abstract class booruDefaultQueryIdentifiersPostsDTO extends booruOptionsDTO {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly defaultQueryIdentifiersPostsLimit: IBooruQueryIdentifiers['posts']['limit']
+  readonly defaultQueryIdentifiersPostsLimit?: PostsQueryIdentifiers['limit']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly defaultQueryIdentifiersPostsPageID: IBooruQueryIdentifiers['posts']['pageID']
+  readonly defaultQueryIdentifiersPostsPageID?: PostsQueryIdentifiers['pageID']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly defaultQueryIdentifiersPostsTags: IBooruQueryIdentifiers['posts']['tags']
+  readonly defaultQueryIdentifiersPostsTags?: PostsQueryIdentifiers['tags']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly defaultQueryIdentifiersPostsRating: IBooruQueryIdentifiers['posts']['rating']
+  readonly defaultQueryIdentifiersPostsRating?: PostsQueryIdentifiers['rating']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly defaultQueryIdentifiersPostsScore: IBooruQueryIdentifiers['posts']['score']
+  readonly defaultQueryIdentifiersPostsScore?: PostsQueryIdentifiers['score']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly defaultQueryIdentifiersPostsOrder: IBooruQueryIdentifiers['posts']['order']
+  readonly defaultQueryIdentifiersPostsOrder?: PostsQueryIdentifiers['order']
 }
 abstract class booruDefaultQueryIdentifiersRandomPostsDTO extends booruDefaultQueryIdentifiersPostsDTO {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly defaultQueryIdentifiersRandomPostsLimit: IBooruQueryIdentifiers['randomPosts']['limit']
+  readonly defaultQueryIdentifiersRandomPostsLimit?: RandomPostsQueryIdentifiers['limit']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly defaultQueryIdentifiersRandomPostsPageID: IBooruQueryIdentifiers['randomPosts']['pageID']
+  readonly defaultQueryIdentifiersRandomPostsPageID?: RandomPostsQueryIdentifiers['pageID']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly defaultQueryIdentifiersRandomPostsTags: IBooruQueryIdentifiers['randomPosts']['tags']
+  readonly defaultQueryIdentifiersRandomPostsTags?: RandomPostsQueryIdentifiers['tags']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly defaultQueryIdentifiersRandomPostsRating: IBooruQueryIdentifiers['randomPosts']['rating']
+  readonly defaultQueryIdentifiersRandomPostsRating?: RandomPostsQueryIdentifiers['rating']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly defaultQueryIdentifiersRandomPostsScore: IBooruQueryIdentifiers['randomPosts']['score']
+  readonly defaultQueryIdentifiersRandomPostsScore?: RandomPostsQueryIdentifiers['score']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly defaultQueryIdentifiersRandomPostsOrder: IBooruQueryIdentifiers['randomPosts']['order']
+  readonly defaultQueryIdentifiersRandomPostsOrder?: RandomPostsQueryIdentifiers['order']
 }
 abstract class booruDefaultQueryIdentifiersSinglePostDTO extends booruDefaultQueryIdentifiersRandomPostsDTO {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly defaultQueryIdentifiersSinglePostID: IBooruQueryIdentifiers['singlePost']['id']
+  readonly defaultQueryIdentifiersSinglePostID?: SinglePostQueryIdentifiers['id']
 }
 
 abstract class booruDefaultQueryIdentifiersTagsDTO extends booruDefaultQueryIdentifiersSinglePostDTO {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly defaultQueryIdentifiersTagsTag: IBooruQueryIdentifiers['tags']['tag']
+  readonly defaultQueryIdentifiersTagsTag?: TagsQueryIdentifiers['tag']
 
   @IsString()
   @IsOptional()
-  readonly defaultQueryIdentifiersTagsTagEnding: IBooruQueryIdentifiers['tags']['tagEnding']
-
-  @IsString()
-  @IsNotEmpty()
-  @IsOptional()
-  readonly defaultQueryIdentifiersTagsLimit: IBooruQueryIdentifiers['tags']['limit']
+  readonly defaultQueryIdentifiersTagsTagEnding?: TagsQueryIdentifiers['tagEnding']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly defaultQueryIdentifiersTagsPageID: IBooruQueryIdentifiers['tags']['pageID']
+  readonly defaultQueryIdentifiersTagsLimit?: TagsQueryIdentifiers['limit']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly defaultQueryIdentifiersTagsOrder: IBooruQueryIdentifiers['tags']['order']
+  readonly defaultQueryIdentifiersTagsPageID?: TagsQueryIdentifiers['pageID']
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly defaultQueryIdentifiersTagsOrder?: TagsQueryIdentifiers['order']
 }
 
 /**
@@ -167,47 +197,39 @@ export abstract class booruQueriesDTO extends booruDefaultQueryIdentifiersTagsDT
 export class booruQueryValuesPostsDTO extends booruQueriesDTO {
   @IsInt()
   @Min(1)
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }: { value: unknown }) => parseIntegerQueryValue(value))
   @IsOptional()
-  readonly limit: IBooruQueryValues['posts']['limit']
+  readonly limit?: PostsQueryValues['limit']
 
   @IsInt()
   @Min(0)
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }: { value: unknown }) => parseIntegerQueryValue(value))
   @IsOptional()
-  readonly pageID: IBooruQueryValues['posts']['pageID']
+  readonly pageID?: PostsQueryValues['pageID']
 
   @IsArray()
   @ArrayNotEmpty()
   @ArrayNotContains([''])
   @IsString({ each: true })
-  @Transform(({ value }) => {
-    if (value === undefined || value === null) {
-      return value
-    }
-
-    return (Array.isArray(value) ? value : [value]).flatMap((tag) =>
-      typeof tag === 'string' ? tag.trim().split('|') : [tag]
-    )
-  })
+  @Transform(({ value }: { value: unknown }) => transformTagsQueryValue(value))
   @IsOptional()
-  readonly tags: IBooruQueryValues['posts']['tags']
+  readonly tags?: PostsQueryValues['tags']
 
   @IsString()
   @IsNotEmpty()
   @IsIn(['safe', 'general', 'sensitive', 'questionable', 'explicit'])
   @IsOptional()
-  readonly rating: IBooruQueryValues['posts']['rating']
+  readonly rating?: PostsQueryValues['rating']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly score: IBooruQueryValues['posts']['score']
+  readonly score?: PostsQueryValues['score']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly order: IBooruQueryValues['posts']['order']
+  readonly order?: PostsQueryValues['order']
 }
 
 // Same as PostsQueries since they are practically the same
@@ -217,35 +239,35 @@ export class booruQueryValuesSinglePostDTO extends booruQueriesDTO {
   @IsInt()
   @Min(0)
   @Max(99999)
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }: { value: unknown }) => parseIntegerQueryValue(value))
   @IsOptional()
-  readonly ID: IBooruQueryValues['singlePost']['id']
+  readonly ID?: SinglePostQueryValues['id']
 }
 
 export class booruQueryValuesTagsDTO extends booruQueriesDTO {
   @IsString()
   @IsNotEmpty()
-  readonly tag: IBooruQueryValues['tags']['tag']
+  readonly tag!: TagsQueryValues['tag']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly tagEnding: IBooruQueryValues['tags']['tagEnding']
+  readonly tagEnding?: TagsQueryValues['tagEnding']
 
   @IsInt()
   @Min(1)
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }: { value: unknown }) => parseIntegerQueryValue(value))
   @IsOptional()
-  readonly limit: IBooruQueryValues['tags']['limit']
+  readonly limit?: TagsQueryValues['limit']
 
   @IsInt()
   @Min(0)
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }: { value: unknown }) => parseIntegerQueryValue(value))
   @IsOptional()
-  readonly pageID: IBooruQueryValues['tags']['pageID']
+  readonly pageID?: TagsQueryValues['pageID']
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  readonly order: IBooruQueryValues['tags']['order']
+  readonly order?: TagsQueryValues['order']
 }

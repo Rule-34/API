@@ -53,7 +53,8 @@ export class BooruAuthManagerService implements OnModuleInit {
         stats.map((s) => `${s.domain} (${s.total})`).join(', ')
       )
     } catch (error) {
-      console.error('Failed to parse BOORU_AUTH_CONFIG:', error.message)
+      const message = error instanceof Error ? error.message : String(error)
+      console.error('Failed to parse BOORU_AUTH_CONFIG:', message)
     }
   }
 
@@ -95,6 +96,11 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
 
     const selectedCredential = this.selectCredentialRoundRobin(normalizedDomain, availableCredentials)
+
+    if (selectedCredential === null) {
+      console.warn(`🚫 No available credentials for domain: ${normalizedDomain} after round-robin selection`)
+      return null
+    }
 
     console.log(
       `🔑 Selected credential for ${normalizedDomain}: ${selectedCredential.user} (${availableCredentials.length}/${credentialsArray.length} available)`

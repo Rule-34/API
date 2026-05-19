@@ -12,18 +12,9 @@ import {
   booruQueryValuesTagsDTO
 } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
+import type { BooruAuthContext, BooruHttpRequest } from './interfaces/booru-http.interface'
 import { BooruCacheControlInterceptor } from './interceptors/booru-cache-control.interceptor'
 import { BooruErrorsInterceptor } from './interceptors/booru-exception.interceptor'
-
-interface BooruAuthContext {
-  baseEndpoint: string
-  credential?: { user: string; password: string }
-  source: ResolvedAuthCredentials['source']
-}
-
-interface AuthContextRequest {
-  booruAuthContext?: BooruAuthContext
-}
 
 // Successful responses use the route policy from BooruCacheControlInterceptor.
 // Thrown responses are intentionally left to BooruErrorsInterceptor so they
@@ -33,12 +24,26 @@ interface AuthContextRequest {
 export class BooruController {
   constructor(private readonly booruService: BooruService) {}
 
-  private withEffectivePageId<T extends object>(queries: T, pageID: number): T {
-    return Object.assign(Object.create(Object.getPrototypeOf(queries)), queries, { pageID })
+  private withEffectivePageId(queries: booruQueryValuesPostsDTO, pageID: number): booruQueryValuesPostsDTO
+  private withEffectivePageId(queries: booruQueryValuesRandomPostsDTO, pageID: number): booruQueryValuesRandomPostsDTO
+  private withEffectivePageId(queries: booruQueryValuesTagsDTO, pageID: number): booruQueryValuesTagsDTO
+  private withEffectivePageId(
+    queries: booruQueryValuesPostsDTO | booruQueryValuesRandomPostsDTO | booruQueryValuesTagsDTO,
+    pageID: number
+  ): booruQueryValuesPostsDTO | booruQueryValuesRandomPostsDTO | booruQueryValuesTagsDTO {
+    if (queries instanceof booruQueryValuesRandomPostsDTO) {
+      return Object.assign(new booruQueryValuesRandomPostsDTO(), queries, { pageID })
+    }
+
+    if (queries instanceof booruQueryValuesTagsDTO) {
+      return Object.assign(new booruQueryValuesTagsDTO(), queries, { pageID })
+    }
+
+    return Object.assign(new booruQueryValuesPostsDTO(), queries, { pageID })
   }
 
   private attachAuthContext(
-    request: AuthContextRequest,
+    request: BooruHttpRequest,
     baseEndpoint: string,
     authResolution: ResolvedAuthCredentials
   ): void {
@@ -55,7 +60,7 @@ export class BooruController {
   @BooruCachePolicy(BOORU_CACHE_CONTROL_POLICIES.POSTS)
   async GetPosts(
     @Request()
-    request,
+    request: BooruHttpRequest,
     @Param()
     params: BooruEndpointParamsDTO,
     @Query()
@@ -97,7 +102,7 @@ export class BooruController {
   @BooruCachePolicy(BOORU_CACHE_CONTROL_POLICIES.RANDOM_POSTS)
   async GetRandomPosts(
     @Request()
-    request,
+    request: BooruHttpRequest,
     @Param()
     params: BooruEndpointParamsDTO,
     @Query()
@@ -139,15 +144,18 @@ export class BooruController {
   @BooruCachePolicy(BOORU_CACHE_CONTROL_POLICIES.SINGLE_POST)
   async GetSinglePost(
     @Request()
-    request,
+    request: BooruHttpRequest,
     @Param()
     params: BooruEndpointParamsDTO,
     @Query()
     queries: booruQueryValuesSinglePostDTO
   ) {
-    const postQueryValues: IBooruQueryValues['singlePost'] = {
-      id: queries.ID
-    }
+    const postQueryValues: IBooruQueryValues['singlePost'] =
+      queries.ID === undefined
+        ? undefined
+        : {
+            id: queries.ID
+          }
 
     const initialApi = this.booruService.buildApiClass(params, queries)
 
@@ -163,7 +171,7 @@ export class BooruController {
   @BooruCachePolicy(BOORU_CACHE_CONTROL_POLICIES.TAGS)
   async GetTags(
     @Request()
-    request,
+    request: BooruHttpRequest,
     @Param()
     params: BooruEndpointParamsDTO,
     @Query()

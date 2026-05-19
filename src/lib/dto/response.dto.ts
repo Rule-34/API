@@ -5,7 +5,10 @@ import {
   booruQueryValuesSinglePostDTO,
   booruQueryValuesTagsDTO
 } from '../../booru/dto/booru-queries.dto'
+import type { BooruHttpRequest } from '../../booru/interfaces/booru-http.interface'
 import { createFirstPageUrl, createNextPageUrl, createPreviousPageUrl, createUrlFromRequest } from '../support/url'
+
+type PaginatedResponseQuery = booruQueryValuesPostsDTO | booruQueryValuesRandomPostsDTO | booruQueryValuesTagsDTO
 
 export class ResponseDto {
   readonly data: unknown[]
@@ -39,7 +42,7 @@ export class ResponseDto {
   }
 
   public static createFromController(
-    request,
+    request: BooruHttpRequest,
     queries:
       | booruQueryValuesPostsDTO
       | booruQueryValuesSinglePostDTO
@@ -59,15 +62,11 @@ export class ResponseDto {
 
           total_items: null,
 
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          current_page: queries.pageID,
+          current_page: queries.pageID ?? null,
 
           total_pages: null,
 
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          items_per_page: queries.limit
+          items_per_page: queries.limit ?? null
         }
         break
 
@@ -94,21 +93,19 @@ export class ResponseDto {
     switch (true) {
       case queries instanceof booruQueryValuesPostsDTO:
       case queries instanceof booruQueryValuesRandomPostsDTO:
-      case queries instanceof booruQueryValuesTagsDTO:
+      case queries instanceof booruQueryValuesTagsDTO: {
+        const paginatedQueries: PaginatedResponseQuery = queries
         links = {
           self: createUrlFromRequest(request),
 
           first: createFirstPageUrl(request, booruApi.booruType.initialPageID),
           last: null,
 
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          prev: createPreviousPageUrl(request, queries.pageID, booruApi.booruType.initialPageID),
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          next: createNextPageUrl(request, queries.pageID)
+          prev: createPreviousPageUrl(request, paginatedQueries.pageID, booruApi.booruType.initialPageID),
+          next: createNextPageUrl(request, paginatedQueries.pageID)
         }
         break
+      }
 
       case queries instanceof booruQueryValuesSinglePostDTO:
         links = {

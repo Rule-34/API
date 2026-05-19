@@ -8,5 +8,5 @@ export class BooruEndpointParamsDTO {
   @IsNotEmpty()
   @IsString()
   @IsIn(BooruTypesToArray)
-  readonly booruType: BooruTypesStringEnum
+  readonly booruType!: BooruTypesStringEnum
 }

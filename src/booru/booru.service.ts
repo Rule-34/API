@@ -32,6 +32,13 @@ export interface BuiltBooruApi {
   authResolution: ResolvedAuthCredentials
 }
 
+type BooruQueryIdentifierDefaults = {
+  posts?: Partial<NonNullable<IBooruQueryIdentifiers['posts']>>
+  randomPosts?: Partial<NonNullable<IBooruQueryIdentifiers['randomPosts']>>
+  singlePost?: Partial<NonNullable<IBooruQueryIdentifiers['singlePost']>>
+  tags?: Partial<NonNullable<IBooruQueryIdentifiers['tags']>>
+}
+
 export class ManagedCredentialPoolUnavailableError extends Error {
   constructor(
     public readonly domain: string,
@@ -78,7 +85,7 @@ export class BooruService {
       tags: queries.tagsEndpoint
     }
 
-    const defaultQueryIdentifiers: IBooruQueryIdentifiers = {
+    const defaultQueryIdentifiers: BooruQueryIdentifierDefaults = {
       posts: {
         limit: queries.defaultQueryIdentifiersPostsLimit,
         pageID: queries.defaultQueryIdentifiersPostsPageID,
@@ -115,12 +122,20 @@ export class BooruService {
     // Resolve authentication credentials
     const authResolution = this.resolveAuthCredentials(queries)
 
-    const options: IBooruOptions = {
-      HTTPScheme: queries.httpScheme,
+    const options: Partial<IBooruOptions> = {
       auth: authResolution.auth
     }
 
-    const Api = new booruClass(endpoints, defaultQueryIdentifiers, undefined, options)
+    if (queries.httpScheme) {
+      options.HTTPScheme = queries.httpScheme
+    }
+
+    const Api = new booruClass(
+      endpoints,
+      defaultQueryIdentifiers as Partial<IBooruQueryIdentifiers>,
+      undefined,
+      options
+    )
 
     return {
       api: Api,
@@ -264,13 +279,13 @@ export class BooruService {
   }
 
   private getFailureKind(
-    error: any
+    error: HttpError
   ): 'auth_invalid' | 'auth_forbidden' | 'rate_limited' | 'upstream_error' | 'network_error' | 'unknown' {
     if (error.failureKind) {
       return error.failureKind
     }
 
-    const statusCode = error.statusCode || error.status
+    const statusCode = error.statusCode
 
     if (statusCode === 429) {
       return 'rate_limited'
@@ -287,7 +302,7 @@ export class BooruService {
     return 'unknown'
   }
 
-  private getRetryAfterSeconds(error: any): number | undefined {
+  private getRetryAfterSeconds(error: HttpError): number | undefined {
     if (typeof error.retryAfterSeconds === 'number') {
       return error.retryAfterSeconds
     }
