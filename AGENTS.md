@@ -13,19 +13,20 @@ For product/context details, read:
 ## Setup And Commands
 
 Prerequisites:
-- Node 20 (see `package.json` engines)
+- Node 24 (see `package.json` engines)
 - Access to GitHub Packages for private dependency installation (see [DOCUMENTATION.md](DOCUMENTATION.md))
 
 Install and run:
-- `npm install`
-- `npm run dev` (watch mode)
-- `npm run build`
-- `npm start` (runs compiled `dist/main`)
+- `corepack enable`
+- `pnpm install`
+- `pnpm dev` (watch mode)
+- `pnpm build`
+- `pnpm start` (runs compiled `dist/main`)
 
 Quality checks:
-- `npm run lint`
-- `npm run format`
-- `npm test`
+- `pnpm lint`
+- `pnpm format`
+- `pnpm test`
 
 ## Architecture Map
 
@@ -87,7 +88,7 @@ Reference tests:
 ## Change Checklist For Agents
 
 Before finishing a change:
-1. Run `npm run lint` and `npm test` if dependencies are installed.
+1. Run `pnpm lint` and `pnpm test` if dependencies are installed.
 2. If DTOs changed, verify validation and query transforms with tests.
 3. If error/auth logic changed, verify sanitization and auth failure handling paths.
 4. If response generation changed, validate `meta` and `links` outputs.

@@ -7,11 +7,12 @@ This API has gone through many rewrites and should **ONLY** be used on the `Rule
 Log in to GitHub packages with:
 
 ```bash
-npm login --scope=@alejandroakbal --registry=https://npm.pkg.github.com
+pnpm login --scope=@alejandroakbal --registry=https://npm.pkg.github.com
 ```
 
 ## Installation
 
 ```bash
-npm install
+corepack enable
+pnpm install
 ```

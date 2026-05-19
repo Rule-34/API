@@ -119,7 +119,7 @@ TODO              text
 .gitconfig        text
 .htaccess         text
 *.lock            text -diff
-package-lock.json text -diff
+pnpm-lock.yaml    text -diff
 *.npmignore       text
 *.yaml            text
 *.yml             text

@@ -1,22 +1,21 @@
-ARG NODE_VERSION=20
+ARG NODE_VERSION=24
 
 # Stage 1: Build
 FROM node:${NODE_VERSION}-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json package-lock.json .npmrc ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 
 RUN --mount=type=secret,id=GITHUB_TOKEN \
-    echo "//npm.pkg.github.com/:_authToken=$(cat /run/secrets/GITHUB_TOKEN)" >> .npmrc
-
-RUN npm ci
-
-RUN rm -f .npmrc
+    echo "//npm.pkg.github.com/:_authToken=$(cat /run/secrets/GITHUB_TOKEN)" >> .npmrc && \
+    corepack enable && \
+    pnpm install --frozen-lockfile && \
+    rm -f .npmrc
 
 COPY . .
 
-RUN npm run build
+RUN pnpm run build
 
 # Stage 2: Production
 FROM node:${NODE_VERSION}-alpine AS production
@@ -28,12 +27,19 @@ WORKDIR /app
 RUN apk add --no-cache tini
 
 COPY --from=builder --chown=node:node /app/package.json ./
+COPY --from=builder --chown=node:node /app/pnpm-lock.yaml ./
+COPY --from=builder --chown=node:node /app/pnpm-workspace.yaml ./
 COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 
 COPY --from=builder --chown=node:node /app/dist ./dist
 COPY --from=builder --chown=node:node /app/public ./public
 
-RUN npm prune --omit=dev
+RUN --mount=type=secret,id=GITHUB_TOKEN \
+    echo "@alejandroakbal:registry=https://npm.pkg.github.com" > .npmrc && \
+    echo "//npm.pkg.github.com/:_authToken=$(cat /run/secrets/GITHUB_TOKEN)" >> .npmrc && \
+    corepack enable && \
+    pnpm prune --prod && \
+    rm -f .npmrc
 
 USER node
 
