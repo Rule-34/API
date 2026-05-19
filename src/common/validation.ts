@@ -1,4 +1,5 @@
-import { ValidationPipe, ValidationPipeOptions } from '@nestjs/common'
+import type { ValidationPipeOptions } from '@nestjs/common'
+import { ValidationPipe } from '@nestjs/common'
 
 export const APP_VALIDATION_PIPE_OPTIONS: ValidationPipeOptions = {
   transform: true,

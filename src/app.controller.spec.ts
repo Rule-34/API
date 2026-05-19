@@ -1,5 +1,5 @@
 import { AppController } from './app.controller'
-import { BooruAuthManagerService } from './booru/services/booru-auth-manager.service'
+import type { BooruAuthManagerService } from './booru/services/booru-auth-manager.service'
 
 describe('AppController', () => {
   let controller: AppController

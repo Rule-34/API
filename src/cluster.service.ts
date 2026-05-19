@@ -8,7 +8,7 @@ const numCPUs = process.env['NODE_ENV'] === 'development' ? 1 : availableParalle
 
 @Injectable()
 export class AppClusterService {
-  private static disabledCredentials = new Set<string>()
+  private static readonly disabledCredentials = new Set<string>()
 
   static clusterize(callback: () => void | Promise<void>): void {
     if (cluster.isPrimary) {

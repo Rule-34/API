@@ -22,7 +22,7 @@ export class BooruCacheControlInterceptor implements NestInterceptor {
       context.getClass()
     ])
 
-    if (!cachePolicy) {
+    if (cachePolicy === undefined || cachePolicy === '') {
       return next.handle()
     }
 

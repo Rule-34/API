@@ -1,9 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing'
+import type { TestingModule } from '@nestjs/testing'
+import { Test } from '@nestjs/testing'
 import { ConfigService } from '@nestjs/config'
 import { BooruTypesStringEnum, HttpError } from '@alejandroakbal/universal-booru-wrapper'
-import { BooruService, ManagedCredentialPoolUnavailableError } from './booru.service'
-import { booruQueriesDTO } from './dto/booru-queries.dto'
-import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
+import type { ManagedCredentialPoolUnavailableError } from './booru.service'
+import { BooruService } from './booru.service'
+import type { booruQueriesDTO } from './dto/booru-queries.dto'
+import type { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import { BooruAuthManagerService } from './services/booru-auth-manager.service'
 
 interface MockAuthManager {

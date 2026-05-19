@@ -18,10 +18,13 @@ import { createCredentialKey, parseCredentialKey } from './credential-key.util'
 export class BooruAuthManagerService implements OnModuleInit {
   private static readonly HTTP_STATUS_PATTERN = /(?:status(?:\s*code|_code)?|http)\s*[:=]?\s*(\d{3})|\b(\d{3})\b/i
 
-  private disabledCredentials = new Map<string, { disabledAt: number; reason: string }>()
-  private cooldownCredentials = new Map<string, { disabledAt: number; cooldownUntil: number; reason: string }>()
-  private selectionCursorByDomain = new Map<string, number>()
-  private availabilityByDomain = new Map<string, number>()
+  private readonly disabledCredentials = new Map<string, { disabledAt: number; reason: string }>()
+  private readonly cooldownCredentials = new Map<
+    string,
+    { disabledAt: number; cooldownUntil: number; reason: string }
+  >()
+  private readonly selectionCursorByDomain = new Map<string, number>()
+  private readonly availabilityByDomain = new Map<string, number>()
   private authConfig: BooruAuthConfig = {}
   private readonly domainAliases: Record<string, string> = {
     'www.rule34.xxx': 'rule34.xxx',
@@ -39,7 +42,7 @@ export class BooruAuthManagerService implements OnModuleInit {
   private loadAuthConfig(): void {
     const authConfigJson = this.configService.get<string>('BOORU_AUTH_CONFIG')
 
-    if (!authConfigJson) {
+    if (authConfigJson === undefined || authConfigJson === '') {
       console.warn('BOORU_AUTH_CONFIG not found in environment variables')
       return
     }
@@ -339,7 +342,7 @@ export class BooruAuthManagerService implements OnModuleInit {
   }
 
   public getCredentialPoolStatus(domain?: string): DomainCredentialStatus[] {
-    if (domain) {
+    if (domain !== undefined && domain !== '') {
       return [this.getDomainCredentialStatus(domain)]
     }
 
@@ -578,14 +581,13 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
 
     const cooldownRecord = this.cooldownCredentials.get(fullKey) ?? this.cooldownCredentials.get(userKey)
-    const cooldownUntil = cooldownRecord?.cooldownUntil
 
-    if (cooldownUntil && cooldownUntil > now) {
+    if (cooldownRecord !== undefined && cooldownRecord.cooldownUntil > now) {
       return {
         user: credential.user,
         state: 'cooldown',
-        cooldownUntil: new Date(cooldownUntil).toISOString(),
-        secondsRemaining: Math.max(1, Math.ceil((cooldownUntil - now) / 1000)),
+        cooldownUntil: new Date(cooldownRecord.cooldownUntil).toISOString(),
+        secondsRemaining: Math.max(1, Math.ceil((cooldownRecord.cooldownUntil - now) / 1000)),
         reason: cooldownRecord.reason
       }
     }

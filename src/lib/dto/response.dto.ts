@@ -1,14 +1,23 @@
-import { BooruPostObject, BooruTagObject, BooruTypes } from '@alejandroakbal/universal-booru-wrapper'
+import type { BooruPostObject, BooruTagObject, BooruTypes } from '@alejandroakbal/universal-booru-wrapper'
 import {
   booruQueryValuesPostsDTO,
   booruQueryValuesRandomPostsDTO,
-  booruQueryValuesSinglePostDTO,
   booruQueryValuesTagsDTO
 } from '../../booru/dto/booru-queries.dto'
+import type { booruQueryValuesSinglePostDTO } from '../../booru/dto/booru-queries.dto'
 import type { BooruHttpRequest } from '../../booru/interfaces/booru-http.interface'
 import { createFirstPageUrl, createNextPageUrl, createPreviousPageUrl, createUrlFromRequest } from '../support/url'
 
 type PaginatedResponseQuery = booruQueryValuesPostsDTO | booruQueryValuesRandomPostsDTO | booruQueryValuesTagsDTO
+type ControllerResponseQuery = PaginatedResponseQuery | booruQueryValuesSinglePostDTO
+
+function isPaginatedResponseQuery(queries: ControllerResponseQuery): queries is PaginatedResponseQuery {
+  return (
+    queries instanceof booruQueryValuesPostsDTO ||
+    queries instanceof booruQueryValuesRandomPostsDTO ||
+    queries instanceof booruQueryValuesTagsDTO
+  )
+}
 
 export class ResponseDto {
   readonly data: unknown[]
@@ -43,21 +52,13 @@ export class ResponseDto {
 
   public static createFromController(
     request: BooruHttpRequest,
-    queries:
-      | booruQueryValuesPostsDTO
-      | booruQueryValuesSinglePostDTO
-      | booruQueryValuesRandomPostsDTO
-      | booruQueryValuesTagsDTO,
+    queries: ControllerResponseQuery,
     booruApi: BooruTypes,
     posts: BooruPostObject[] | BooruTagObject[]
-  ) {
-    let meta: ResponseDto['meta']
-
-    switch (true) {
-      case queries instanceof booruQueryValuesPostsDTO:
-      case queries instanceof booruQueryValuesRandomPostsDTO:
-      case queries instanceof booruQueryValuesTagsDTO:
-        meta = {
+  ): ResponseDto {
+    const isPaginatedQuery = isPaginatedResponseQuery(queries)
+    const meta: ResponseDto['meta'] = isPaginatedQuery
+      ? {
           items_count: posts.length,
 
           total_items: null,
@@ -68,10 +69,7 @@ export class ResponseDto {
 
           items_per_page: queries.limit ?? null
         }
-        break
-
-      case queries instanceof booruQueryValuesSinglePostDTO:
-        meta = {
+      : {
           items_count: posts.length,
 
           total_items: null,
@@ -82,33 +80,18 @@ export class ResponseDto {
 
           items_per_page: null
         }
-        break
 
-      default:
-        throw new Error('Invalid query type')
-    }
-
-    let links: ResponseDto['links']
-
-    switch (true) {
-      case queries instanceof booruQueryValuesPostsDTO:
-      case queries instanceof booruQueryValuesRandomPostsDTO:
-      case queries instanceof booruQueryValuesTagsDTO: {
-        const paginatedQueries: PaginatedResponseQuery = queries
-        links = {
+    const links: ResponseDto['links'] = isPaginatedQuery
+      ? {
           self: createUrlFromRequest(request),
 
           first: createFirstPageUrl(request, booruApi.booruType.initialPageID),
           last: null,
 
-          prev: createPreviousPageUrl(request, paginatedQueries.pageID, booruApi.booruType.initialPageID),
-          next: createNextPageUrl(request, paginatedQueries.pageID)
+          prev: createPreviousPageUrl(request, queries.pageID, booruApi.booruType.initialPageID),
+          next: createNextPageUrl(request, queries.pageID)
         }
-        break
-      }
-
-      case queries instanceof booruQueryValuesSinglePostDTO:
-        links = {
+      : {
           self: createUrlFromRequest(request),
 
           first: null,
@@ -117,11 +100,6 @@ export class ResponseDto {
           prev: null,
           next: null
         }
-        break
-
-      default:
-        throw new Error('Invalid query type')
-    }
 
     return new ResponseDto(
       posts,

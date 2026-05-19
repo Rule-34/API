@@ -1,15 +1,19 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
+import type { TestingModule } from '@nestjs/testing'
+import { Test } from '@nestjs/testing'
+import type { NestFastifyApplication } from '@nestjs/platform-fastify'
+import { FastifyAdapter } from '@nestjs/platform-fastify'
 import request from 'supertest'
 import { BooruController } from './booru.controller'
-import { BooruService, ResolvedAuthCredentials } from './booru.service'
+import type { ResolvedAuthCredentials } from './booru.service'
+import { BooruService } from './booru.service'
 import { BooruCacheControlInterceptor } from './interceptors/booru-cache-control.interceptor'
 import { BooruErrorsInterceptor } from './interceptors/booru-exception.interceptor'
 import { BooruAuthManagerService } from './services/booru-auth-manager.service'
 import { createAppValidationPipe } from '../common/validation'
 import { ResponseDto } from '../lib/dto/response.dto'
 import { Reflector } from '@nestjs/core'
-import { BooruTypes, EmptyDataError } from '@alejandroakbal/universal-booru-wrapper'
+import type { BooruTypes } from '@alejandroakbal/universal-booru-wrapper'
+import { EmptyDataError } from '@alejandroakbal/universal-booru-wrapper'
 
 interface MockBooruService {
   buildApiClass: jest.MockedFunction<BooruService['buildApiClass']>

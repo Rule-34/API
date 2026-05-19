@@ -1,4 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing'
+import type { TestingModule } from '@nestjs/testing'
+import { Test } from '@nestjs/testing'
 import { ConfigModule } from '@nestjs/config'
 import { BooruAuthManagerService } from './booru-auth-manager.service'
 import type { CooldownDisabledCredential, DisabledCredential } from '../interfaces/auth-manager.interface'

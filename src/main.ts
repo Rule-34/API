@@ -1,7 +1,8 @@
 import './instrument'
 import { NestFactory } from '@nestjs/core'
 import { ConfigService } from '@nestjs/config'
-import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
+import type { NestFastifyApplication } from '@nestjs/platform-fastify'
+import { FastifyAdapter } from '@nestjs/platform-fastify'
 import helmet from '@fastify/helmet'
 import fastifyStatic from '@fastify/static'
 import { AppModule } from './app.module'
@@ -34,7 +35,7 @@ async function bootstrap() {
 
   const corsOptions: FastifyCorsOptions = {
     origin: (origin, callback) => {
-      callback(null, !origin || allowedOrigins.some((pattern) => pattern.test(origin)))
+      callback(null, origin === undefined || origin === '' || allowedOrigins.some((pattern) => pattern.test(origin)))
     },
     credentials: true
   }

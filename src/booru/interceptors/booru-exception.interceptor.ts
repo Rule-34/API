@@ -116,7 +116,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
         if (error instanceof Error) {
           sanitizedError.name = error.name
 
-          if (error.stack) {
+          if (error.stack !== undefined && error.stack !== '') {
             sanitizedError.stack = this.sanitizeErrorMessage(error.stack)
           }
         }
@@ -188,7 +188,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
     const authUser = contextCredential?.user ?? request.query?.auth_user ?? request.body?.auth_user
     const authPass = contextCredential?.password ?? request.query?.auth_pass ?? request.body?.auth_pass
 
-    if (!baseEndpoint || !authUser) {
+    if (baseEndpoint === undefined || baseEndpoint === '' || authUser === undefined || authUser === '') {
       return
     }
 

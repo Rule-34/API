@@ -67,7 +67,7 @@ export class BooruService {
     queries: booruQueriesDTO,
     operation: (api: BooruTypes, authResolution: ResolvedAuthCredentials) => Promise<T>
   ): Promise<T> {
-    if (queries.auth_user && queries.auth_pass) {
+    if (this.hasQueryCredentials(queries)) {
       const explicitContext = this.buildApiWithContext(params, queries)
       return operation(explicitContext.api, explicitContext.authResolution)
     }
@@ -184,7 +184,7 @@ export class BooruService {
 
   private resolveAuthCredentials(queries: booruQueriesDTO): ResolvedAuthCredentials {
     // Priority 1: Query parameters
-    if (queries.auth_user && queries.auth_pass) {
+    if (this.hasQueryCredentials(queries)) {
       return {
         auth: {
           username: queries.auth_user,
@@ -291,6 +291,17 @@ export class BooruService {
     }
 
     return Math.floor(parsedCap)
+  }
+
+  private hasQueryCredentials(
+    queries: booruQueriesDTO
+  ): queries is booruQueriesDTO & { auth_user: string; auth_pass: string } {
+    return (
+      queries.auth_user !== undefined &&
+      queries.auth_user.length > 0 &&
+      queries.auth_pass !== undefined &&
+      queries.auth_pass.length > 0
+    )
   }
 
   private createPoolUnavailableError(domain: string): ManagedCredentialPoolUnavailableError {
