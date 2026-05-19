@@ -4,6 +4,10 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { createAppValidationPipe } from '../../common/validation'
 import { booruQueryValuesPostsDTO } from './booru-queries.dto'
 
+interface TagsResponseBody {
+  tags?: string[]
+}
+
 @Controller('dto-test')
 class BooruQueriesTestController {
   @Get('posts')
@@ -37,7 +41,7 @@ describe('booruQueryValuesPostsDTO request handling', () => {
       url: '/dto-test/posts?baseEndpoint=gelbooru.com&tags=panty_%26_stocking_with_garterbelt%7Crating%3Asafe'
     })
 
-    const body = JSON.parse(response.body)
+    const body = JSON.parse(response.body) as unknown as TagsResponseBody
 
     expect(response.statusCode).toBe(200)
     expect(body.tags).toEqual(['panty_&_stocking_with_garterbelt', 'rating:safe'])
@@ -49,7 +53,7 @@ describe('booruQueryValuesPostsDTO request handling', () => {
       url: '/dto-test/posts?baseEndpoint=gelbooru.com&tags=artist%3Afoo%7Crating%3Asafe&tags=score%3A%3E100'
     })
 
-    const body = JSON.parse(response.body)
+    const body = JSON.parse(response.body) as unknown as TagsResponseBody
 
     expect(response.statusCode).toBe(200)
     expect(body.tags).toEqual(['artist:foo', 'rating:safe', 'score:>100'])

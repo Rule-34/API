@@ -1,6 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { ConfigModule } from '@nestjs/config'
 import { BooruAuthManagerService } from './booru-auth-manager.service'
+import type { CooldownDisabledCredential, DisabledCredential } from '../interfaces/auth-manager.interface'
+
+interface AuthManagerPrivateAccess {
+  disableCredentialLocally(credential: DisabledCredential): void
+}
+
+type SerializedCooldownDisabledCredential = Omit<CooldownDisabledCredential, 'disabledAt' | 'cooldownUntil'> & {
+  disabledAt: string
+  cooldownUntil: string
+}
 
 describe('BooruAuthManagerService', () => {
   let service: BooruAuthManagerService
@@ -69,25 +79,33 @@ describe('BooruAuthManagerService', () => {
   it('should resolve credentials for api.rule34.xxx using rule34.xxx auth pool', () => {
     const credential = service.getAvailableCredential('https://api.rule34.xxx/index.php?page=dapi')
 
-    expect(credential).not.toBeNull()
-    expect(['canonical-user', 'api-user']).toContain(credential!.user)
+    if (credential === null) {
+      throw new Error('Expected a credential for api.rule34.xxx')
+    }
+
+    expect(['canonical-user', 'api-user']).toContain(credential.user)
   })
 
   it('should resolve credentials when base endpoint uses uppercase protocol', () => {
     const credential = service.getAvailableCredential('HTTPS://API.RULE34.XXX/index.php?page=dapi')
 
-    expect(credential).not.toBeNull()
-    expect(['canonical-user', 'api-user']).toContain(credential!.user)
+    if (credential === null) {
+      throw new Error('Expected a credential for uppercase api.rule34.xxx')
+    }
+
+    expect(['canonical-user', 'api-user']).toContain(credential.user)
   })
 
   it('should normalize reported auth failures to canonical rule34 domain', () => {
     const selectedCredential = service.getAvailableCredential('https://rule34.xxx/index.php?page=dapi')
 
-    expect(selectedCredential).not.toBeNull()
+    if (selectedCredential === null) {
+      throw new Error('Expected a credential for rule34.xxx')
+    }
 
     service.reportAuthFailure({
       domain: 'https://api.rule34.xxx/index.php?page=dapi',
-      user: selectedCredential!.user,
+      user: selectedCredential.user,
       error: 'HTTP 403',
       timestamp: new Date()
     })
@@ -95,7 +113,7 @@ describe('BooruAuthManagerService', () => {
     const disabledCredentials = service.getDisabledCredentials()
 
     expect(
-      disabledCredentials.some((cred) => cred.domain === 'rule34.xxx' && cred.user === selectedCredential!.user)
+      disabledCredentials.some((cred) => cred.domain === 'rule34.xxx' && cred.user === selectedCredential.user)
     ).toBe(true)
   })
 
@@ -385,20 +403,20 @@ describe('BooruAuthManagerService', () => {
     }
 
     // JSON roundtrip — same transformation as process.send() / IPC
-    const serialized = JSON.parse(JSON.stringify(original))
+    const serialized = JSON.parse(JSON.stringify(original)) as unknown as SerializedCooldownDisabledCredential
 
     // With fix: reconstruct Dates before calling disableCredentialLocally
-    const reconstructed =
-      serialized.state === 'cooldown'
-        ? {
-            ...serialized,
-            disabledAt: new Date(serialized.disabledAt),
-            cooldownUntil: new Date(serialized.cooldownUntil)
-          }
-        : { ...serialized, disabledAt: new Date(serialized.disabledAt) }
+    const reconstructed: DisabledCredential = {
+      ...serialized,
+      disabledAt: new Date(serialized.disabledAt),
+      cooldownUntil: new Date(serialized.cooldownUntil)
+    }
 
     // Should NOT throw — disabledAt.getTime() and cooldownUntil.getTime() must work
-    expect(() => (service as any).disableCredentialLocally(reconstructed)).not.toThrow()
+    expect(() => {
+      const serviceWithPrivateAccess = service as unknown as AuthManagerPrivateAccess
+      serviceWithPrivateAccess.disableCredentialLocally(reconstructed)
+    }).not.toThrow()
 
     // Credential should be on cooldown (pool has 2 total due to api.rule34.xxx alias merge)
     const stats = service.getDomainStats('rule34.xxx')
@@ -419,13 +437,13 @@ describe('BooruAuthManagerService', () => {
         cooldownUntil: new Date(Date.now() + 60_000),
         reason: 'HTTP 429'
       })
-    )
+    ) as unknown as SerializedCooldownDisabledCredential
 
     // disabledAt and cooldownUntil are now strings — calling .getTime() on them throws
     expect(typeof serialized.disabledAt).toBe('string')
     expect(typeof serialized.cooldownUntil).toBe('string')
-    expect(() => (serialized.disabledAt as any).getTime()).toThrow(TypeError)
-    expect(() => (serialized.cooldownUntil as any).getTime()).toThrow(TypeError)
+    expect(() => (serialized.disabledAt as unknown as { getTime: () => number }).getTime()).toThrow(TypeError)
+    expect(() => (serialized.cooldownUntil as unknown as { getTime: () => number }).getTime()).toThrow(TypeError)
   })
 
   it('should return credential pool status snapshots', () => {

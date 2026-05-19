@@ -6,9 +6,31 @@ import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import { BooruAuthManagerService } from './services/booru-auth-manager.service'
 
+type MockAuthManager = {
+  getAvailableCredential: jest.MockedFunction<BooruAuthManagerService['getAvailableCredential']>
+  getDomainStats: jest.MockedFunction<BooruAuthManagerService['getDomainStats']>
+  reportAuthFailure: jest.MockedFunction<BooruAuthManagerService['reportAuthFailure']>
+  getMinCooldownSeconds: jest.MockedFunction<BooruAuthManagerService['getMinCooldownSeconds']>
+}
+
+interface ApiAuth {
+  username?: string
+  apiKey?: string
+}
+
+interface ApiAuthOptions {
+  options?: {
+    auth?: ApiAuth
+  }
+}
+
+function getApiAuth(api: unknown): ApiAuth | undefined {
+  return (api as ApiAuthOptions).options?.auth
+}
+
 describe('BooruService', () => {
   let service: BooruService
-  let mockAuthManager: any
+  let mockAuthManager: MockAuthManager
 
   const mockConfigService = {
     get: jest.fn()
@@ -24,10 +46,10 @@ describe('BooruService', () => {
 
   beforeEach(async () => {
     mockAuthManager = {
-      getAvailableCredential: jest.fn(),
-      getDomainStats: jest.fn(),
-      reportAuthFailure: jest.fn(),
-      getMinCooldownSeconds: jest.fn()
+      getAvailableCredential: jest.fn() as jest.MockedFunction<BooruAuthManagerService['getAvailableCredential']>,
+      getDomainStats: jest.fn() as jest.MockedFunction<BooruAuthManagerService['getDomainStats']>,
+      reportAuthFailure: jest.fn() as jest.MockedFunction<BooruAuthManagerService['reportAuthFailure']>,
+      getMinCooldownSeconds: jest.fn() as jest.MockedFunction<BooruAuthManagerService['getMinCooldownSeconds']>
     }
 
     const module: TestingModule = await Test.createTestingModule({
@@ -68,8 +90,8 @@ describe('BooruService', () => {
 
       const api = service.buildApiClass(mockParams, queries)
 
-      expect((api as any).options?.auth?.username).toBe('query_user')
-      expect((api as any).options?.auth?.apiKey).toBe('query_pass')
+      expect(getApiAuth(api)?.username).toBe('query_user')
+      expect(getApiAuth(api)?.apiKey).toBe('query_pass')
     })
 
     it('should fallback to environment variables when query parameters are missing or incomplete', () => {
@@ -80,8 +102,8 @@ describe('BooruService', () => {
       const apiNoAuth = service.buildApiClass(mockParams, queriesNoAuth)
 
       expect(mockAuthManager.getAvailableCredential).toHaveBeenCalledWith('https://gelbooru.com')
-      expect((apiNoAuth as any).options?.auth?.username).toBe('env_user')
-      expect((apiNoAuth as any).options?.auth?.apiKey).toBe('env_pass')
+      expect(getApiAuth(apiNoAuth)?.username).toBe('env_user')
+      expect(getApiAuth(apiNoAuth)?.apiKey).toBe('env_pass')
 
       // Test with partial query params (should still use env)
       const queriesPartial = {
@@ -90,8 +112,8 @@ describe('BooruService', () => {
       } as booruQueriesDTO
       const apiPartial = service.buildApiClass(mockParams, queriesPartial)
 
-      expect((apiPartial as any).options?.auth?.username).toBe('env_user')
-      expect((apiPartial as any).options?.auth?.apiKey).toBe('env_pass')
+      expect(getApiAuth(apiPartial)?.username).toBe('env_user')
+      expect(getApiAuth(apiPartial)?.apiKey).toBe('env_pass')
     })
 
     it('should prioritize query parameters over environment variables', () => {
@@ -107,8 +129,8 @@ describe('BooruService', () => {
 
       // Should use query credentials, not env credentials - auth manager should not be called
       expect(mockAuthManager.getAvailableCredential).not.toHaveBeenCalled()
-      expect((api as any).options?.auth?.username).toBe('query_user')
-      expect((api as any).options?.auth?.apiKey).toBe('query_pass')
+      expect(getApiAuth(api)?.username).toBe('query_user')
+      expect(getApiAuth(api)?.apiKey).toBe('query_pass')
     })
 
     it('should create API without authentication when no credentials are available', () => {
@@ -118,8 +140,8 @@ describe('BooruService', () => {
       const api = service.buildApiClass(mockParams, queries)
 
       expect(mockAuthManager.getAvailableCredential).toHaveBeenCalledWith('https://gelbooru.com')
-      expect((api as any).options?.auth?.username).toBeUndefined()
-      expect((api as any).options?.auth?.apiKey).toBeUndefined()
+      expect(getApiAuth(api)?.username).toBeUndefined()
+      expect(getApiAuth(api)?.apiKey).toBeUndefined()
     })
 
     it('should use auth manager for credential selection', () => {
@@ -129,8 +151,8 @@ describe('BooruService', () => {
       const api = service.buildApiClass(mockParams, queries)
 
       expect(mockAuthManager.getAvailableCredential).toHaveBeenCalledWith('https://gelbooru.com')
-      expect((api as any).options?.auth?.username).toBe('managed_user')
-      expect((api as any).options?.auth?.apiKey).toBe('managed_pass')
+      expect(getApiAuth(api)?.username).toBe('managed_user')
+      expect(getApiAuth(api)?.apiKey).toBe('managed_pass')
     })
 
     it('should expose selected credential metadata when building API with context', () => {
@@ -139,7 +161,7 @@ describe('BooruService', () => {
       const queries = { ...baseQueries } as booruQueriesDTO
       const result = service.buildApiWithContext(mockParams, queries)
 
-      expect((result.api as any).options?.auth?.username).toBe('managed_user')
+      expect(getApiAuth(result.api)?.username).toBe('managed_user')
       expect(result.authResolution.source).toBe('env')
       expect(result.authResolution.selectedCredential).toEqual({
         user: 'managed_user',

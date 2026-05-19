@@ -2,52 +2,74 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import request from 'supertest'
 import { BooruController } from './booru.controller'
-import { BooruService } from './booru.service'
+import { BooruService, ResolvedAuthCredentials } from './booru.service'
 import { BooruCacheControlInterceptor } from './interceptors/booru-cache-control.interceptor'
 import { BooruErrorsInterceptor } from './interceptors/booru-exception.interceptor'
 import { BooruAuthManagerService } from './services/booru-auth-manager.service'
 import { createAppValidationPipe } from '../common/validation'
 import { ResponseDto } from '../lib/dto/response.dto'
 import { Reflector } from '@nestjs/core'
-import { EmptyDataError } from '@alejandroakbal/universal-booru-wrapper'
+import { BooruTypes, EmptyDataError } from '@alejandroakbal/universal-booru-wrapper'
+
+type MockBooruService = {
+  buildApiClass: jest.MockedFunction<BooruService['buildApiClass']>
+  executeWithAuthStrategy: jest.MockedFunction<BooruService['executeWithAuthStrategy']>
+}
+
+type MockApi = Partial<Pick<BooruTypes, 'getPosts' | 'getRandomPosts' | 'getSinglePost' | 'getTags'>>
+
+function createExecuteWithAuthStrategyMock(
+  api: MockApi,
+  authResolution: ResolvedAuthCredentials
+): jest.MockedFunction<BooruService['executeWithAuthStrategy']> {
+  const implementation = async <T>(
+    _params: Parameters<BooruService['executeWithAuthStrategy']>[0],
+    _queries: Parameters<BooruService['executeWithAuthStrategy']>[1],
+    operation: (api: BooruTypes, authResolution: ResolvedAuthCredentials) => Promise<T>
+  ): Promise<T> => operation(api as BooruTypes, authResolution)
+
+  return jest.fn(implementation) as jest.MockedFunction<BooruService['executeWithAuthStrategy']>
+}
 
 describe('BooruController', () => {
   let app: NestFastifyApplication
-  let mockBooruService: jest.Mocked<Partial<BooruService>>
+  let mockBooruService: MockBooruService
 
   beforeEach(async () => {
     mockBooruService = {
       buildApiClass: jest.fn().mockReturnValue({
         booruType: { initialPageID: 0 }
-      }),
-      executeWithAuthStrategy: jest.fn().mockImplementation(async (_params, _queries, operation) => {
-        const mockApi = {
+      }) as jest.MockedFunction<BooruService['buildApiClass']>,
+      executeWithAuthStrategy: createExecuteWithAuthStrategyMock(
+        {
           getPosts: jest.fn().mockResolvedValue([]),
           getRandomPosts: jest.fn().mockResolvedValue([]),
           getSinglePost: jest.fn().mockResolvedValue([]),
           getTags: jest.fn().mockResolvedValue([])
-        }
-        return operation(mockApi, { source: 'none' })
-      })
+        },
+        { source: 'none' }
+      )
     }
 
-    jest.spyOn(ResponseDto, 'createFromController').mockReturnValue({
-      data: [],
-      meta: {
-        items_count: 0,
-        total_items: null,
-        current_page: 0,
-        total_pages: null,
-        items_per_page: 0
-      },
-      links: {
-        self: null,
-        first: null,
-        last: null,
-        prev: null,
-        next: null
-      }
-    } as any)
+    jest.spyOn(ResponseDto, 'createFromController').mockReturnValue(
+      new ResponseDto(
+        [],
+        {
+          items_count: 0,
+          total_items: null,
+          current_page: 0,
+          total_pages: null,
+          items_per_page: 0
+        },
+        {
+          self: null,
+          first: null,
+          last: null,
+          prev: null,
+          next: null
+        }
+      )
+    )
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [BooruController],
@@ -115,10 +137,10 @@ describe('BooruController', () => {
     })
 
     it('posts endpoint with auth returns private, no-store', async () => {
-      mockBooruService.executeWithAuthStrategy = jest.fn().mockImplementation(async (_params, _queries, operation) => {
-        const mockApi = { getPosts: jest.fn().mockResolvedValue([]) }
-        return operation(mockApi, { source: 'query', selectedCredential: { user: 'u', password: 'p' } })
-      })
+      mockBooruService.executeWithAuthStrategy = createExecuteWithAuthStrategyMock(
+        { getPosts: jest.fn().mockResolvedValue([]) },
+        { source: 'query', selectedCredential: { user: 'u', password: 'p' } }
+      )
 
       const res = await request(app.getHttpServer())
         .get('/booru/gelbooru/posts')
@@ -129,10 +151,10 @@ describe('BooruController', () => {
     })
 
     it('posts endpoint with env auth keeps the public cache header', async () => {
-      mockBooruService.executeWithAuthStrategy = jest.fn().mockImplementation(async (_params, _queries, operation) => {
-        const mockApi = { getPosts: jest.fn().mockResolvedValue([]) }
-        return operation(mockApi, { source: 'env', selectedCredential: { user: 'u', password: 'p' } })
-      })
+      mockBooruService.executeWithAuthStrategy = createExecuteWithAuthStrategyMock(
+        { getPosts: jest.fn().mockResolvedValue([]) },
+        { source: 'env', selectedCredential: { user: 'u', password: 'p' } }
+      )
 
       const res = await request(app.getHttpServer())
         .get('/booru/gelbooru/posts')
@@ -154,10 +176,10 @@ describe('BooruController', () => {
     })
 
     it('posts endpoint keeps the public cache header for legitimate empty results', async () => {
-      mockBooruService.executeWithAuthStrategy = jest.fn().mockImplementation(async (_params, _queries, operation) => {
-        const mockApi = { getPosts: jest.fn().mockRejectedValue(new EmptyDataError()) }
-        return operation(mockApi, { source: 'none' })
-      })
+      mockBooruService.executeWithAuthStrategy = createExecuteWithAuthStrategyMock(
+        { getPosts: jest.fn().mockRejectedValue(new EmptyDataError()) },
+        { source: 'none' }
+      )
 
       const res = await request(app.getHttpServer())
         .get('/booru/gelbooru/posts')
@@ -170,10 +192,10 @@ describe('BooruController', () => {
     })
 
     it('posts endpoint with auth keeps empty results private and non-cacheable', async () => {
-      mockBooruService.executeWithAuthStrategy = jest.fn().mockImplementation(async (_params, _queries, operation) => {
-        const mockApi = { getPosts: jest.fn().mockRejectedValue(new EmptyDataError()) }
-        return operation(mockApi, { source: 'query', selectedCredential: { user: 'u', password: 'p' } })
-      })
+      mockBooruService.executeWithAuthStrategy = createExecuteWithAuthStrategyMock(
+        { getPosts: jest.fn().mockRejectedValue(new EmptyDataError()) },
+        { source: 'query', selectedCredential: { user: 'u', password: 'p' } }
+      )
 
       const res = await request(app.getHttpServer())
         .get('/booru/gelbooru/posts')
@@ -184,10 +206,10 @@ describe('BooruController', () => {
     })
 
     it('single-post endpoint with auth returns private, no-store', async () => {
-      mockBooruService.executeWithAuthStrategy = jest.fn().mockImplementation(async (_params, _queries, operation) => {
-        const mockApi = { getSinglePost: jest.fn().mockResolvedValue([]) }
-        return operation(mockApi, { source: 'query', selectedCredential: { user: 'u', password: 'p' } })
-      })
+      mockBooruService.executeWithAuthStrategy = createExecuteWithAuthStrategyMock(
+        { getSinglePost: jest.fn().mockResolvedValue([]) },
+        { source: 'query', selectedCredential: { user: 'u', password: 'p' } }
+      )
 
       const res = await request(app.getHttpServer())
         .get('/booru/gelbooru/single-post')
@@ -198,10 +220,10 @@ describe('BooruController', () => {
     })
 
     it('single-post not found returns the strict error cache header', async () => {
-      mockBooruService.executeWithAuthStrategy = jest.fn().mockImplementation(async (_params, _queries, operation) => {
-        const mockApi = { getSinglePost: jest.fn().mockRejectedValue(new EmptyDataError()) }
-        return operation(mockApi, { source: 'none' })
-      })
+      mockBooruService.executeWithAuthStrategy = createExecuteWithAuthStrategyMock(
+        { getSinglePost: jest.fn().mockRejectedValue(new EmptyDataError()) },
+        { source: 'none' }
+      )
 
       const res = await request(app.getHttpServer())
         .get('/booru/gelbooru/single-post')
@@ -212,10 +234,10 @@ describe('BooruController', () => {
     })
 
     it('tags endpoint with auth returns private, no-store', async () => {
-      mockBooruService.executeWithAuthStrategy = jest.fn().mockImplementation(async (_params, _queries, operation) => {
-        const mockApi = { getTags: jest.fn().mockResolvedValue([]) }
-        return operation(mockApi, { source: 'query', selectedCredential: { user: 'u', password: 'p' } })
-      })
+      mockBooruService.executeWithAuthStrategy = createExecuteWithAuthStrategyMock(
+        { getTags: jest.fn().mockResolvedValue([]) },
+        { source: 'query', selectedCredential: { user: 'u', password: 'p' } }
+      )
 
       const res = await request(app.getHttpServer())
         .get('/booru/gelbooru/tags')
@@ -226,10 +248,10 @@ describe('BooruController', () => {
     })
 
     it('random-posts endpoint with auth returns private, no-store', async () => {
-      mockBooruService.executeWithAuthStrategy = jest.fn().mockImplementation(async (_params, _queries, operation) => {
-        const mockApi = { getRandomPosts: jest.fn().mockResolvedValue([]) }
-        return operation(mockApi, { source: 'query', selectedCredential: { user: 'u', password: 'p' } })
-      })
+      mockBooruService.executeWithAuthStrategy = createExecuteWithAuthStrategyMock(
+        { getRandomPosts: jest.fn().mockResolvedValue([]) },
+        { source: 'query', selectedCredential: { user: 'u', password: 'p' } }
+      )
 
       const res = await request(app.getHttpServer())
         .get('/booru/gelbooru/random-posts')

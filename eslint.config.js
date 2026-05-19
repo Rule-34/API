@@ -26,8 +26,9 @@ module.exports = tseslint.config(
       '@typescript-eslint/interface-name-prefix': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/no-non-null-assertion': 'error',
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
@@ -49,13 +50,24 @@ module.exports = tseslint.config(
   {
     files: ['**/*.spec.ts'],
     languageOptions: {
+      parserOptions: {
+        projectService: false,
+        project: './tsconfig.spec.json',
+        tsconfigRootDir: __dirname,
+        sourceType: 'commonjs'
+      },
       globals: {
         ...globals.jest
       }
     },
     rules: {
       '@typescript-eslint/require-await': 'off',
-      '@typescript-eslint/no-unnecessary-type-assertion': 'off'
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'error',
+      '@typescript-eslint/no-unsafe-assignment': 'error',
+      '@typescript-eslint/no-unsafe-call': 'error',
+      '@typescript-eslint/no-unsafe-member-access': 'error',
+      '@typescript-eslint/no-unsafe-return': 'error'
     }
   }
 )

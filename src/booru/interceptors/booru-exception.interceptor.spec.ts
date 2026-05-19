@@ -19,6 +19,11 @@ interface TestRequestWithAuthContext {
   }
 }
 
+interface PoolUnavailableResponseBody {
+  retryAfterSeconds?: number
+  reason?: string
+}
+
 @Controller('test-booru-errors')
 @UseInterceptors(BooruErrorsInterceptor)
 class TestBooruErrorsController {
@@ -237,11 +242,12 @@ describe('BooruErrorsInterceptor', () => {
 
   it('should map managed pool unavailable errors to 503 with retry metadata', async () => {
     const response = await request(app.getHttpServer()).get('/test-booru-errors/pool-unavailable')
+    const body = response.body as unknown as PoolUnavailableResponseBody
 
     expect(response.status).toBe(503)
     expect(response.headers['retry-after']).toBe('25')
-    expect(response.body.retryAfterSeconds).toBe(25)
-    expect(response.body.reason).toBe('cooldown_exhausted')
+    expect(body.retryAfterSeconds).toBe(25)
+    expect(body.reason).toBe('cooldown_exhausted')
   })
 
   it('should skip auth failure reporting when managed failures were handled by service', async () => {
