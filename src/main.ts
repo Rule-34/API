@@ -1,22 +1,22 @@
-import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface'
+import './instrument'
 import { NestFactory } from '@nestjs/core'
 import { ConfigService } from '@nestjs/config'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import helmet from '@fastify/helmet'
 import fastifyStatic from '@fastify/static'
-import * as Sentry from '@sentry/node'
-import { escapeRegExp } from 'lodash'
 import { AppModule } from './app.module'
 import { AppClusterService } from './cluster.service'
 import { join } from 'path'
 import { createAppValidationPipe } from './common/validation'
+
+type FastifyCorsOptions = Parameters<NestFastifyApplication['enableCors']>[0]
 
 function buildAllowedOrigins(originConfig: string): RegExp[] {
   return originConfig
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
-    .map((pattern) => new RegExp('^https?://' + escapeRegExp(pattern).replace(/\\\*/g, '.*') + '$'))
+    .map((pattern) => new RegExp('^https?://' + RegExp.escape(pattern).replace(/\\\*/g, '.*') + '$'))
 }
 
 async function bootstrap() {
@@ -28,19 +28,11 @@ async function bootstrap() {
     root: join(__dirname, '..', 'public')
   })
 
-  // Sentry
-  Sentry.init({
-    enabled: configService.get<boolean>('SENTRY_ENABLED') || false,
-    dsn: configService.get<string>('SENTRY_DSN')
-
-    // ignoreErrors: ['NoContentException', 'MethodNotAllowedException'],
-  })
-
   await app.register(helmet)
 
   const allowedOrigins = buildAllowedOrigins(configService.get<string>('ALLOWED_ORIGINS', ''))
 
-  const corsOptions: CorsOptions = {
+  const corsOptions: FastifyCorsOptions = {
     origin: (origin, callback) => {
       callback(null, !origin || allowedOrigins.some((pattern) => pattern.test(origin)))
     },

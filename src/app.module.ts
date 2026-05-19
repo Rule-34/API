@@ -1,27 +1,20 @@
-import { APP_INTERCEPTOR } from '@nestjs/core'
-import { HttpException, Module } from '@nestjs/common'
+import { APP_FILTER } from '@nestjs/core'
+import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { RavenInterceptor, RavenModule } from 'nest-raven'
+import { SentryModule } from '@sentry/nestjs/setup'
 import { BooruModule } from './booru/booru.module'
 import { AppController } from './app.controller'
+import { SentryExceptionFilter } from './common/filters/sentry-exception.filter'
 
 @Module({
-  imports: [RavenModule, ConfigModule.forRoot({ isGlobal: true, cache: true }), BooruModule],
+  imports: [SentryModule.forRoot(), ConfigModule.forRoot({ isGlobal: true, cache: true }), BooruModule],
 
   controllers: [AppController],
 
   providers: [
     {
-      provide: APP_INTERCEPTOR,
-      useValue: new RavenInterceptor({
-        filters: [
-          // Filter exceptions of type HttpException. Ignore those that have status code of less than 500
-          {
-            type: HttpException,
-            filter: (exception: HttpException) => 500 > exception.getStatus()
-          }
-        ]
-      })
+      provide: APP_FILTER,
+      useClass: SentryExceptionFilter
     }
   ]
 })

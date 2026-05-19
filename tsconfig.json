@@ -1,9 +1,13 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     //
-    "target": "ES2021",
+    "target": "ES2025",
+    //
+    "rootDir": "./src",
+    "strict": false,
+    "types": ["node"],
     //
     "incremental": true,
     "declaration": true,
@@ -19,7 +23,7 @@
     //
     "sourceMap": true,
     //
-    "outDir": "./dist",
-    "baseUrl": "./"
-  }
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*.ts"]
 }

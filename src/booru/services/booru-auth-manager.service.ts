@@ -371,7 +371,7 @@ export class BooruAuthManagerService implements OnModuleInit {
       const normalizedUrl = hasProtocol ? url : `https://${url}`
       const urlObj = new URL(normalizedUrl)
       return urlObj.hostname.toLowerCase()
-    } catch (error) {
+    } catch {
       return url
         .replace(/^(https?:\/\/)?/i, '')
         .split(/[?#]/)[0]
@@ -421,7 +421,7 @@ export class BooruAuthManagerService implements OnModuleInit {
       }
 
       return urlObj.toString()
-    } catch (error) {
+    } catch {
       return this.sanitizeRawUrl(url)
     }
   }

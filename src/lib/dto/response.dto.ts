@@ -15,11 +15,11 @@ export class ResponseDto {
 
     total_items: number | null
 
-    current_page: number
+    current_page: number | null
 
     total_pages: number | null
 
-    items_per_page: number
+    items_per_page: number | null
   }
 
   readonly links: {
@@ -48,7 +48,7 @@ export class ResponseDto {
     booruApi: BooruTypes,
     posts: BooruPostObject[] | BooruTagObject[]
   ) {
-    let meta = null
+    let meta: ResponseDto['meta']
 
     switch (true) {
       case queries instanceof booruQueryValuesPostsDTO:
@@ -89,7 +89,7 @@ export class ResponseDto {
         throw new Error('Invalid query type')
     }
 
-    let links = null
+    let links: ResponseDto['links']
 
     switch (true) {
       case queries instanceof booruQueryValuesPostsDTO:

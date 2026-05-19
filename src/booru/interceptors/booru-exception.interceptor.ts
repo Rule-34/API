@@ -149,7 +149,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
       }
 
       return urlObj.toString()
-    } catch (error) {
+    } catch {
       return this.sanitizeRawUrl(url)
     }
   }
@@ -307,7 +307,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
       const normalizedUrl = hasProtocol ? url : `https://${url}`
       const urlObj = new URL(normalizedUrl)
       return urlObj.hostname.toLowerCase()
-    } catch (error) {
+    } catch {
       return url
         .replace(/^(https?:\/\/)?/i, '')
         .split(/[?#]/)[0]
