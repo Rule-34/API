@@ -4,7 +4,7 @@
     "moduleResolution": "nodenext",
     "resolvePackageJsonExports": true,
     //
-    "target": "ES2025",
+    "target": "ESNext",
     //
     "rootDir": "./src",
     "strict": true,
@@ -23,8 +23,10 @@
     "forceConsistentCasingInFileNames": true,
     //
     "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "isolatedModules": true,
     "skipLibCheck": false,
+    "lib": ["ESNext", "ES2025"],
     "types": ["node"],
     //
     "resolveJsonModule": true,
