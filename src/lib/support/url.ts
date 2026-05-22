@@ -1,13 +1,34 @@
 import type { BooruHttpRequest } from '../../booru/interfaces/booru-http.interface'
 
+function getFirstHeaderValue(value: string | string[] | undefined): string | undefined {
+  const headerValue = Array.isArray(value) ? value[0] : value
+
+  return headerValue
+    ?.split(',')
+    .map((part) => part.trim())
+    .find(Boolean)
+}
+
+function getRequestProtocol(request: BooruHttpRequest): string {
+  const protocol = request.protocol
+
+  if (protocol === 'http' || protocol === 'https') {
+    return protocol
+  }
+
+  if (protocol === 'http:' || protocol === 'https:') {
+    return protocol.slice(0, -1)
+  }
+
+  return process.env['NODE_ENV'] === 'development' ? 'http' : 'https'
+}
+
+function getRequestHost(request: BooruHttpRequest): string {
+  return getFirstHeaderValue(request.headers?.host) ?? request.hostname
+}
+
 export function createUrlFromRequest(request: BooruHttpRequest): string {
-  const hostname = request.hostname
-  const originalUrl = request.url
-
-  // TODO: Do not hardcode protocol
-  const protocol = process.env['NODE_ENV'] === 'development' ? 'http' : 'https'
-
-  return `${protocol}://${hostname}${originalUrl}`
+  return new URL(request.url, `${getRequestProtocol(request)}://${getRequestHost(request)}`).toString()
 }
 
 export function createPreviousPageUrl(

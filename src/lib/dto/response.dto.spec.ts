@@ -79,6 +79,61 @@ describe('ResponseDTO', () => {
     expect(responseDto.links.next).toBeTruthy()
   })
 
+  it('should create absolute posts pagination links from the API host and preserve query params', () => {
+    const queryDto = new booruQueryValuesPostsDTO()
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    queryDto.pageID = 0
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    queryDto.limit = 29
+
+    const responseDto = ResponseDto.createFromController(
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        url: '/booru/gelbooru/posts?baseEndpoint=safebooru.org&limit=29&pageID=0&tags=foo%7Cbar&order=desc&rating=safe&score=%3E100&httpScheme=https',
+        headers: {
+          host: 'localhost:8081',
+          'x-forwarded-host': 'attacker.example',
+          'x-forwarded-proto': 'https',
+          origin: 'http://localhost'
+        }
+      },
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      queryDto,
+      {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        booruType: {
+          initialPageID: 0
+        }
+      },
+      []
+    )
+
+    expect(responseDto.links.next).not.toBeNull()
+
+    const nextUrl = new URL(responseDto.links.next ?? '')
+
+    expect(nextUrl.origin).toBe('http://localhost:8081')
+    expect(nextUrl.origin).not.toBe('http://localhost')
+    expect(nextUrl.pathname).toBe('/booru/gelbooru/posts')
+    expect(nextUrl.searchParams.get('baseEndpoint')).toBe('safebooru.org')
+    expect(nextUrl.searchParams.get('limit')).toBe('29')
+    expect(nextUrl.searchParams.get('pageID')).toBe('1')
+    expect(nextUrl.searchParams.get('tags')).toBe('foo|bar')
+    expect(nextUrl.searchParams.get('order')).toBe('desc')
+    expect(nextUrl.searchParams.get('rating')).toBe('safe')
+    expect(nextUrl.searchParams.get('score')).toBe('>100')
+    expect(nextUrl.searchParams.get('httpScheme')).toBe('https')
+
+    expect(responseDto.links.self).toMatch(/^http:\/\/localhost:8081\//)
+    expect(responseDto.links.first).toMatch(/^http:\/\/localhost:8081\//)
+    expect(responseDto.links.next).toMatch(/^http:\/\/localhost:8081\//)
+  })
+
   it('should create a valid DTO for /single-post endpoint', () => {
     const examplePosts = [
       {

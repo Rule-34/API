@@ -1,3 +1,4 @@
+import type { IncomingHttpHeaders } from 'node:http'
 import type { ResolvedAuthCredentials } from '../booru.service'
 
 export interface BooruAuthContext {
@@ -7,6 +8,7 @@ export interface BooruAuthContext {
 }
 
 export interface BooruHttpRequest {
+  headers?: IncomingHttpHeaders
   hostname: string
   protocol?: string
   url: string
