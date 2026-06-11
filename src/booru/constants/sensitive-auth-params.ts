@@ -1,6 +1,8 @@
 export const SENSITIVE_AUTH_PARAMS = [
   'user_id',
   'api_key',
+  'apikey',
+  'apiKey',
   'password',
   'password_hash',
   'pass_hash',

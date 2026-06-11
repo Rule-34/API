@@ -13,6 +13,18 @@ interface AuthManagerPrivateAccess {
   reserveAvailableCredentialFromPrimary(domain: string): Promise<BooruAuthCredential | null>
 }
 
+async function createAuthManagerService(): Promise<{ module: TestingModule; service: BooruAuthManagerService }> {
+  const module = await Test.createTestingModule({
+    imports: [ConfigModule.forRoot({ isGlobal: true, cache: false, ignoreEnvFile: true })],
+    providers: [BooruAuthManagerService]
+  }).compile()
+
+  const service = module.get<BooruAuthManagerService>(BooruAuthManagerService)
+  service.onModuleInit()
+
+  return { module, service }
+}
+
 describe('BooruAuthManagerService', () => {
   let service: BooruAuthManagerService
 
@@ -43,14 +55,7 @@ describe('BooruAuthManagerService', () => {
         { user: 'name', password: 'one:pass' }
       ]
     })
-
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [ConfigModule.forRoot({ isGlobal: true, cache: false, ignoreEnvFile: true })],
-      providers: [BooruAuthManagerService]
-    }).compile()
-
-    service = module.get<BooruAuthManagerService>(BooruAuthManagerService)
-    service.onModuleInit()
+    ;({ service } = await createAuthManagerService())
   })
 
   afterEach(() => {
@@ -158,7 +163,7 @@ describe('BooruAuthManagerService', () => {
       user: 'www-gel-user',
       password: 'www-gel-pass',
       error:
-        'HTTP 403: Forbidden auth_user=www-gel-user auth_pass=secret123 token=abc123 api_key=xyz789 user_id=42 key=plain-key limit=10',
+        'HTTP 403: Forbidden auth_user=www-gel-user auth_pass=secret123 token=abc123 api_key=xyz789 apikey=compact-key user_id=42 key=plain-key limit=10',
       timestamp: new Date()
     })
 
@@ -168,6 +173,7 @@ describe('BooruAuthManagerService', () => {
     expect(loggedMessage).toContain('auth_pass=REDACTED')
     expect(loggedMessage).toContain('token=REDACTED')
     expect(loggedMessage).toContain('api_key=REDACTED')
+    expect(loggedMessage).toContain('apikey=REDACTED')
     expect(loggedMessage).toContain('user_id=REDACTED')
     expect(loggedMessage).toContain('key=REDACTED')
     expect(loggedMessage).toContain('limit=10')
@@ -175,10 +181,31 @@ describe('BooruAuthManagerService', () => {
     expect(loggedMessage).not.toContain('secret123')
     expect(loggedMessage).not.toContain('abc123')
     expect(loggedMessage).not.toContain('xyz789')
+    expect(loggedMessage).not.toContain('compact-key')
     expect(loggedMessage).not.toContain('plain-key')
 
     errorSpy.mockRestore()
     warnSpy.mockRestore()
+  })
+
+  it('should fail startup when auth config credentials have the wrong shape', async () => {
+    process.env['BOORU_AUTH_CONFIG'] = JSON.stringify({
+      'rule34.xxx': [{ user: 'valid-user', password: 'secret-one' }, { user: 'missing-password' }]
+    })
+
+    await expect(createAuthManagerService()).rejects.toThrow(
+      'Invalid BOORU_AUTH_CONFIG credential for rule34.xxx at index 1'
+    )
+  })
+
+  it('should fail startup when auth config rate limits have the wrong shape', async () => {
+    process.env['BOORU_AUTH_CONFIG'] = JSON.stringify({
+      'rule34.xxx': [{ user: 'valid-user', password: 'secret-one', rateLimit: { requests: 0, windowSeconds: 1 } }]
+    })
+
+    await expect(createAuthManagerService()).rejects.toThrow(
+      'Invalid BOORU_AUTH_CONFIG rateLimit for rule34.xxx at index 0'
+    )
   })
 
   it('should redact malformed uppercase-protocol URLs in auth failure logs', () => {

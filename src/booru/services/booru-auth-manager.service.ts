@@ -13,12 +13,12 @@ import {
   IpcAuthMessage
 } from '../interfaces/auth-manager.interface'
 import { SENSITIVE_AUTH_PARAMS } from '../constants/sensitive-auth-params'
+import {
+  BOORU_AUTH_DOMAIN_ALIASES,
+  BOORU_AUTH_RATE_LIMIT_DEFAULTS,
+  RateLimitPolicy
+} from '../constants/booru-auth-provider-policies'
 import { createCredentialKey, parseCredentialKey } from './credential-key.util'
-
-interface RateLimitPolicy {
-  requests: number
-  windowSeconds: number
-}
 
 interface ReservationResponse {
   credential: BooruAuthCredential | null
@@ -41,16 +41,8 @@ export class BooruAuthManagerService implements OnModuleInit {
   private readonly selectionCursorByDomain = new Map<string, number>()
   private readonly availabilityByDomain = new Map<string, number>()
   private authConfig: BooruAuthConfig = {}
-  private readonly domainRateLimitDefaults: Record<string, RateLimitPolicy> = {
-    'gelbooru.com': { requests: 10, windowSeconds: 1 },
-    'www.gelbooru.com': { requests: 10, windowSeconds: 1 },
-    'rule34.xxx': { requests: 60, windowSeconds: 60 },
-    'api.rule34.xxx': { requests: 60, windowSeconds: 60 }
-  }
-  private readonly domainAliases: Record<string, string> = {
-    'www.rule34.xxx': 'rule34.xxx',
-    'api.rule34.xxx': 'rule34.xxx'
-  }
+  private readonly domainRateLimitDefaults: Record<string, RateLimitPolicy> = BOORU_AUTH_RATE_LIMIT_DEFAULTS
+  private readonly domainAliases: Record<string, string> = BOORU_AUTH_DOMAIN_ALIASES
   private readonly sensitiveParams = new Set<string>(SENSITIVE_AUTH_PARAMS)
 
   constructor(@Inject(ConfigService) private readonly configService: Pick<ConfigService, 'get'>) {}
@@ -79,6 +71,7 @@ export class BooruAuthManagerService implements OnModuleInit {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       console.error('Failed to parse BOORU_AUTH_CONFIG:', message)
+      throw error
     }
   }
 
@@ -480,12 +473,62 @@ export class BooruAuthManagerService implements OnModuleInit {
 
     for (const [domain, credentials] of Object.entries(authConfig)) {
       const normalizedDomain = this.normalizeDomain(domain)
-      const mergedCredentials = [...(normalizedAuthConfig[normalizedDomain] ?? []), ...credentials]
+      const validatedCredentials = this.validateAuthConfigCredentials(normalizedDomain, credentials)
+
+      const mergedCredentials = [...(normalizedAuthConfig[normalizedDomain] ?? []), ...validatedCredentials]
 
       normalizedAuthConfig[normalizedDomain] = this.dedupeCredentials(mergedCredentials)
     }
 
     return normalizedAuthConfig
+  }
+
+  private validateAuthConfigCredentials(domain: string, credentials: unknown): BooruAuthCredential[] {
+    if (!Array.isArray(credentials)) {
+      throw new Error(`Invalid BOORU_AUTH_CONFIG credentials list for ${domain}`)
+    }
+
+    const validCredentials: BooruAuthCredential[] = []
+
+    for (const [index, credential] of credentials.entries()) {
+      if (!this.isValidAuthCredentialShape(credential)) {
+        throw new Error(`Invalid BOORU_AUTH_CONFIG credential for ${domain} at index ${index}`)
+      }
+
+      if (credential.rateLimit !== undefined && !this.isValidRateLimitPolicy(credential.rateLimit)) {
+        throw new Error(`Invalid BOORU_AUTH_CONFIG rateLimit for ${domain} at index ${index}`)
+      }
+
+      validCredentials.push(credential)
+    }
+
+    return validCredentials
+  }
+
+  private isValidAuthCredentialShape(credential: unknown): credential is BooruAuthCredential {
+    if (!this.isRecord(credential)) {
+      return false
+    }
+
+    const user = credential['user']
+    const password = credential['password']
+
+    return typeof user === 'string' && user.length > 0 && typeof password === 'string' && password.length > 0
+  }
+
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null
+  }
+
+  private isValidRateLimitPolicy(rateLimit: BooruAuthCredential['rateLimit']): rateLimit is RateLimitPolicy {
+    if (rateLimit === undefined) {
+      return false
+    }
+
+    const requests = Math.floor(rateLimit.requests)
+    const windowSeconds = Math.floor(rateLimit.windowSeconds)
+
+    return Number.isFinite(requests) && requests > 0 && Number.isFinite(windowSeconds) && windowSeconds > 0
   }
 
   private dedupeCredentials(credentials: BooruAuthCredential[]): BooruAuthCredential[] {
