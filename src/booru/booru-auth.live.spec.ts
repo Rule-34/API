@@ -8,6 +8,7 @@ import { BooruAuthManagerService } from './services/booru-auth-manager.service'
 
 const runLiveTests = process.env['RUN_BOORU_AUTH_LIVE_TESTS'] === 'true'
 const describeLive = runLiveTests ? describe : describe.skip
+const sensitiveAuthParams = ['user_id', 'api_key', 'auth_user', 'auth_pass', 'token', 'key']
 
 const liveBoorus: {
   domain: string
@@ -25,6 +26,34 @@ const liveBoorus: {
     initialPageID: 0
   }
 ]
+
+function sanitizeLiveSmokeErrorMessage(message: string): string {
+  let sanitizedMessage = message
+
+  for (const key of sensitiveAuthParams) {
+    const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    sanitizedMessage = sanitizedMessage.replace(new RegExp(`([?&\\s]${escapedKey}=)[^\\s&#]+`, 'gi'), '$1REDACTED')
+  }
+
+  return sanitizedMessage
+}
+
+describe('live smoke error sanitization', () => {
+  it('redacts auth query params before rethrowing non-quota live errors', () => {
+    const message =
+      'HTTP 403 https://gelbooru.com/index.php?page=dapi&api_key=secret&user_id=123 auth_user=user auth_pass=pass'
+
+    const sanitizedMessage = sanitizeLiveSmokeErrorMessage(message)
+
+    expect(sanitizedMessage).toContain('api_key=REDACTED')
+    expect(sanitizedMessage).toContain('user_id=REDACTED')
+    expect(sanitizedMessage).toContain('auth_user=REDACTED')
+    expect(sanitizedMessage).toContain('auth_pass=REDACTED')
+    expect(sanitizedMessage).not.toContain('secret')
+    expect(sanitizedMessage).not.toContain('user_id=123')
+    expect(sanitizedMessage).not.toContain('auth_pass=pass')
+  })
+})
 
 describeLive('authenticated booru live smoke tests', () => {
   let module: TestingModule
@@ -78,7 +107,18 @@ describeLive('authenticated booru live smoke tests', () => {
           return
         }
 
-        throw error
+        const message = error instanceof Error ? error.message : String(error)
+        const sanitizedMessage = sanitizeLiveSmokeErrorMessage(message)
+
+        if (error instanceof Error) {
+          error.message = sanitizedMessage
+
+          if (error.stack !== undefined) {
+            error.stack = sanitizeLiveSmokeErrorMessage(error.stack)
+          }
+        }
+
+        throw new Error(sanitizedMessage, { cause: error })
       }
 
       expect(posts.length).toBeGreaterThan(0)

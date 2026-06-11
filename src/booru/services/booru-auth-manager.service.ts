@@ -5,6 +5,7 @@ import {
   BooruAuthConfig,
   BooruAuthCredential,
   DisabledCredential,
+  SerializedDisabledCredential,
   AuthCredentialStats,
   DomainCredentialStatus,
   MaskedCredentialStatus,
@@ -146,7 +147,7 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
   }
 
-  public applyDisabledCredential(credential: DisabledCredential): void {
+  public applyDisabledCredential(credential: DisabledCredential | SerializedDisabledCredential): void {
     this.disableCredentialLocally(this.rehydrateDisabledCredential(credential))
   }
 
@@ -156,7 +157,7 @@ export class BooruAuthManagerService implements OnModuleInit {
       const requestId = `${process.pid}:${Date.now()}:${Math.random().toString(36).slice(2)}`
       const timeout = setTimeout(() => {
         this.pendingReservationRequests.delete(requestId)
-        resolve(this.reserveAvailableCredentialLocally(normalizedDomain).credential)
+        resolve(null)
       }, BooruAuthManagerService.IPC_RESERVATION_TIMEOUT_MS)
 
       this.pendingReservationRequests.set(requestId, (response) => {
@@ -254,18 +255,31 @@ export class BooruAuthManagerService implements OnModuleInit {
     this.cooldownCredentials.delete(credentialKey)
   }
 
-  private rehydrateDisabledCredential(raw: DisabledCredential): DisabledCredential {
+  private rehydrateDisabledCredential(raw: DisabledCredential | SerializedDisabledCredential): DisabledCredential {
     // IPC serializes Date objects as ISO strings — reconstruct them before use.
     return raw.state === 'cooldown'
       ? { ...raw, disabledAt: new Date(raw.disabledAt), cooldownUntil: new Date(raw.cooldownUntil) }
       : { ...raw, disabledAt: new Date(raw.disabledAt) }
   }
 
+  private serializeDisabledCredential(credential: DisabledCredential): SerializedDisabledCredential {
+    return credential.state === 'cooldown'
+      ? {
+          ...credential,
+          disabledAt: credential.disabledAt.toISOString(),
+          cooldownUntil: credential.cooldownUntil.toISOString()
+        }
+      : {
+          ...credential,
+          disabledAt: credential.disabledAt.toISOString()
+        }
+  }
+
   private broadcastDisabledCredential(credential: DisabledCredential): void {
     if (cluster.isWorker && process.send) {
       const message: IpcAuthMessage = {
         type: 'DISABLE_CREDENTIAL',
-        payload: credential
+        payload: this.serializeDisabledCredential(credential)
       }
       process.send(message)
     }
@@ -795,6 +809,18 @@ export class BooruAuthManagerService implements OnModuleInit {
         cooldownUntil: new Date(cooldownRecord.cooldownUntil).toISOString(),
         secondsRemaining: Math.max(1, Math.ceil((cooldownRecord.cooldownUntil - now) / 1000)),
         reason: cooldownRecord.reason
+      }
+    }
+
+    const quotaRetryAfterSeconds = this.getQuotaRetryAfterSeconds(domain, credential)
+
+    if (quotaRetryAfterSeconds !== undefined) {
+      return {
+        user: credential.user,
+        state: 'cooldown',
+        cooldownUntil: new Date(now + quotaRetryAfterSeconds * 1_000).toISOString(),
+        secondsRemaining: quotaRetryAfterSeconds,
+        reason: 'quota_exhausted'
       }
     }
 

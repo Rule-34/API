@@ -21,6 +21,7 @@ import { booruQueriesDTO } from './dto/booru-queries.dto'
 import { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import type { AuthFailureEvent } from './interfaces/auth-manager.interface'
 import { BooruAuthManagerService } from './services/booru-auth-manager.service'
+import { SENSITIVE_AUTH_PARAMS } from './constants/sensitive-auth-params'
 
 export interface ResolvedAuthCredentials {
   auth?: { username: string; apiKey: string }
@@ -53,6 +54,8 @@ export class ManagedCredentialPoolUnavailableError extends Error {
 
 @Injectable()
 export class BooruService {
+  private readonly sensitiveAuthParams = new Set<string>(SENSITIVE_AUTH_PARAMS)
+
   constructor(
     private readonly configService: ConfigService,
     private readonly authManager: BooruAuthManagerService
@@ -237,7 +240,7 @@ export class BooruService {
 
       const context = this.buildApiWithContext(params, queries, authResolution)
 
-      const credentialKey = `${selectedCredential.user}:${selectedCredential.password}`
+      const credentialKey = JSON.stringify([selectedCredential.user, selectedCredential.password])
 
       if (attemptedCredentials.has(credentialKey)) {
         throw this.createPoolUnavailableError(queries.baseEndpoint)
@@ -320,11 +323,59 @@ export class BooruService {
   }
 
   private stringifyHttpError(error: HttpError): string {
-    if (typeof error.message === 'string' && error.message.length > 0) {
-      return error.message
+    const message = typeof error.message === 'string' && error.message.length > 0 ? error.message : error.toString()
+
+    return this.sanitizeErrorMessage(message)
+  }
+
+  private sanitizeErrorMessage(message: string): string {
+    if (!message) {
+      return message
     }
 
-    return error.toString()
+    const urlPattern = /https?:\/\/[^\s]+/gi
+    const sanitizedUrlMessage = message.replace(urlPattern, (url) => this.sanitizeUrl(url))
+    return this.sanitizeKeyValueTokens(sanitizedUrlMessage)
+  }
+
+  private sanitizeKeyValueTokens(message: string): string {
+    let sanitizedMessage = message
+
+    for (const key of this.sensitiveAuthParams) {
+      const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const pattern = new RegExp(`\\b(${escapedKey})(\\s*=\\s*)([^\\s&#,;\\]\\)\\}]+)`, 'gi')
+      sanitizedMessage = sanitizedMessage.replace(pattern, '$1$2REDACTED')
+    }
+
+    return sanitizedMessage
+  }
+
+  private sanitizeUrl(url: string): string {
+    try {
+      const urlObj = new URL(url)
+
+      for (const [key] of urlObj.searchParams.entries()) {
+        if (this.sensitiveAuthParams.has(key.toLowerCase())) {
+          urlObj.searchParams.set(key, 'REDACTED')
+        }
+      }
+
+      return urlObj.toString()
+    } catch {
+      return this.sanitizeRawUrl(url)
+    }
+  }
+
+  private sanitizeRawUrl(url: string): string {
+    let sanitizedUrl = url
+
+    for (const key of this.sensitiveAuthParams) {
+      const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const pattern = new RegExp(`([?&]${escapedKey}=)[^&#\\s]*`, 'gi')
+      sanitizedUrl = sanitizedUrl.replace(pattern, '$1REDACTED')
+    }
+
+    return sanitizedUrl
   }
 
   private getFailureKind(

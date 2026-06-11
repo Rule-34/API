@@ -28,6 +28,25 @@ export interface CooldownDisabledCredential extends DisabledCredentialBase {
 
 export type DisabledCredential = PermanentDisabledCredential | CooldownDisabledCredential
 
+interface SerializedDisabledCredentialBase {
+  domain: string
+  user: string
+  password?: string
+  disabledAt: string
+  reason?: string
+}
+
+export interface SerializedPermanentDisabledCredential extends SerializedDisabledCredentialBase {
+  state: 'permanent'
+}
+
+export interface SerializedCooldownDisabledCredential extends SerializedDisabledCredentialBase {
+  state: 'cooldown'
+  cooldownUntil: string
+}
+
+export type SerializedDisabledCredential = SerializedPermanentDisabledCredential | SerializedCooldownDisabledCredential
+
 export interface AuthCredentialStats {
   domain: string
   total: number
@@ -91,7 +110,7 @@ export interface AuthFailureEvent {
 }
 
 export type IpcAuthMessage =
-  | { type: 'DISABLE_CREDENTIAL'; payload: DisabledCredential }
+  | { type: 'DISABLE_CREDENTIAL'; payload: SerializedDisabledCredential }
   | { type: 'RESERVE_CREDENTIAL'; payload: { requestId: string; domain: string } }
   | {
       type: 'RESERVE_CREDENTIAL_RESPONSE'

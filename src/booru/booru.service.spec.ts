@@ -238,6 +238,67 @@ describe('BooruService', () => {
       )
     })
 
+    it('should not collapse attempted credentials when usernames or passwords contain colons', async () => {
+      mockAuthManager.getDomainStats.mockReturnValue({
+        domain: 'gelbooru.com',
+        total: 2,
+        available: 2,
+        disabled: 0,
+        cooldown: 0,
+        permanentDisabled: 0
+      })
+
+      mockAuthManager.reserveAvailableCredential
+        .mockResolvedValueOnce({ user: 'name:one', password: 'pass' })
+        .mockResolvedValueOnce({ user: 'name', password: 'one:pass' })
+
+      const queries = { ...baseQueries } as booruQueriesDTO
+      const operation = jest.fn().mockImplementation(() => {
+        throw new HttpError({
+          message: 'rate limited',
+          statusCode: 429,
+          failureKind: 'rate_limited'
+        })
+      })
+
+      await expect(service.executeWithAuthStrategy(mockParams, queries, operation)).rejects.toEqual(
+        expect.objectContaining<Partial<ManagedCredentialPoolUnavailableError>>({
+          name: 'ManagedCredentialPoolUnavailableError'
+        })
+      )
+
+      expect(operation).toHaveBeenCalledTimes(2)
+      expect(mockAuthManager.reportAuthFailure).toHaveBeenCalledTimes(2)
+    })
+
+    it('should sanitize credential-bearing upstream errors before reporting managed auth failures', async () => {
+      const queries = { ...baseQueries } as booruQueriesDTO
+      const operation = jest.fn().mockImplementation(() => {
+        throw new HttpError({
+          message:
+            'HTTP 429 for https://gelbooru.com/index.php?page=dapi&auth_user=managed_1&auth_pass=pass_1&api_key=secret-key&user_id=123',
+          statusCode: 429,
+          failureKind: 'rate_limited'
+        })
+      })
+
+      await expect(service.executeWithAuthStrategy(mockParams, queries, operation)).rejects.toEqual(
+        expect.objectContaining<Partial<ManagedCredentialPoolUnavailableError>>({
+          name: 'ManagedCredentialPoolUnavailableError'
+        })
+      )
+
+      const reportedError = mockAuthManager.reportAuthFailure.mock.calls[0]?.[0].error
+
+      expect(reportedError).toContain('auth_user=REDACTED')
+      expect(reportedError).toContain('auth_pass=REDACTED')
+      expect(reportedError).toContain('api_key=REDACTED')
+      expect(reportedError).toContain('user_id=REDACTED')
+      expect(reportedError).not.toContain('managed_1')
+      expect(reportedError).not.toContain('pass_1')
+      expect(reportedError).not.toContain('secret-key')
+    })
+
     it('should fallback to unauthenticated execution when no managed credentials are configured', async () => {
       mockAuthManager.getDomainStats.mockReturnValue({
         domain: 'rule34.paheal.net',

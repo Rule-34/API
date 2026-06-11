@@ -2,15 +2,15 @@ import type { TestingModule } from '@nestjs/testing'
 import { Test } from '@nestjs/testing'
 import { ConfigModule } from '@nestjs/config'
 import { BooruAuthManagerService } from './booru-auth-manager.service'
-import type { CooldownDisabledCredential, DisabledCredential } from '../interfaces/auth-manager.interface'
+import type {
+  BooruAuthCredential,
+  DisabledCredential,
+  SerializedCooldownDisabledCredential
+} from '../interfaces/auth-manager.interface'
 
 interface AuthManagerPrivateAccess {
   disableCredentialLocally(credential: DisabledCredential): void
-}
-
-type SerializedCooldownDisabledCredential = Omit<CooldownDisabledCredential, 'disabledAt' | 'cooldownUntil'> & {
-  disabledAt: string
-  cooldownUntil: string
+  reserveAvailableCredentialFromPrimary(domain: string): Promise<BooruAuthCredential | null>
 }
 
 describe('BooruAuthManagerService', () => {
@@ -370,6 +370,30 @@ describe('BooruAuthManagerService', () => {
     jest.useRealTimers()
   })
 
+  it('should expose quota-full credentials as cooldown in status snapshots', async () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
+
+    for (let i = 0; i < 10; i++) {
+      await service.reserveAvailableCredential('gelbooru.com')
+    }
+
+    const [snapshot] = service.getCredentialPoolStatus('gelbooru.com')
+    const credential = snapshot?.credentials.at(0)
+
+    expect(snapshot?.available).toBe(0)
+    expect(snapshot?.cooldown).toBe(1)
+    expect(credential).toEqual({
+      user: 'gel-user',
+      state: 'cooldown',
+      cooldownUntil: '2026-01-01T00:00:01.000Z',
+      secondsRemaining: 1,
+      reason: 'quota_exhausted'
+    })
+
+    jest.useRealTimers()
+  })
+
   it('should reserve rule34 credentials according to the provider per-key quota', async () => {
     jest.useFakeTimers()
     jest.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
@@ -529,6 +553,34 @@ describe('BooruAuthManagerService', () => {
     expect(stats.total).toBe(2)
     expect(stats.cooldown).toBe(1)
     expect(stats.available).toBe(1)
+  })
+
+  it('should not locally reserve credentials when primary worker reservation IPC times out', async () => {
+    jest.useFakeTimers()
+    const originalSend = Reflect.get(process, 'send') as typeof process.send
+    const sendMock = jest.fn() as jest.MockedFunction<NonNullable<typeof process.send>>
+    Reflect.set(process, 'send', sendMock)
+
+    const reservation = (service as unknown as AuthManagerPrivateAccess).reserveAvailableCredentialFromPrimary(
+      'gelbooru.com'
+    )
+
+    jest.advanceTimersByTime(1_001)
+
+    await expect(reservation).resolves.toBeNull()
+    expect(sendMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'RESERVE_CREDENTIAL'
+      })
+    )
+    expect(await service.reserveAvailableCredential('gelbooru.com')).toEqual({ user: 'gel-user', password: 'gel-pass' })
+
+    if (originalSend === undefined) {
+      Reflect.deleteProperty(process, 'send')
+    } else {
+      Reflect.set(process, 'send', originalSend)
+    }
+    jest.useRealTimers()
   })
 
   it('should throw when IPC-serialized Dates are used without reconstruction (proves original bug)', () => {
