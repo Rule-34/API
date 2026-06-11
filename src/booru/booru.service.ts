@@ -41,6 +41,13 @@ interface BooruQueryIdentifierDefaults {
   tags?: Partial<NonNullable<IBooruQueryIdentifiers['tags']>>
 }
 
+interface BooruOutboundProxyPolicy {
+  baseUrl: string
+  targetParam: string
+}
+
+type NormalizedBooruOutboundProxyConfig = Record<string, BooruOutboundProxyPolicy[]>
+
 export class ManagedCredentialPoolUnavailableError extends Error {
   constructor(
     public readonly domain: string,
@@ -55,6 +62,8 @@ export class ManagedCredentialPoolUnavailableError extends Error {
 @Injectable()
 export class BooruService {
   private readonly sensitiveAuthParams = new Set<string>(SENSITIVE_AUTH_PARAMS)
+  private outboundProxyConfig: NormalizedBooruOutboundProxyConfig | null | undefined
+  private readonly outboundProxyCursors = new Map<string, number>()
 
   constructor(
     private readonly configService: ConfigService,
@@ -181,6 +190,7 @@ export class BooruService {
       undefined,
       options
     )
+    this.applyOutboundProxy(Api, queries.baseEndpoint)
 
     return {
       api: Api,
@@ -390,6 +400,159 @@ export class BooruService {
     }
 
     return undefined
+  }
+
+  private applyOutboundProxy(api: BooruTypes, domain: string): void {
+    if (!this.hasOutboundProxyPolicy(domain)) {
+      return
+    }
+
+    const apiWithInternals = api as unknown as Record<string, unknown>
+    const queryMethodNames = ['addPostQueries', 'addRandomPostQueries', 'addSinglePostQueries', 'addTagsQueries']
+
+    for (const methodName of queryMethodNames) {
+      const originalMethod = apiWithInternals[methodName]
+
+      if (typeof originalMethod !== 'function') {
+        continue
+      }
+
+      apiWithInternals[methodName] = (...args: unknown[]) => {
+        const upstreamUrl = originalMethod.apply(api, args) as URL
+        const proxyPolicy = this.getOutboundProxyPolicy(domain)
+
+        if (proxyPolicy === undefined) {
+          return upstreamUrl
+        }
+
+        return this.createProxiedOutboundUrl(upstreamUrl, proxyPolicy)
+      }
+    }
+  }
+
+  private createProxiedOutboundUrl(upstreamUrl: URL, proxyPolicy: BooruOutboundProxyPolicy): URL {
+    const proxiedUrl = new URL(proxyPolicy.baseUrl)
+    proxiedUrl.searchParams.set(proxyPolicy.targetParam, upstreamUrl.toString())
+    return proxiedUrl
+  }
+
+  private hasOutboundProxyPolicy(domain: string): boolean {
+    const config = this.getOutboundProxyConfig()
+
+    if (config === null) {
+      return false
+    }
+
+    const policies = config[this.normalizeOutboundProxyDomain(domain)]
+    return policies !== undefined && policies.length > 0
+  }
+
+  private getOutboundProxyPolicy(domain: string): BooruOutboundProxyPolicy | undefined {
+    const config = this.getOutboundProxyConfig()
+
+    if (config === null) {
+      return undefined
+    }
+
+    const normalizedDomain = this.normalizeOutboundProxyDomain(domain)
+    const policies = config[normalizedDomain]
+
+    if (policies === undefined || policies.length === 0) {
+      return undefined
+    }
+
+    const cursor = this.outboundProxyCursors.get(normalizedDomain) ?? 0
+    const policy = policies[cursor % policies.length]
+    this.outboundProxyCursors.set(normalizedDomain, cursor + 1)
+
+    return policy
+  }
+
+  private getOutboundProxyConfig(): NormalizedBooruOutboundProxyConfig | null {
+    if (this.outboundProxyConfig !== undefined) {
+      return this.outboundProxyConfig
+    }
+
+    const configJson = this.configService.get<string>('BOORU_OUTBOUND_PROXY_CONFIG')
+
+    if (configJson === undefined || configJson.length === 0) {
+      this.outboundProxyConfig = null
+      return this.outboundProxyConfig
+    }
+
+    try {
+      const parsedConfig = JSON.parse(configJson) as unknown
+      this.outboundProxyConfig = this.validateOutboundProxyConfig(parsedConfig)
+      return this.outboundProxyConfig
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new Error('Failed to parse BOORU_OUTBOUND_PROXY_CONFIG', { cause: error })
+      }
+
+      throw error
+    }
+  }
+
+  private validateOutboundProxyConfig(config: unknown): NormalizedBooruOutboundProxyConfig {
+    if (!this.isPlainObject(config)) {
+      throw new Error('Invalid BOORU_OUTBOUND_PROXY_CONFIG')
+    }
+
+    const outboundProxyConfig: NormalizedBooruOutboundProxyConfig = {}
+
+    for (const [domain, policyOrPolicies] of Object.entries(config)) {
+      const policies = Array.isArray(policyOrPolicies) ? policyOrPolicies : [policyOrPolicies]
+
+      if (policies.length === 0) {
+        throw new Error(`Invalid BOORU_OUTBOUND_PROXY_CONFIG policy for ${domain}`)
+      }
+
+      outboundProxyConfig[this.normalizeOutboundProxyDomain(domain)] = policies.map((policy) =>
+        this.validateOutboundProxyPolicy(domain, policy)
+      )
+    }
+
+    return outboundProxyConfig
+  }
+
+  private validateOutboundProxyPolicy(domain: string, policy: unknown): BooruOutboundProxyPolicy {
+    if (!this.isPlainObject(policy)) {
+      throw new Error(`Invalid BOORU_OUTBOUND_PROXY_CONFIG policy for ${domain}`)
+    }
+
+    const baseUrl = policy['baseUrl']
+    const targetParam = policy['targetParam'] ?? 'q'
+
+    if (typeof baseUrl !== 'string' || !URL.canParse(baseUrl)) {
+      throw new Error(`Invalid BOORU_OUTBOUND_PROXY_CONFIG baseUrl for ${domain}`)
+    }
+
+    const parsedBaseUrl = new URL(baseUrl)
+
+    if (parsedBaseUrl.protocol !== 'https:' && parsedBaseUrl.protocol !== 'http:') {
+      throw new Error(`Invalid BOORU_OUTBOUND_PROXY_CONFIG baseUrl for ${domain}`)
+    }
+
+    if (typeof targetParam !== 'string' || targetParam.length === 0) {
+      throw new Error(`Invalid BOORU_OUTBOUND_PROXY_CONFIG targetParam for ${domain}`)
+    }
+
+    return {
+      baseUrl: parsedBaseUrl.toString(),
+      targetParam
+    }
+  }
+
+  private normalizeOutboundProxyDomain(domain: string): string {
+    if (URL.canParse(domain)) {
+      return new URL(domain).hostname.toLowerCase()
+    }
+
+    return domain.toLowerCase()
+  }
+
+  private isPlainObject(value: unknown): value is Record<string, unknown> {
+    return value !== null && typeof value === 'object' && !Array.isArray(value)
   }
 
   private getApiClassByType(booruType: BooruTypesStringEnum) {
