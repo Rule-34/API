@@ -5,10 +5,11 @@ import { BooruTypesStringEnum } from '@alejandroakbal/universal-booru-wrapper'
 import { BooruService, ManagedCredentialPoolUnavailableError } from './booru.service'
 import type { booruQueryValuesPostsDTO } from './dto/booru-queries.dto'
 import { BooruAuthManagerService } from './services/booru-auth-manager.service'
+import { SENSITIVE_AUTH_PARAMS } from './constants/sensitive-auth-params'
 
 const runLiveTests = process.env['RUN_BOORU_AUTH_LIVE_TESTS'] === 'true'
 const describeLive = runLiveTests ? describe : describe.skip
-const sensitiveAuthParams = ['user_id', 'api_key', 'auth_user', 'auth_pass', 'token', 'key']
+const sensitiveAuthParams = SENSITIVE_AUTH_PARAMS
 
 const liveBoorus: {
   domain: string
