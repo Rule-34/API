@@ -59,7 +59,7 @@ export class BooruService {
   ) {}
 
   public buildApiClass(params: BooruEndpointParamsDTO, queries: booruQueriesDTO): BooruTypes {
-    return this.buildApiWithContext(params, queries).api
+    return this.buildApiWithContext(params, queries, this.resolveQueryAuthCredentials(queries)).api
   }
 
   public async executeWithAuthStrategy<T>(
@@ -68,14 +68,18 @@ export class BooruService {
     operation: (api: BooruTypes, authResolution: ResolvedAuthCredentials) => Promise<T>
   ): Promise<T> {
     if (this.hasQueryCredentials(queries)) {
-      const explicitContext = this.buildApiWithContext(params, queries)
+      const explicitContext = this.buildApiWithContext(params, queries, this.resolveQueryAuthCredentials(queries))
       return operation(explicitContext.api, explicitContext.authResolution)
     }
 
     return this.executeManagedCredentialFailover(params, queries, operation)
   }
 
-  public buildApiWithContext(params: BooruEndpointParamsDTO, queries: booruQueriesDTO): BuiltBooruApi {
+  public buildApiWithContext(
+    params: BooruEndpointParamsDTO,
+    queries: booruQueriesDTO,
+    resolvedAuthOverride?: ResolvedAuthCredentials
+  ): BuiltBooruApi {
     const booruClass = this.getApiClassByType(params.booruType)
 
     const endpoints: IBooruEndpoints = {
@@ -156,8 +160,7 @@ export class BooruService {
 
     // No default QueryValues are needed
 
-    // Resolve authentication credentials
-    const authResolution = this.resolveAuthCredentials(queries)
+    const authResolution = resolvedAuthOverride ?? this.resolveQueryAuthCredentials(queries)
 
     const options: Partial<IBooruOptions> = {}
 
@@ -182,39 +185,21 @@ export class BooruService {
     }
   }
 
-  private resolveAuthCredentials(queries: booruQueriesDTO): ResolvedAuthCredentials {
-    // Priority 1: Query parameters
-    if (this.hasQueryCredentials(queries)) {
-      return {
-        auth: {
-          username: queries.auth_user,
-          apiKey: queries.auth_pass
-        },
-        source: 'query',
-        selectedCredential: {
-          user: queries.auth_user,
-          password: queries.auth_pass
-        }
-      }
+  private resolveQueryAuthCredentials(queries: booruQueriesDTO): ResolvedAuthCredentials {
+    if (!this.hasQueryCredentials(queries)) {
+      return { source: 'none' }
     }
 
-    // Priority 2: Environment variables through auth manager
-    const envCredentials = this.authManager.getAvailableCredential(queries.baseEndpoint)
-
-    if (envCredentials) {
-      return {
-        auth: {
-          username: envCredentials.user,
-          apiKey: envCredentials.password
-        },
-        source: 'env',
-        selectedCredential: envCredentials
-      }
-    }
-
-    // Priority 3: No authentication
     return {
-      source: 'none'
+      auth: {
+        username: queries.auth_user,
+        apiKey: queries.auth_pass
+      },
+      source: 'query',
+      selectedCredential: {
+        user: queries.auth_user,
+        password: queries.auth_pass
+      }
     }
   }
 
@@ -235,12 +220,22 @@ export class BooruService {
     const attemptedCredentials = new Set<string>()
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const context = this.buildApiWithContext(params, queries)
-      const selectedCredential = context.authResolution.selectedCredential
+      const selectedCredential = await this.authManager.reserveAvailableCredential(queries.baseEndpoint)
 
-      if (context.authResolution.source !== 'env' || !selectedCredential) {
+      if (!selectedCredential) {
         throw this.createPoolUnavailableError(queries.baseEndpoint)
       }
+
+      const authResolution: ResolvedAuthCredentials = {
+        auth: {
+          username: selectedCredential.user,
+          apiKey: selectedCredential.password
+        },
+        source: 'env',
+        selectedCredential
+      }
+
+      const context = this.buildApiWithContext(params, queries, authResolution)
 
       const credentialKey = `${selectedCredential.user}:${selectedCredential.password}`
 
@@ -306,13 +301,10 @@ export class BooruService {
 
   private createPoolUnavailableError(domain: string): ManagedCredentialPoolUnavailableError {
     const stats = this.authManager.getDomainStats(domain)
+    const retryAfterSeconds = this.authManager.getMinCooldownSeconds(domain)
 
-    if (stats.available === 0 && stats.cooldown > 0) {
-      return new ManagedCredentialPoolUnavailableError(
-        domain,
-        'cooldown_exhausted',
-        this.authManager.getMinCooldownSeconds(domain)
-      )
+    if (retryAfterSeconds !== undefined || (stats.available === 0 && stats.cooldown > 0)) {
+      return new ManagedCredentialPoolUnavailableError(domain, 'cooldown_exhausted', retryAfterSeconds)
     }
 
     return new ManagedCredentialPoolUnavailableError(domain, 'permanent_exhausted')

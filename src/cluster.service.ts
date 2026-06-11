@@ -1,14 +1,26 @@
 import { Injectable } from '@nestjs/common'
 import { availableParallelism } from 'os'
 import cluster from 'cluster'
-import { IpcAuthMessage, DisabledCredential } from './booru/interfaces/auth-manager.interface'
-import { createCredentialKey } from './booru/services/credential-key.util'
+import { IpcAuthMessage } from './booru/interfaces/auth-manager.interface'
+import { BooruAuthManagerService } from './booru/services/booru-auth-manager.service'
 
-const numCPUs = process.env['NODE_ENV'] === 'development' ? 1 : availableParallelism()
+export function getWorkerCount(): number {
+  if (process.env['NODE_ENV'] === 'development') {
+    return 1
+  }
+
+  const configuredWorkerCount = Number.parseInt(process.env['WEB_CONCURRENCY'] ?? '', 10)
+
+  if (Number.isFinite(configuredWorkerCount) && configuredWorkerCount > 0) {
+    return configuredWorkerCount
+  }
+
+  return availableParallelism()
+}
 
 @Injectable()
 export class AppClusterService {
-  private static readonly disabledCredentials = new Set<string>()
+  private static primaryAuthManager: BooruAuthManagerService | null = null
 
   static clusterize(callback: () => void | Promise<void>): void {
     if (cluster.isPrimary) {
@@ -17,7 +29,7 @@ export class AppClusterService {
       // Setup IPC message handling for credential management
       this.setupPrimaryIpcHandling()
 
-      for (let i = 0; i < numCPUs; i++) {
+      for (let i = 0; i < getWorkerCount(); i++) {
         cluster.fork()
       }
 
@@ -34,11 +46,9 @@ export class AppClusterService {
   private static setupPrimaryIpcHandling(): void {
     cluster.on('message', (worker, message: IpcAuthMessage) => {
       if (message.type === 'DISABLE_CREDENTIAL') {
-        const credential = message.payload as DisabledCredential
-        const credentialKey = createCredentialKey(credential.domain, credential.user, credential.password)
+        const credential = message.payload
 
-        // Store in primary process
-        this.disabledCredentials.add(credentialKey)
+        this.getPrimaryAuthManager().applyDisabledCredential(credential)
 
         // Broadcast to all other workers
         Object.values(cluster.workers ?? {}).forEach((w) => {
@@ -52,11 +62,35 @@ export class AppClusterService {
         console.log(
           `🔄 Broadcasting disabled ${scope} credential for ${credential.domain} to ${Object.keys(cluster.workers ?? {}).length - 1} other workers`
         )
+        return
+      }
+
+      if (message.type === 'RESERVE_CREDENTIAL') {
+        const payload = message.payload
+        const reservation = this.getPrimaryAuthManager().reserveAvailableCredentialLocally(payload.domain)
+
+        worker.send({
+          type: 'RESERVE_CREDENTIAL_RESPONSE',
+          payload: {
+            requestId: payload.requestId,
+            credential: reservation.credential,
+            ...(reservation.retryAfterSeconds !== undefined ? { retryAfterSeconds: reservation.retryAfterSeconds } : {})
+          }
+        } satisfies IpcAuthMessage)
       }
     })
   }
 
-  static getDisabledCredentials(): Set<string> {
-    return this.disabledCredentials
+  private static getPrimaryAuthManager(): BooruAuthManagerService {
+    if (this.primaryAuthManager !== null) {
+      return this.primaryAuthManager
+    }
+
+    this.primaryAuthManager = new BooruAuthManagerService({
+      get: (key: string) => process.env[key]
+    })
+    this.primaryAuthManager.onModuleInit()
+
+    return this.primaryAuthManager
   }
 }

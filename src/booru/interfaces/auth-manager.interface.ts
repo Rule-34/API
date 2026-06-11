@@ -1,6 +1,10 @@
 export interface BooruAuthCredential {
   user: string
   password: string
+  rateLimit?: {
+    requests: number
+    windowSeconds: number
+  }
 }
 
 export type BooruAuthConfig = Record<string, BooruAuthCredential[]>
@@ -86,7 +90,10 @@ export interface AuthFailureEvent {
   timestamp: Date
 }
 
-export interface IpcAuthMessage {
-  type: 'DISABLE_CREDENTIAL' | 'CREDENTIAL_STATS_REQUEST' | 'CREDENTIAL_STATS_RESPONSE'
-  payload: DisabledCredential | AuthCredentialStats[] | { requestId: string }
-}
+export type IpcAuthMessage =
+  | { type: 'DISABLE_CREDENTIAL'; payload: DisabledCredential }
+  | { type: 'RESERVE_CREDENTIAL'; payload: { requestId: string; domain: string } }
+  | {
+      type: 'RESERVE_CREDENTIAL_RESPONSE'
+      payload: { requestId: string; credential: BooruAuthCredential | null; retryAfterSeconds?: number }
+    }
