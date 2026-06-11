@@ -2,15 +2,27 @@ import type { TestingModule } from '@nestjs/testing'
 import { Test } from '@nestjs/testing'
 import { ConfigModule } from '@nestjs/config'
 import { BooruAuthManagerService } from './booru-auth-manager.service'
-import type { CooldownDisabledCredential, DisabledCredential } from '../interfaces/auth-manager.interface'
+import type {
+  BooruAuthCredential,
+  DisabledCredential,
+  SerializedCooldownDisabledCredential
+} from '../interfaces/auth-manager.interface'
 
 interface AuthManagerPrivateAccess {
   disableCredentialLocally(credential: DisabledCredential): void
+  reserveAvailableCredentialFromPrimary(domain: string): Promise<BooruAuthCredential | null>
 }
 
-type SerializedCooldownDisabledCredential = Omit<CooldownDisabledCredential, 'disabledAt' | 'cooldownUntil'> & {
-  disabledAt: string
-  cooldownUntil: string
+async function createAuthManagerService(): Promise<{ module: TestingModule; service: BooruAuthManagerService }> {
+  const module = await Test.createTestingModule({
+    imports: [ConfigModule.forRoot({ isGlobal: true, cache: false, ignoreEnvFile: true })],
+    providers: [BooruAuthManagerService]
+  }).compile()
+
+  const service = module.get<BooruAuthManagerService>(BooruAuthManagerService)
+  service.onModuleInit()
+
+  return { module, service }
 }
 
 describe('BooruAuthManagerService', () => {
@@ -26,24 +38,24 @@ describe('BooruAuthManagerService', () => {
         { user: 'api-user', password: 'api-pass' }
       ],
       'gelbooru.com': [{ user: 'gel-user', password: 'gel-pass' }],
+      'gelbooru-override.test': [
+        { user: 'override-user', password: 'override-pass', rateLimit: { requests: 2, windowSeconds: 5 } }
+      ],
       'www.gelbooru.com': [{ user: 'www-gel-user', password: 'www-gel-pass' }],
       'same-user.test': [
         { user: 'shared-user', password: 'first-pass' },
         { user: 'shared-user', password: 'second-pass' }
+      ],
+      'quota-round-robin.test': [
+        { user: 'quota-user-1', password: 'quota-pass-1', rateLimit: { requests: 1, windowSeconds: 10 } },
+        { user: 'quota-user-2', password: 'quota-pass-2', rateLimit: { requests: 2, windowSeconds: 10 } }
       ],
       'colon-user.test': [
         { user: 'name:one', password: 'pass' },
         { user: 'name', password: 'one:pass' }
       ]
     })
-
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [ConfigModule.forRoot({ isGlobal: true, cache: false, ignoreEnvFile: true })],
-      providers: [BooruAuthManagerService]
-    }).compile()
-
-    service = module.get<BooruAuthManagerService>(BooruAuthManagerService)
-    service.onModuleInit()
+    ;({ service } = await createAuthManagerService())
   })
 
   afterEach(() => {
@@ -69,16 +81,16 @@ describe('BooruAuthManagerService', () => {
     })
   })
 
-  it('should keep non-aliased www domains separate from root domains', () => {
-    const rootCredential = service.getAvailableCredential('https://gelbooru.com/index.php?page=dapi')
-    const wwwCredential = service.getAvailableCredential('https://www.gelbooru.com/index.php?page=dapi')
+  it('should keep non-aliased www domains separate from root domains', async () => {
+    const rootCredential = await service.reserveAvailableCredential('https://gelbooru.com/index.php?page=dapi')
+    const wwwCredential = await service.reserveAvailableCredential('https://www.gelbooru.com/index.php?page=dapi')
 
     expect(rootCredential).toEqual({ user: 'gel-user', password: 'gel-pass' })
     expect(wwwCredential).toEqual({ user: 'www-gel-user', password: 'www-gel-pass' })
   })
 
-  it('should resolve credentials for api.rule34.xxx using rule34.xxx auth pool', () => {
-    const credential = service.getAvailableCredential('https://api.rule34.xxx/index.php?page=dapi')
+  it('should resolve credentials for api.rule34.xxx using rule34.xxx auth pool', async () => {
+    const credential = await service.reserveAvailableCredential('https://api.rule34.xxx/index.php?page=dapi')
 
     if (credential === null) {
       throw new Error('Expected a credential for api.rule34.xxx')
@@ -87,8 +99,8 @@ describe('BooruAuthManagerService', () => {
     expect(['canonical-user', 'api-user']).toContain(credential.user)
   })
 
-  it('should resolve credentials when base endpoint uses uppercase protocol', () => {
-    const credential = service.getAvailableCredential('HTTPS://API.RULE34.XXX/index.php?page=dapi')
+  it('should resolve credentials when base endpoint uses uppercase protocol', async () => {
+    const credential = await service.reserveAvailableCredential('HTTPS://API.RULE34.XXX/index.php?page=dapi')
 
     if (credential === null) {
       throw new Error('Expected a credential for uppercase api.rule34.xxx')
@@ -97,8 +109,8 @@ describe('BooruAuthManagerService', () => {
     expect(['canonical-user', 'api-user']).toContain(credential.user)
   })
 
-  it('should normalize reported auth failures to canonical rule34 domain', () => {
-    const selectedCredential = service.getAvailableCredential('https://rule34.xxx/index.php?page=dapi')
+  it('should normalize reported auth failures to canonical rule34 domain', async () => {
+    const selectedCredential = await service.reserveAvailableCredential('https://rule34.xxx/index.php?page=dapi')
 
     if (selectedCredential === null) {
       throw new Error('Expected a credential for rule34.xxx')
@@ -151,7 +163,7 @@ describe('BooruAuthManagerService', () => {
       user: 'www-gel-user',
       password: 'www-gel-pass',
       error:
-        'HTTP 403: Forbidden auth_user=www-gel-user auth_pass=secret123 token=abc123 api_key=xyz789 user_id=42 key=plain-key limit=10',
+        'HTTP 403: Forbidden auth_user=www-gel-user auth_pass=secret123 token=abc123 api_key=xyz789 apikey=compact-key user_id=42 key=plain-key limit=10',
       timestamp: new Date()
     })
 
@@ -161,6 +173,7 @@ describe('BooruAuthManagerService', () => {
     expect(loggedMessage).toContain('auth_pass=REDACTED')
     expect(loggedMessage).toContain('token=REDACTED')
     expect(loggedMessage).toContain('api_key=REDACTED')
+    expect(loggedMessage).toContain('apikey=REDACTED')
     expect(loggedMessage).toContain('user_id=REDACTED')
     expect(loggedMessage).toContain('key=REDACTED')
     expect(loggedMessage).toContain('limit=10')
@@ -168,10 +181,31 @@ describe('BooruAuthManagerService', () => {
     expect(loggedMessage).not.toContain('secret123')
     expect(loggedMessage).not.toContain('abc123')
     expect(loggedMessage).not.toContain('xyz789')
+    expect(loggedMessage).not.toContain('compact-key')
     expect(loggedMessage).not.toContain('plain-key')
 
     errorSpy.mockRestore()
     warnSpy.mockRestore()
+  })
+
+  it('should fail startup when auth config credentials have the wrong shape', async () => {
+    process.env['BOORU_AUTH_CONFIG'] = JSON.stringify({
+      'rule34.xxx': [{ user: 'valid-user', password: 'secret-one' }, { user: 'missing-password' }]
+    })
+
+    await expect(createAuthManagerService()).rejects.toThrow(
+      'Invalid BOORU_AUTH_CONFIG credential for rule34.xxx at index 1'
+    )
+  })
+
+  it('should fail startup when auth config rate limits have the wrong shape', async () => {
+    process.env['BOORU_AUTH_CONFIG'] = JSON.stringify({
+      'rule34.xxx': [{ user: 'valid-user', password: 'secret-one', rateLimit: { requests: 0, windowSeconds: 1 } }]
+    })
+
+    await expect(createAuthManagerService()).rejects.toThrow(
+      'Invalid BOORU_AUTH_CONFIG rateLimit for rule34.xxx at index 0'
+    )
   })
 
   it('should redact malformed uppercase-protocol URLs in auth failure logs', () => {
@@ -312,7 +346,125 @@ describe('BooruAuthManagerService', () => {
     ).toBe(true)
   })
 
-  it('should reactivate credentials after cooldown expiration', () => {
+  it('should use provider fallback cooldown when rate limit has no retry-after', () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
+
+    service.reportAuthFailure({
+      domain: 'https://gelbooru.com/index.php?page=dapi',
+      user: 'gel-user',
+      password: 'gel-pass',
+      error: 'HTTP 429: Too Many Requests',
+      failureKind: 'rate_limited',
+      timestamp: new Date()
+    })
+
+    const disabledCredential = service
+      .getDisabledCredentials()
+      .find((credential) => credential.domain === 'gelbooru.com' && credential.user === 'gel-user')
+
+    expect(disabledCredential?.state).toBe('cooldown')
+
+    if (disabledCredential?.state !== 'cooldown') {
+      throw new Error('Expected cooldown credential')
+    }
+
+    expect(disabledCredential.cooldownUntil.getTime()).toBe(new Date('2026-01-01T00:00:01.000Z').getTime())
+
+    jest.useRealTimers()
+  })
+
+  it('should reserve gelbooru credentials according to the provider per-key quota', async () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
+
+    const reservations = []
+
+    for (let i = 0; i < 10; i++) {
+      reservations.push(await service.reserveAvailableCredential('gelbooru.com'))
+    }
+
+    const exhaustedReservation = await service.reserveAvailableCredential('gelbooru.com')
+
+    expect(reservations.every((credential) => credential?.user === 'gel-user')).toBe(true)
+    expect(exhaustedReservation).toBeNull()
+    expect(service.getMinCooldownSeconds('gelbooru.com')).toBe(1)
+
+    jest.advanceTimersByTime(1_001)
+
+    expect(await service.reserveAvailableCredential('gelbooru.com')).toEqual({ user: 'gel-user', password: 'gel-pass' })
+
+    jest.useRealTimers()
+  })
+
+  it('should expose quota-full credentials as cooldown in status snapshots', async () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
+
+    for (let i = 0; i < 10; i++) {
+      await service.reserveAvailableCredential('gelbooru.com')
+    }
+
+    const [snapshot] = service.getCredentialPoolStatus('gelbooru.com')
+    const credential = snapshot?.credentials.at(0)
+
+    expect(snapshot?.available).toBe(0)
+    expect(snapshot?.cooldown).toBe(1)
+    expect(credential).toEqual({
+      user: 'gel-user',
+      state: 'cooldown',
+      cooldownUntil: '2026-01-01T00:00:01.000Z',
+      secondsRemaining: 1,
+      reason: 'quota_exhausted'
+    })
+
+    jest.useRealTimers()
+  })
+
+  it('should reserve rule34 credentials according to the provider per-key quota', async () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
+
+    for (let i = 0; i < 120; i++) {
+      expect(await service.reserveAvailableCredential('rule34.xxx')).not.toBeNull()
+    }
+
+    expect(await service.reserveAvailableCredential('rule34.xxx')).toBeNull()
+    expect(service.getMinCooldownSeconds('rule34.xxx')).toBe(60)
+
+    jest.advanceTimersByTime(60_001)
+
+    expect(await service.reserveAvailableCredential('rule34.xxx')).not.toBeNull()
+
+    jest.useRealTimers()
+  })
+
+  it('should use per-key quota overrides before domain defaults', async () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
+
+    expect(await service.reserveAvailableCredential('gelbooru-override.test')).not.toBeNull()
+    expect(await service.reserveAvailableCredential('gelbooru-override.test')).not.toBeNull()
+    expect(await service.reserveAvailableCredential('gelbooru-override.test')).toBeNull()
+    expect(service.getMinCooldownSeconds('gelbooru-override.test')).toBe(5)
+
+    jest.useRealTimers()
+  })
+
+  it('should skip quota-full credentials and reserve another key', async () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
+
+    await service.reserveAvailableCredential('quota-round-robin.test')
+
+    const selectedCredential = await service.reserveAvailableCredential('quota-round-robin.test')
+
+    expect(selectedCredential?.user).toBe('quota-user-2')
+
+    jest.useRealTimers()
+  })
+
+  it('should reactivate credentials after cooldown expiration', async () => {
     jest.useFakeTimers()
     jest.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
 
@@ -326,13 +478,17 @@ describe('BooruAuthManagerService', () => {
       timestamp: new Date()
     })
 
-    const selectedDuringCooldown = service.getAvailableCredential('https://www.gelbooru.com/index.php?page=dapi')
+    const selectedDuringCooldown = await service.reserveAvailableCredential(
+      'https://www.gelbooru.com/index.php?page=dapi'
+    )
 
     expect(selectedDuringCooldown).toBeNull()
 
     jest.advanceTimersByTime(1_100)
 
-    const selectedAfterCooldown = service.getAvailableCredential('https://www.gelbooru.com/index.php?page=dapi')
+    const selectedAfterCooldown = await service.reserveAvailableCredential(
+      'https://www.gelbooru.com/index.php?page=dapi'
+    )
 
     expect(selectedAfterCooldown).toEqual({ user: 'www-gel-user', password: 'www-gel-pass' })
 
@@ -424,6 +580,34 @@ describe('BooruAuthManagerService', () => {
     expect(stats.total).toBe(2)
     expect(stats.cooldown).toBe(1)
     expect(stats.available).toBe(1)
+  })
+
+  it('should not locally reserve credentials when primary worker reservation IPC times out', async () => {
+    jest.useFakeTimers()
+    const originalSend = Reflect.get(process, 'send') as typeof process.send
+    const sendMock = jest.fn() as jest.MockedFunction<NonNullable<typeof process.send>>
+    Reflect.set(process, 'send', sendMock)
+
+    const reservation = (service as unknown as AuthManagerPrivateAccess).reserveAvailableCredentialFromPrimary(
+      'gelbooru.com'
+    )
+
+    jest.advanceTimersByTime(1_001)
+
+    await expect(reservation).resolves.toBeNull()
+    expect(sendMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'RESERVE_CREDENTIAL'
+      })
+    )
+    expect(await service.reserveAvailableCredential('gelbooru.com')).toEqual({ user: 'gel-user', password: 'gel-pass' })
+
+    if (originalSend === undefined) {
+      Reflect.deleteProperty(process, 'send')
+    } else {
+      Reflect.set(process, 'send', originalSend)
+    }
+    jest.useRealTimers()
   })
 
   it('should throw when IPC-serialized Dates are used without reconstruction (proves original bug)', () => {

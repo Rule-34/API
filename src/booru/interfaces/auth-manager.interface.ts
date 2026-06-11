@@ -1,6 +1,10 @@
 export interface BooruAuthCredential {
   user: string
   password: string
+  rateLimit?: {
+    requests: number
+    windowSeconds: number
+  }
 }
 
 export type BooruAuthConfig = Record<string, BooruAuthCredential[]>
@@ -23,6 +27,25 @@ export interface CooldownDisabledCredential extends DisabledCredentialBase {
 }
 
 export type DisabledCredential = PermanentDisabledCredential | CooldownDisabledCredential
+
+interface SerializedDisabledCredentialBase {
+  domain: string
+  user: string
+  password?: string
+  disabledAt: string
+  reason?: string
+}
+
+export interface SerializedPermanentDisabledCredential extends SerializedDisabledCredentialBase {
+  state: 'permanent'
+}
+
+export interface SerializedCooldownDisabledCredential extends SerializedDisabledCredentialBase {
+  state: 'cooldown'
+  cooldownUntil: string
+}
+
+export type SerializedDisabledCredential = SerializedPermanentDisabledCredential | SerializedCooldownDisabledCredential
 
 export interface AuthCredentialStats {
   domain: string
@@ -86,7 +109,10 @@ export interface AuthFailureEvent {
   timestamp: Date
 }
 
-export interface IpcAuthMessage {
-  type: 'DISABLE_CREDENTIAL' | 'CREDENTIAL_STATS_REQUEST' | 'CREDENTIAL_STATS_RESPONSE'
-  payload: DisabledCredential | AuthCredentialStats[] | { requestId: string }
-}
+export type IpcAuthMessage =
+  | { type: 'DISABLE_CREDENTIAL'; payload: SerializedDisabledCredential }
+  | { type: 'RESERVE_CREDENTIAL'; payload: { requestId: string; domain: string } }
+  | {
+      type: 'RESERVE_CREDENTIAL_RESPONSE'
+      payload: { requestId: string; credential: BooruAuthCredential | null; retryAfterSeconds?: number }
+    }

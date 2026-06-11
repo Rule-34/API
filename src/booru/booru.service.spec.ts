@@ -9,7 +9,7 @@ import type { BooruEndpointParamsDTO } from './dto/request-booru.dto'
 import { BooruAuthManagerService } from './services/booru-auth-manager.service'
 
 interface MockAuthManager {
-  getAvailableCredential: jest.MockedFunction<BooruAuthManagerService['getAvailableCredential']>
+  reserveAvailableCredential: jest.MockedFunction<BooruAuthManagerService['reserveAvailableCredential']>
   getDomainStats: jest.MockedFunction<BooruAuthManagerService['getDomainStats']>
   reportAuthFailure: jest.MockedFunction<BooruAuthManagerService['reportAuthFailure']>
   getMinCooldownSeconds: jest.MockedFunction<BooruAuthManagerService['getMinCooldownSeconds']>
@@ -48,7 +48,9 @@ describe('BooruService', () => {
 
   beforeEach(async () => {
     mockAuthManager = {
-      getAvailableCredential: jest.fn() as jest.MockedFunction<BooruAuthManagerService['getAvailableCredential']>,
+      reserveAvailableCredential: jest.fn() as jest.MockedFunction<
+        BooruAuthManagerService['reserveAvailableCredential']
+      >,
       getDomainStats: jest.fn() as jest.MockedFunction<BooruAuthManagerService['getDomainStats']>,
       reportAuthFailure: jest.fn() as jest.MockedFunction<BooruAuthManagerService['reportAuthFailure']>,
       getMinCooldownSeconds: jest.fn() as jest.MockedFunction<BooruAuthManagerService['getMinCooldownSeconds']>
@@ -80,6 +82,7 @@ describe('BooruService', () => {
       cooldown: 0,
       permanentDisabled: 0
     })
+    mockAuthManager.reserveAvailableCredential.mockResolvedValue({ user: 'managed_1', password: 'pass_1' })
   })
 
   describe('Authentication Resolution', () => {
@@ -96,16 +99,13 @@ describe('BooruService', () => {
       expect(getApiAuth(api)?.apiKey).toBe('query_pass')
     })
 
-    it('should fallback to environment variables when query parameters are missing or incomplete', () => {
-      mockAuthManager.getAvailableCredential.mockReturnValue({ user: 'env_user', password: 'env_pass' })
-
+    it('should not use managed credentials while building metadata APIs', () => {
       // Test with no query params
       const queriesNoAuth = { ...baseQueries } as booruQueriesDTO
       const apiNoAuth = service.buildApiClass(mockParams, queriesNoAuth)
 
-      expect(mockAuthManager.getAvailableCredential).toHaveBeenCalledWith('https://gelbooru.com')
-      expect(getApiAuth(apiNoAuth)?.username).toBe('env_user')
-      expect(getApiAuth(apiNoAuth)?.apiKey).toBe('env_pass')
+      expect(getApiAuth(apiNoAuth)?.username).toBeUndefined()
+      expect(getApiAuth(apiNoAuth)?.apiKey).toBeUndefined()
 
       // Test with partial query params (should still use env)
       const queriesPartial = {
@@ -114,13 +114,11 @@ describe('BooruService', () => {
       } as booruQueriesDTO
       const apiPartial = service.buildApiClass(mockParams, queriesPartial)
 
-      expect(getApiAuth(apiPartial)?.username).toBe('env_user')
-      expect(getApiAuth(apiPartial)?.apiKey).toBe('env_pass')
+      expect(getApiAuth(apiPartial)?.username).toBeUndefined()
+      expect(getApiAuth(apiPartial)?.apiKey).toBeUndefined()
     })
 
-    it('should prioritize query parameters over environment variables', () => {
-      mockAuthManager.getAvailableCredential.mockReturnValue({ user: 'env_user', password: 'env_pass' })
-
+    it('should use query parameters when building metadata APIs', () => {
       const queries = {
         ...baseQueries,
         auth_user: 'query_user',
@@ -129,39 +127,25 @@ describe('BooruService', () => {
 
       const api = service.buildApiClass(mockParams, queries)
 
-      // Should use query credentials, not env credentials - auth manager should not be called
-      expect(mockAuthManager.getAvailableCredential).not.toHaveBeenCalled()
       expect(getApiAuth(api)?.username).toBe('query_user')
       expect(getApiAuth(api)?.apiKey).toBe('query_pass')
     })
 
-    it('should create API without authentication when no credentials are available', () => {
-      mockAuthManager.getAvailableCredential.mockReturnValue(null)
-
+    it('should create metadata API without authentication when no query credentials are available', () => {
       const queries = { ...baseQueries } as booruQueriesDTO
       const api = service.buildApiClass(mockParams, queries)
 
-      expect(mockAuthManager.getAvailableCredential).toHaveBeenCalledWith('https://gelbooru.com')
       expect(getApiAuth(api)?.username).toBeUndefined()
       expect(getApiAuth(api)?.apiKey).toBeUndefined()
     })
 
-    it('should use auth manager for credential selection', () => {
-      mockAuthManager.getAvailableCredential.mockReturnValue({ user: 'managed_user', password: 'managed_pass' })
-
+    it('should expose selected credential metadata when building API with an auth override', () => {
       const queries = { ...baseQueries } as booruQueriesDTO
-      const api = service.buildApiClass(mockParams, queries)
-
-      expect(mockAuthManager.getAvailableCredential).toHaveBeenCalledWith('https://gelbooru.com')
-      expect(getApiAuth(api)?.username).toBe('managed_user')
-      expect(getApiAuth(api)?.apiKey).toBe('managed_pass')
-    })
-
-    it('should expose selected credential metadata when building API with context', () => {
-      mockAuthManager.getAvailableCredential.mockReturnValue({ user: 'managed_user', password: 'managed_pass' })
-
-      const queries = { ...baseQueries } as booruQueriesDTO
-      const result = service.buildApiWithContext(mockParams, queries)
+      const result = service.buildApiWithContext(mockParams, queries, {
+        auth: { username: 'managed_user', apiKey: 'managed_pass' },
+        source: 'env',
+        selectedCredential: { user: 'managed_user', password: 'managed_pass' }
+      })
 
       expect(getApiAuth(result.api)?.username).toBe('managed_user')
       expect(result.authResolution.source).toBe('env')
@@ -169,6 +153,15 @@ describe('BooruService', () => {
         user: 'managed_user',
         password: 'managed_pass'
       })
+    })
+
+    it('should not use managed credentials when building API context without an override', () => {
+      const queries = { ...baseQueries } as booruQueriesDTO
+      const result = service.buildApiWithContext(mockParams, queries)
+
+      expect(result.authResolution.source).toBe('none')
+      expect(getApiAuth(result.api)?.username).toBeUndefined()
+      expect(getApiAuth(result.api)?.apiKey).toBeUndefined()
     })
 
     it('should expose query credential metadata when query auth is provided', () => {
@@ -185,7 +178,6 @@ describe('BooruService', () => {
         user: 'query_user',
         password: 'query_pass'
       })
-      expect(mockAuthManager.getAvailableCredential).not.toHaveBeenCalled()
     })
   })
 
@@ -201,7 +193,6 @@ describe('BooruService', () => {
       const result = await service.executeWithAuthStrategy(mockParams, queries, operation)
 
       expect(result).toBe('ok')
-      expect(mockAuthManager.getAvailableCredential).not.toHaveBeenCalled()
       expect(mockAuthManager.reportAuthFailure).not.toHaveBeenCalled()
     })
 
@@ -215,9 +206,9 @@ describe('BooruService', () => {
         permanentDisabled: 0
       })
 
-      mockAuthManager.getAvailableCredential
-        .mockReturnValueOnce({ user: 'managed_1', password: 'pass_1' })
-        .mockReturnValueOnce({ user: 'managed_2', password: 'pass_2' })
+      mockAuthManager.reserveAvailableCredential
+        .mockResolvedValueOnce({ user: 'managed_1', password: 'pass_1' })
+        .mockResolvedValueOnce({ user: 'managed_2', password: 'pass_2' })
 
       const queries = { ...baseQueries } as booruQueriesDTO
       const operation = jest
@@ -247,6 +238,67 @@ describe('BooruService', () => {
       )
     })
 
+    it('should not collapse attempted credentials when usernames or passwords contain colons', async () => {
+      mockAuthManager.getDomainStats.mockReturnValue({
+        domain: 'gelbooru.com',
+        total: 2,
+        available: 2,
+        disabled: 0,
+        cooldown: 0,
+        permanentDisabled: 0
+      })
+
+      mockAuthManager.reserveAvailableCredential
+        .mockResolvedValueOnce({ user: 'name:one', password: 'pass' })
+        .mockResolvedValueOnce({ user: 'name', password: 'one:pass' })
+
+      const queries = { ...baseQueries } as booruQueriesDTO
+      const operation = jest.fn().mockImplementation(() => {
+        throw new HttpError({
+          message: 'rate limited',
+          statusCode: 429,
+          failureKind: 'rate_limited'
+        })
+      })
+
+      await expect(service.executeWithAuthStrategy(mockParams, queries, operation)).rejects.toEqual(
+        expect.objectContaining<Partial<ManagedCredentialPoolUnavailableError>>({
+          name: 'ManagedCredentialPoolUnavailableError'
+        })
+      )
+
+      expect(operation).toHaveBeenCalledTimes(2)
+      expect(mockAuthManager.reportAuthFailure).toHaveBeenCalledTimes(2)
+    })
+
+    it('should sanitize credential-bearing upstream errors before reporting managed auth failures', async () => {
+      const queries = { ...baseQueries } as booruQueriesDTO
+      const operation = jest.fn().mockImplementation(() => {
+        throw new HttpError({
+          message:
+            'HTTP 429 for https://gelbooru.com/index.php?page=dapi&auth_user=managed_1&auth_pass=pass_1&api_key=secret-key&user_id=123',
+          statusCode: 429,
+          failureKind: 'rate_limited'
+        })
+      })
+
+      await expect(service.executeWithAuthStrategy(mockParams, queries, operation)).rejects.toEqual(
+        expect.objectContaining<Partial<ManagedCredentialPoolUnavailableError>>({
+          name: 'ManagedCredentialPoolUnavailableError'
+        })
+      )
+
+      const reportedError = mockAuthManager.reportAuthFailure.mock.calls[0]?.[0].error
+
+      expect(reportedError).toContain('auth_user=REDACTED')
+      expect(reportedError).toContain('auth_pass=REDACTED')
+      expect(reportedError).toContain('api_key=REDACTED')
+      expect(reportedError).toContain('user_id=REDACTED')
+      expect(reportedError).not.toContain('managed_1')
+      expect(reportedError).not.toContain('pass_1')
+      expect(reportedError).not.toContain('secret-key')
+    })
+
     it('should fallback to unauthenticated execution when no managed credentials are configured', async () => {
       mockAuthManager.getDomainStats.mockReturnValue({
         domain: 'rule34.paheal.net',
@@ -256,7 +308,7 @@ describe('BooruService', () => {
         cooldown: 0,
         permanentDisabled: 0
       })
-      mockAuthManager.getAvailableCredential.mockReturnValue(null)
+      mockAuthManager.reserveAvailableCredential.mockResolvedValue(null)
 
       const queries = {
         ...baseQueries,
@@ -270,7 +322,6 @@ describe('BooruService', () => {
       expect(result).toBe('ok-no-auth')
       expect(operation).toHaveBeenCalledTimes(1)
       expect(mockAuthManager.reportAuthFailure).not.toHaveBeenCalled()
-      expect(mockAuthManager.getAvailableCredential).toHaveBeenCalledWith('https://rule34.paheal.net')
     })
 
     it('should throw pool unavailable error when managed credentials are exhausted', async () => {
@@ -282,7 +333,7 @@ describe('BooruService', () => {
         cooldown: 1,
         permanentDisabled: 0
       })
-      mockAuthManager.getAvailableCredential.mockReturnValue(null)
+      mockAuthManager.reserveAvailableCredential.mockResolvedValue(null)
       mockAuthManager.getMinCooldownSeconds.mockReturnValue(42)
 
       const queries = { ...baseQueries } as booruQueriesDTO
@@ -314,7 +365,7 @@ describe('BooruService', () => {
         permanentDisabled: 0
       })
 
-      mockAuthManager.getAvailableCredential.mockReturnValue({ user: 'managed_1', password: 'pass_1' })
+      mockAuthManager.reserveAvailableCredential.mockResolvedValue({ user: 'managed_1', password: 'pass_1' })
 
       const queries = { ...baseQueries } as booruQueriesDTO
       const operation = jest.fn().mockImplementation(() => {
