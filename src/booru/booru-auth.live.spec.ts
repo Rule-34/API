@@ -39,6 +39,21 @@ function sanitizeLiveSmokeErrorMessage(message: string): string {
   return sanitizedMessage
 }
 
+function createSanitizedLiveSmokeErrorCause(error: unknown): Error {
+  if (!(error instanceof Error)) {
+    return new Error(sanitizeLiveSmokeErrorMessage(String(error)))
+  }
+
+  const cause = new Error(sanitizeLiveSmokeErrorMessage(error.message))
+  cause.name = error.name
+
+  if (error.stack !== undefined) {
+    cause.stack = sanitizeLiveSmokeErrorMessage(error.stack)
+  }
+
+  return cause
+}
+
 describe('live smoke error sanitization', () => {
   it('redacts auth query params before rethrowing non-quota live errors', () => {
     const message =
@@ -53,6 +68,17 @@ describe('live smoke error sanitization', () => {
     expect(sanitizedMessage).not.toContain('secret')
     expect(sanitizedMessage).not.toContain('user_id=123')
     expect(sanitizedMessage).not.toContain('auth_pass=pass')
+  })
+
+  it('uses a sanitized cause when rethrowing non-quota live errors', () => {
+    const originalError = new Error('HTTP 403 https://gelbooru.com/index.php?page=dapi&api_key=secret&user_id=123')
+    originalError.stack = 'Error: api_key=secret user_id=123'
+
+    const cause = createSanitizedLiveSmokeErrorCause(originalError)
+
+    expect(cause.name).toBe('Error')
+    expect(cause.message).toBe('HTTP 403 https://gelbooru.com/index.php?page=dapi&api_key=REDACTED&user_id=REDACTED')
+    expect(cause.stack).toBe('Error: api_key=REDACTED user_id=REDACTED')
   })
 })
 
@@ -110,16 +136,9 @@ describeLive('authenticated booru live smoke tests', () => {
 
         const message = error instanceof Error ? error.message : String(error)
         const sanitizedMessage = sanitizeLiveSmokeErrorMessage(message)
-
-        if (error instanceof Error) {
-          error.message = sanitizedMessage
-
-          if (error.stack !== undefined) {
-            error.stack = sanitizeLiveSmokeErrorMessage(error.stack)
-          }
-        }
-
-        throw new Error(sanitizedMessage, { cause: error })
+        // Do not preserve the original cause here; live upstream errors can carry credential-bearing request objects.
+        // eslint-disable-next-line preserve-caught-error
+        throw new Error(sanitizedMessage, { cause: createSanitizedLiveSmokeErrorCause(error) })
       }
 
       expect(posts.length).toBeGreaterThan(0)
