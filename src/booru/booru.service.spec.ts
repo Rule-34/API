@@ -399,6 +399,30 @@ describe('BooruService', () => {
         'Invalid BOORU_OUTBOUND_PROXY_CONFIG baseUrl for gelbooru.com'
       )
     })
+
+    it('should reject plaintext outbound proxy URLs', () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'BOORU_OUTBOUND_PROXY_CONFIG') {
+          return JSON.stringify({
+            'gelbooru.com': {
+              baseUrl: 'http://cors-proxy.example.test/',
+              targetParam: 'q'
+            }
+          })
+        }
+
+        return undefined
+      })
+
+      const queries = {
+        ...baseQueries,
+        baseEndpoint: 'gelbooru.com'
+      } as booruQueriesDTO
+
+      expect(() => service.buildApiClass(mockParams, queries)).toThrow(
+        'Invalid BOORU_OUTBOUND_PROXY_CONFIG baseUrl for gelbooru.com'
+      )
+    })
   })
 
   describe('Managed Strategy Execution', () => {

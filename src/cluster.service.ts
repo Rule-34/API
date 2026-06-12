@@ -72,9 +72,11 @@ export class AppClusterService {
         try {
           reservation = this.getPrimaryAuthManager().reserveAvailableCredentialLocally(payload.domain)
         } catch (error) {
+          const errorName = error instanceof Error ? error.name : 'NonErrorThrown'
+
           console.error(
             `Failed to reserve credential in primary process for ${payload.domain} request ${payload.requestId}`,
-            error
+            { errorName }
           )
 
           worker.send({

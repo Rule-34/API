@@ -529,7 +529,7 @@ export class BooruService {
 
     const parsedBaseUrl = new URL(baseUrl)
 
-    if (parsedBaseUrl.protocol !== 'https:' && parsedBaseUrl.protocol !== 'http:') {
+    if (parsedBaseUrl.protocol !== 'https:') {
       throw new Error(`Invalid BOORU_OUTBOUND_PROXY_CONFIG baseUrl for ${domain}`)
     }
 
