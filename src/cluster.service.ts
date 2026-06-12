@@ -67,7 +67,27 @@ export class AppClusterService {
 
       if (message.type === 'RESERVE_CREDENTIAL') {
         const payload = message.payload
-        const reservation = this.getPrimaryAuthManager().reserveAvailableCredentialLocally(payload.domain)
+        let reservation: ReturnType<BooruAuthManagerService['reserveAvailableCredentialLocally']>
+
+        try {
+          reservation = this.getPrimaryAuthManager().reserveAvailableCredentialLocally(payload.domain)
+        } catch (error) {
+          const errorName = error instanceof Error ? error.name : 'NonErrorThrown'
+
+          console.error(
+            `Failed to reserve credential in primary process for ${payload.domain} request ${payload.requestId}`,
+            { errorName }
+          )
+
+          worker.send({
+            type: 'RESERVE_CREDENTIAL_RESPONSE',
+            payload: {
+              requestId: payload.requestId,
+              credential: null
+            }
+          } satisfies IpcAuthMessage)
+          return
+        }
 
         worker.send({
           type: 'RESERVE_CREDENTIAL_RESPONSE',

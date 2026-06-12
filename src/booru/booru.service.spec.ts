@@ -30,6 +30,31 @@ function getApiAuth(api: unknown): ApiAuth | undefined {
   return (api as ApiAuthOptions).options?.auth
 }
 
+function buildPostUrl(api: unknown): URL {
+  const internalApi = api as {
+    generateEndpointUrl(endpoint: string): URL
+    addPostQueries(url: URL, queries: { limit: number; pageID: number; tags: string[] }): URL
+  }
+
+  return internalApi.addPostQueries(internalApi.generateEndpointUrl('/index.php?page=dapi&s=post&q=index'), {
+    limit: 1,
+    pageID: 1,
+    tags: ['diana']
+  })
+}
+
+function buildTagUrl(api: unknown): URL {
+  const internalApi = api as {
+    generateEndpointUrl(endpoint: string): URL
+    addTagsQueries(url: URL, queries: { tag: string; limit: number }): URL
+  }
+
+  return internalApi.addTagsQueries(internalApi.generateEndpointUrl('/index.php?page=dapi&s=tag&q=index'), {
+    tag: 'dian',
+    limit: 1
+  })
+}
+
 describe('BooruService', () => {
   let service: BooruService
   let mockAuthManager: MockAuthManager
@@ -47,6 +72,8 @@ describe('BooruService', () => {
   }
 
   beforeEach(async () => {
+    mockConfigService.get.mockReset()
+
     mockAuthManager = {
       reserveAvailableCredential: jest.fn() as jest.MockedFunction<
         BooruAuthManagerService['reserveAvailableCredential']
@@ -71,8 +98,6 @@ describe('BooruService', () => {
     }).compile()
 
     service = module.get<BooruService>(BooruService)
-
-    jest.clearAllMocks()
 
     mockAuthManager.getDomainStats.mockReturnValue({
       domain: 'gelbooru.com',
@@ -178,6 +203,225 @@ describe('BooruService', () => {
         user: 'query_user',
         password: 'query_pass'
       })
+    })
+  })
+
+  describe('Outbound Proxy Resolution', () => {
+    it('should proxy configured provider URLs after query and auth parameters are applied', () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'BOORU_OUTBOUND_PROXY_CONFIG') {
+          return JSON.stringify({
+            'gelbooru.com': {
+              baseUrl: 'https://cors-proxy2.rule34.workers.dev/',
+              targetParam: 'q'
+            }
+          })
+        }
+
+        return undefined
+      })
+
+      const queries = {
+        ...baseQueries,
+        baseEndpoint: 'gelbooru.com',
+        auth_user: 'managed_1',
+        auth_pass: 'pass_1'
+      } as booruQueriesDTO
+
+      const api = service.buildApiClass(mockParams, queries)
+      const proxiedUrl = buildPostUrl(api)
+      const upstreamUrl = new URL(proxiedUrl.searchParams.get('q') ?? '')
+
+      expect(proxiedUrl.origin).toBe('https://cors-proxy2.rule34.workers.dev')
+      expect(upstreamUrl.origin).toBe('https://gelbooru.com')
+      expect(upstreamUrl.searchParams.get('limit')).toBe('1')
+      expect(upstreamUrl.searchParams.get('pid')).toBe('1')
+      expect(upstreamUrl.searchParams.get('tags')).toBe('diana')
+      expect(upstreamUrl.searchParams.get('user_id')).toBe('managed_1')
+      expect(upstreamUrl.searchParams.get('api_key')).toBe('pass_1')
+    })
+
+    it('should proxy configured provider tag URLs with the same policy', () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'BOORU_OUTBOUND_PROXY_CONFIG') {
+          return JSON.stringify({
+            'gelbooru.com': {
+              baseUrl: 'https://r34.app/api/cors-proxy/',
+              targetParam: 'q'
+            }
+          })
+        }
+
+        return undefined
+      })
+
+      const queries = {
+        ...baseQueries,
+        baseEndpoint: 'gelbooru.com',
+        auth_user: 'managed_1',
+        auth_pass: 'pass_1'
+      } as booruQueriesDTO
+
+      const api = service.buildApiClass(mockParams, queries)
+      const proxiedUrl = buildTagUrl(api)
+      const upstreamUrl = new URL(proxiedUrl.searchParams.get('q') ?? '')
+
+      expect(proxiedUrl.origin).toBe('https://r34.app')
+      expect(proxiedUrl.pathname).toBe('/api/cors-proxy/')
+      expect(upstreamUrl.origin).toBe('https://gelbooru.com')
+      expect(upstreamUrl.searchParams.get('name_pattern')).toBe('dian%')
+      expect(upstreamUrl.searchParams.get('limit')).toBe('1')
+      expect(upstreamUrl.searchParams.get('user_id')).toBe('managed_1')
+      expect(upstreamUrl.searchParams.get('api_key')).toBe('pass_1')
+    })
+
+    it('should leave unconfigured provider URLs direct', () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'BOORU_OUTBOUND_PROXY_CONFIG') {
+          return JSON.stringify({
+            'rule34.xxx': {
+              baseUrl: 'https://cors-proxy2.rule34.workers.dev/',
+              targetParam: 'q'
+            }
+          })
+        }
+
+        return undefined
+      })
+
+      const queries = {
+        ...baseQueries,
+        baseEndpoint: 'gelbooru.com',
+        auth_user: 'managed_1',
+        auth_pass: 'pass_1'
+      } as booruQueriesDTO
+
+      const api = service.buildApiClass(mockParams, queries)
+      const directUrl = buildPostUrl(api)
+
+      expect(directUrl.origin).toBe('https://gelbooru.com')
+      expect(directUrl.searchParams.get('q')).toBe('index')
+      expect(directUrl.searchParams.get('user_id')).toBe('managed_1')
+      expect(directUrl.searchParams.get('api_key')).toBe('pass_1')
+    })
+
+    it('should rotate through multiple configured provider proxies', () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'BOORU_OUTBOUND_PROXY_CONFIG') {
+          return JSON.stringify({
+            'gelbooru.com': [
+              {
+                baseUrl: 'https://cors-proxy2.rule34.workers.dev/',
+                targetParam: 'q'
+              },
+              {
+                baseUrl: 'https://cors-proxy.refinedsoftware00.workers.dev/',
+                targetParam: 'q'
+              }
+            ]
+          })
+        }
+
+        return undefined
+      })
+
+      const queries = {
+        ...baseQueries,
+        baseEndpoint: 'gelbooru.com',
+        auth_user: 'managed_1',
+        auth_pass: 'pass_1'
+      } as booruQueriesDTO
+
+      const firstUrl = buildPostUrl(service.buildApiClass(mockParams, queries))
+      const secondUrl = buildPostUrl(service.buildApiClass(mockParams, queries))
+      const thirdUrl = buildPostUrl(service.buildApiClass(mockParams, queries))
+
+      expect(firstUrl.origin).toBe('https://cors-proxy2.rule34.workers.dev')
+      expect(secondUrl.origin).toBe('https://cors-proxy.refinedsoftware00.workers.dev')
+      expect(thirdUrl.origin).toBe('https://cors-proxy2.rule34.workers.dev')
+    })
+
+    it('should not rotate proxies while building an API that never fetches', () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'BOORU_OUTBOUND_PROXY_CONFIG') {
+          return JSON.stringify({
+            'gelbooru.com': [
+              {
+                baseUrl: 'https://cors-proxy2.rule34.workers.dev/',
+                targetParam: 'q'
+              },
+              {
+                baseUrl: 'https://cors-proxy.refinedsoftware00.workers.dev/',
+                targetParam: 'q'
+              }
+            ]
+          })
+        }
+
+        return undefined
+      })
+
+      const queries = {
+        ...baseQueries,
+        baseEndpoint: 'gelbooru.com',
+        auth_user: 'managed_1',
+        auth_pass: 'pass_1'
+      } as booruQueriesDTO
+
+      service.buildApiClass(mockParams, queries)
+      const firstFetchedUrl = buildPostUrl(service.buildApiClass(mockParams, queries))
+      const secondFetchedUrl = buildPostUrl(service.buildApiClass(mockParams, queries))
+
+      expect(firstFetchedUrl.origin).toBe('https://cors-proxy2.rule34.workers.dev')
+      expect(secondFetchedUrl.origin).toBe('https://cors-proxy.refinedsoftware00.workers.dev')
+    })
+
+    it('should reject invalid outbound proxy config shapes', () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'BOORU_OUTBOUND_PROXY_CONFIG') {
+          return JSON.stringify({
+            'gelbooru.com': {
+              baseUrl: 'not-a-url',
+              targetParam: 'q'
+            }
+          })
+        }
+
+        return undefined
+      })
+
+      const queries = {
+        ...baseQueries,
+        baseEndpoint: 'gelbooru.com'
+      } as booruQueriesDTO
+
+      expect(() => service.buildApiClass(mockParams, queries)).toThrow(
+        'Invalid BOORU_OUTBOUND_PROXY_CONFIG baseUrl for gelbooru.com'
+      )
+    })
+
+    it('should reject plaintext outbound proxy URLs', () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'BOORU_OUTBOUND_PROXY_CONFIG') {
+          return JSON.stringify({
+            'gelbooru.com': {
+              baseUrl: 'http://cors-proxy.example.test/',
+              targetParam: 'q'
+            }
+          })
+        }
+
+        return undefined
+      })
+
+      const queries = {
+        ...baseQueries,
+        baseEndpoint: 'gelbooru.com'
+      } as booruQueriesDTO
+
+      expect(() => service.buildApiClass(mockParams, queries)).toThrow(
+        'Invalid BOORU_OUTBOUND_PROXY_CONFIG baseUrl for gelbooru.com'
+      )
     })
   })
 
