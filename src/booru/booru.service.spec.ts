@@ -286,6 +286,65 @@ describe('BooruService', () => {
       )
     })
 
+    it('should throw when BOORU_FORWARD_PROXY_CONFIG is not valid JSON', () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'BOORU_FORWARD_PROXY_CONFIG') {
+          return '{ invalid json'
+        }
+
+        return undefined
+      })
+
+      const queries = {
+        ...baseQueries,
+        baseEndpoint: 'e621.net'
+      } as booruQueriesDTO
+
+      expect(() => service.buildApiClass(mockParams, queries)).toThrow(
+        'Failed to parse BOORU_FORWARD_PROXY_CONFIG'
+      )
+    })
+
+    it('should throw when BOORU_FORWARD_PROXY_CONFIG contains an invalid proxy URL', () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'BOORU_FORWARD_PROXY_CONFIG') {
+          return JSON.stringify({
+            'e621.net': 'not-a-valid-url'
+          })
+        }
+
+        return undefined
+      })
+
+      const queries = {
+        ...baseQueries,
+        baseEndpoint: 'e621.net'
+      } as booruQueriesDTO
+
+      expect(() => service.buildApiClass(mockParams, queries)).toThrow(
+        'Invalid BOORU_FORWARD_PROXY_CONFIG proxy URL for e621.net'
+      )
+    })
+
+    it('should throw when BOORU_FORWARD_PROXY_CONFIG is not an object', () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'BOORU_FORWARD_PROXY_CONFIG') {
+          return JSON.stringify(['http://smart-proxy.akbal.dev:24000/'])
+        }
+
+        return undefined
+      })
+
+      const queries = {
+        ...baseQueries,
+        baseEndpoint: 'e621.net'
+      } as booruQueriesDTO
+
+      expect(() => service.buildApiClass(mockParams, queries)).toThrow(
+        'Invalid BOORU_FORWARD_PROXY_CONFIG'
+      )
+    })
+
     it('should proxy configured provider tag URLs with the same policy', () => {
       mockConfigService.get.mockImplementation((key: string) => {
         if (key === 'BOORU_OUTBOUND_PROXY_CONFIG') {

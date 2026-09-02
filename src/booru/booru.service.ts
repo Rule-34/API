@@ -584,25 +584,39 @@ export class BooruService {
     }
 
     try {
-      const parsed = JSON.parse(configJson)
-      if (!this.isPlainObject(parsed)) {
-        throw new Error('Invalid BOORU_FORWARD_PROXY_CONFIG')
+      const parsedConfig = JSON.parse(configJson) as unknown
+      this.forwardProxyConfig = this.validateForwardProxyConfig(parsedConfig)
+      return this.forwardProxyConfig
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new Error('Failed to parse BOORU_FORWARD_PROXY_CONFIG', { cause: error })
       }
 
-      const normalizedConfig: Record<string, string> = {}
-      for (const [domain, proxyUrl] of Object.entries(parsed)) {
-        if (typeof proxyUrl !== 'string' || !URL.canParse(proxyUrl)) {
-          throw new Error(`Invalid BOORU_FORWARD_PROXY_CONFIG proxy URL for ${domain}`)
-        }
-        normalizedConfig[this.normalizeOutboundProxyDomain(domain)] = proxyUrl
-      }
-
-      this.forwardProxyConfig = normalizedConfig
-      return this.forwardProxyConfig
-    } catch {
-      this.forwardProxyConfig = null
-      return this.forwardProxyConfig
+      throw error
     }
+  }
+
+  private validateForwardProxyConfig(config: unknown): Record<string, string> {
+    if (!this.isPlainObject(config)) {
+      throw new Error('Invalid BOORU_FORWARD_PROXY_CONFIG')
+    }
+
+    const forwardProxyConfig: Record<string, string> = {}
+
+    for (const [domain, proxyUrl] of Object.entries(config)) {
+      if (typeof proxyUrl !== 'string' || !URL.canParse(proxyUrl)) {
+        throw new Error(`Invalid BOORU_FORWARD_PROXY_CONFIG proxy URL for ${domain}`)
+      }
+
+      const parsedUrl = new URL(proxyUrl)
+      if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+        throw new Error(`Invalid BOORU_FORWARD_PROXY_CONFIG protocol for ${domain}`)
+      }
+
+      forwardProxyConfig[this.normalizeOutboundProxyDomain(domain)] = parsedUrl.toString()
+    }
+
+    return forwardProxyConfig
   }
 
   private isPlainObject(value: unknown): value is Record<string, unknown> {
