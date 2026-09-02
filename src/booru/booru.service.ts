@@ -63,6 +63,7 @@ export class ManagedCredentialPoolUnavailableError extends Error {
 export class BooruService {
   private readonly sensitiveAuthParams = new Set<string>(SENSITIVE_AUTH_PARAMS)
   private outboundProxyConfig: NormalizedBooruOutboundProxyConfig | null | undefined
+  private forwardProxyConfig: Record<string, string> | null | undefined
   private readonly outboundProxyCursors = new Map<string, number>()
 
   constructor(
@@ -182,6 +183,11 @@ export class BooruService {
 
     if (authResolution.auth) {
       options.auth = authResolution.auth
+    }
+
+    const forwardProxy = this.getForwardProxyForDomain(queries.baseEndpoint)
+    if (forwardProxy) {
+      options.proxy = forwardProxy
     }
 
     const Api = new booruClass(
@@ -554,6 +560,49 @@ export class BooruService {
     }
 
     return domain.toLowerCase()
+  }
+
+  private getForwardProxyForDomain(domain: string): string | undefined {
+    const config = this.getForwardProxyConfig()
+    if (config === null) {
+      return undefined
+    }
+
+    const normalizedDomain = this.normalizeOutboundProxyDomain(domain)
+    return config[normalizedDomain]
+  }
+
+  private getForwardProxyConfig(): Record<string, string> | null {
+    if (this.forwardProxyConfig !== undefined) {
+      return this.forwardProxyConfig
+    }
+
+    const configJson = this.configService.get<string>('BOORU_FORWARD_PROXY_CONFIG')
+    if (configJson === undefined || configJson.length === 0) {
+      this.forwardProxyConfig = null
+      return this.forwardProxyConfig
+    }
+
+    try {
+      const parsed = JSON.parse(configJson)
+      if (!this.isPlainObject(parsed)) {
+        throw new Error('Invalid BOORU_FORWARD_PROXY_CONFIG')
+      }
+
+      const normalizedConfig: Record<string, string> = {}
+      for (const [domain, proxyUrl] of Object.entries(parsed)) {
+        if (typeof proxyUrl !== 'string' || !URL.canParse(proxyUrl)) {
+          throw new Error(`Invalid BOORU_FORWARD_PROXY_CONFIG proxy URL for ${domain}`)
+        }
+        normalizedConfig[this.normalizeOutboundProxyDomain(domain)] = proxyUrl
+      }
+
+      this.forwardProxyConfig = normalizedConfig
+      return this.forwardProxyConfig
+    } catch {
+      this.forwardProxyConfig = null
+      return this.forwardProxyConfig
+    }
   }
 
   private isPlainObject(value: unknown): value is Record<string, unknown> {

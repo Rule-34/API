@@ -265,6 +265,27 @@ describe('BooruService', () => {
       expect(outboundUrl.origin).toBe('https://e621.net')
     })
 
+    it('should attach forward proxy options when BOORU_FORWARD_PROXY_CONFIG is set', () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'BOORU_FORWARD_PROXY_CONFIG') {
+          return JSON.stringify({
+            'e621.net': 'http://smart-proxy.akbal.dev:24000/'
+          })
+        }
+
+        return undefined
+      })
+
+      const api = service.buildApiClass(
+        mockParams,
+        { ...baseQueries, baseEndpoint: 'e621.net' } as booruQueriesDTO
+      )
+
+      expect((api as unknown as { options: { proxy?: string } }).options.proxy).toBe(
+        'http://smart-proxy.akbal.dev:24000/'
+      )
+    })
+
     it('should proxy configured provider tag URLs with the same policy', () => {
       mockConfigService.get.mockImplementation((key: string) => {
         if (key === 'BOORU_OUTBOUND_PROXY_CONFIG') {

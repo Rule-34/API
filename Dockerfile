@@ -5,6 +5,7 @@ FROM node:${NODE_VERSION}-alpine AS builder
 
 WORKDIR /app
 
+COPY ca/ ./ca/
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 
 RUN --mount=type=secret,id=GITHUB_TOKEN \
@@ -21,6 +22,7 @@ RUN pnpm run build
 FROM node:${NODE_VERSION}-alpine AS production
 
 ENV NODE_ENV=production
+ENV NODE_EXTRA_CA_CERTS=/app/ca/smart-proxy-ca.pem
 
 WORKDIR /app
 
@@ -33,6 +35,7 @@ COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 
 COPY --from=builder --chown=node:node /app/dist ./dist
 COPY --from=builder --chown=node:node /app/public ./public
+COPY --chown=node:node ca/ ./ca/
 
 RUN --mount=type=secret,id=GITHUB_TOKEN \
     echo "@alejandroakbal:registry=https://npm.pkg.github.com" > .npmrc && \

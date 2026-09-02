@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@alejandroakbal/universal-booru-wrapper':
-        specifier: ^0.15.25
-        version: 0.15.25
+        specifier: ^0.15.26
+        version: 0.15.26
       '@fastify/helmet':
         specifier: ^13.0.2
         version: 13.0.2
@@ -114,8 +114,8 @@ importers:
 
 packages:
 
-  '@alejandroakbal/universal-booru-wrapper@0.15.25':
-    resolution: {integrity: sha512-dJeA1CuFzP0yYK6P1VL9bz0REA35Up7gGmseX+B4it24PfAK4geM95lWJOolUItZqzRct+Y7o+9D+vGeoQyd6A==, tarball: https://npm.pkg.github.com/download/@AlejandroAkbal/universal-booru-wrapper/0.15.25/75376d3631cedfc3a2390a9438341ad14886ec81}
+  '@alejandroakbal/universal-booru-wrapper@0.15.26':
+    resolution: {integrity: sha512-j6wFAo803hMZ48FYvoq/QEo60p7FzI6EmHwIZYra/6TvRclc9RGcPWdPEy7lCEuBM2aE0B9Ry4MYYahFQCKtSQ==, tarball: https://npm.pkg.github.com/download/@AlejandroAkbal/universal-booru-wrapper/0.15.26/7d0778f6e55803c17437ee5e6ad727278c64a4e7}
     engines: {node: 16.x}
 
   '@ampproject/remapping@2.3.0':
@@ -1517,6 +1517,10 @@ packages:
     resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
     engines: {node: '>= 6.0.0'}
 
+  agent-base@7.1.4:
+    resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
+    engines: {node: '>= 14'}
+
   ajv-formats@2.1.1:
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
     peerDependencies:
@@ -2310,6 +2314,10 @@ packages:
   https-proxy-agent@5.0.1:
     resolution: {integrity: sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==}
     engines: {node: '>= 6'}
+
+  https-proxy-agent@7.0.6:
+    resolution: {integrity: sha512-vK9P5/iUfdl95AI+JVyUuIcVtd4ofvtrOr3HNtM2yxC9bnMbEdp3x01OhQNnjb8IJYi38VlTE3mBXwcfvywuSw==}
+    engines: {node: '>= 14'}
 
   human-signals@2.1.0:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
@@ -3583,11 +3591,12 @@ packages:
 
 snapshots:
 
-  '@alejandroakbal/universal-booru-wrapper@0.15.25':
+  '@alejandroakbal/universal-booru-wrapper@0.15.26':
     dependencies:
       camaro: 6.2.5
       debug: 4.4.3
       he: 1.2.0
+      https-proxy-agent: 7.0.6
       lodash: 4.18.1
       node-fetch: 2.7.0
       utility-types: 3.11.0
@@ -5344,6 +5353,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  agent-base@7.1.4: {}
+
   ajv-formats@2.1.1(ajv@8.12.0):
     optionalDependencies:
       ajv: 8.12.0
@@ -6160,6 +6171,13 @@ snapshots:
     dependencies:
       agent-base: 6.0.2
       debug: 4.4.0
+    transitivePeerDependencies:
+      - supports-color
+
+  https-proxy-agent@7.0.6:
+    dependencies:
+      agent-base: 7.1.4
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
