@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@alejandroakbal/universal-booru-wrapper':
-        specifier: ^0.15.24
-        version: 0.15.24
+        specifier: ^0.15.23
+        version: 0.15.23
       '@fastify/helmet':
         specifier: ^13.0.2
         version: 13.0.2
@@ -114,8 +114,8 @@ importers:
 
 packages:
 
-  '@alejandroakbal/universal-booru-wrapper@0.15.24':
-    resolution: {integrity: sha512-kewKiJHZECAHj3xIRZzhWIZ1Z1rgaBkhWGy+1z1tjuaYyj+jby4z4y98z5O4Bv3PhOPqEWOTiH3JgDyoIVdKkQ==, tarball: https://npm.pkg.github.com/download/@AlejandroAkbal/universal-booru-wrapper/0.15.24/7393f09387a66faa74d136fdd6f1440405a778bf}
+  '@alejandroakbal/universal-booru-wrapper@0.15.23':
+    resolution: {integrity: sha512-VVbN+gSfULnyXmH+UIrenKuGE1TJwbqKsDPGdTiijY0xfBWx1ze1M36ujiylqvRedBSLEYrlOfZYgzuR0yVb/Q==, tarball: https://npm.pkg.github.com/download/@AlejandroAkbal/universal-booru-wrapper/0.15.23/d432441fe32f2196a02c5af702896477549bbc8c}
     engines: {node: 16.x}
 
   '@ampproject/remapping@2.3.0':
@@ -3586,7 +3586,7 @@ packages:
 
 snapshots:
 
-  '@alejandroakbal/universal-booru-wrapper@0.15.24':
+  '@alejandroakbal/universal-booru-wrapper@0.15.23':
     dependencies:
       camaro: 6.2.5
       debug: 4.4.0
