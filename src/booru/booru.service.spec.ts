@@ -257,7 +257,7 @@ describe('BooruService', () => {
       })
 
       const api = service.buildApiClass(
-        { ...mockParams, booruType: BooruTypesStringEnum.E621NET },
+        mockParams,
         { ...baseQueries, baseEndpoint: 'e621.net' } as booruQueriesDTO
       )
       const proxiedUrl = buildPostUrl(api)

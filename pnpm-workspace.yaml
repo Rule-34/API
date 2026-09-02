@@ -2,3 +2,5 @@ allowBuilds:
   '@nestjs/core': true
   nice-napi: true
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - '@alejandroakbal/universal-booru-wrapper'
