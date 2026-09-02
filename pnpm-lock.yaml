@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@alejandroakbal/universal-booru-wrapper':
-        specifier: ^0.15.24
-        version: 0.15.24
+        specifier: ^0.15.25
+        version: 0.15.25
       '@fastify/helmet':
         specifier: ^13.0.2
         version: 13.0.2
@@ -114,8 +114,8 @@ importers:
 
 packages:
 
-  '@alejandroakbal/universal-booru-wrapper@0.15.24':
-    resolution: {integrity: sha512-kewKiJHZECAHj3xIRZzhWIZ1Z1rgaBkhWGy+1z1tjuaYyj+jby4z4y98z5O4Bv3PhOPqEWOTiH3JgDyoIVdKkQ==, tarball: https://npm.pkg.github.com/download/@AlejandroAkbal/universal-booru-wrapper/0.15.24/7393f09387a66faa74d136fdd6f1440405a778bf}
+  '@alejandroakbal/universal-booru-wrapper@0.15.25':
+    resolution: {integrity: sha512-dJeA1CuFzP0yYK6P1VL9bz0REA35Up7gGmseX+B4it24PfAK4geM95lWJOolUItZqzRct+Y7o+9D+vGeoQyd6A==, tarball: https://npm.pkg.github.com/download/@AlejandroAkbal/universal-booru-wrapper/0.15.25/75376d3631cedfc3a2390a9438341ad14886ec81}
     engines: {node: 16.x}
 
   '@ampproject/remapping@2.3.0':
@@ -2645,9 +2645,6 @@ packages:
   lodash.memoize@4.1.2:
     resolution: {integrity: sha512-t7j+NzmgnQzTAYXcsHYLgimltOV1MXHtlOWf6GjL9Kj8GK5FInw5JotxvbOs+IvV1/Dzo04/fCGfLVs7aXb4Ag==}
 
-  lodash@4.17.21:
-    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
-
   lodash@4.18.1:
     resolution: {integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==}
 
@@ -3586,12 +3583,12 @@ packages:
 
 snapshots:
 
-  '@alejandroakbal/universal-booru-wrapper@0.15.24':
+  '@alejandroakbal/universal-booru-wrapper@0.15.25':
     dependencies:
       camaro: 6.2.5
-      debug: 4.4.0
+      debug: 4.4.3
       he: 1.2.0
-      lodash: 4.17.21
+      lodash: 4.18.1
       node-fetch: 2.7.0
       utility-types: 3.11.0
     transitivePeerDependencies:
@@ -6702,8 +6699,6 @@ snapshots:
 
   lodash.memoize@4.1.2: {}
 
-  lodash@4.17.21: {}
-
   lodash@4.18.1: {}
 
   log-symbols@4.1.0:
@@ -6803,7 +6798,7 @@ snapshots:
 
   node-emoji@1.11.0:
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.18.1
 
   node-fetch@2.7.0:
     dependencies:
