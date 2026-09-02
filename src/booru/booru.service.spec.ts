@@ -239,6 +239,30 @@ describe('BooruService', () => {
       expect(upstreamUrl.searchParams.get('tags')).toBe('diana')
       expect(upstreamUrl.searchParams.get('user_id')).toBe('managed_1')
       expect(upstreamUrl.searchParams.get('api_key')).toBe('pass_1')
+      expect(proxiedUrl.searchParams.has('userAgent')).toBe(false)
+    })
+
+    it('should request User-Agent forwarding only for e621 proxy requests', () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'BOORU_OUTBOUND_PROXY_CONFIG') {
+          return JSON.stringify({
+            'e621.net': {
+              baseUrl: 'https://cors-proxy2.rule34.workers.dev/',
+              targetParam: 'q'
+            }
+          })
+        }
+
+        return undefined
+      })
+
+      const api = service.buildApiClass(
+        { ...mockParams, booruType: BooruTypesStringEnum.E621NET },
+        { ...baseQueries, baseEndpoint: 'e621.net' } as booruQueriesDTO
+      )
+      const proxiedUrl = buildPostUrl(api)
+
+      expect(proxiedUrl.searchParams.get('userAgent')).toBe('forward')
     })
 
     it('should proxy configured provider tag URLs with the same policy', () => {
