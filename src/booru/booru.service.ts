@@ -431,12 +431,12 @@ export class BooruService {
   }
 
   private createProxiedOutboundUrl(upstreamUrl: URL, proxyPolicy: BooruOutboundProxyPolicy): URL {
+    if (upstreamUrl.hostname === 'e621.net') {
+      return upstreamUrl
+    }
+
     const proxiedUrl = new URL(proxyPolicy.baseUrl)
     proxiedUrl.searchParams.set(proxyPolicy.targetParam, upstreamUrl.toString())
-
-    if (upstreamUrl.hostname === 'e621.net') {
-      proxiedUrl.searchParams.set('userAgent', 'forward')
-    }
 
     return proxiedUrl
   }

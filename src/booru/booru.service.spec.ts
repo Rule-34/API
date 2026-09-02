@@ -242,7 +242,7 @@ describe('BooruService', () => {
       expect(proxiedUrl.searchParams.has('userAgent')).toBe(false)
     })
 
-    it('should request User-Agent forwarding only for e621 proxy requests', () => {
+    it('should bypass Cloudflare proxy policies for e621', () => {
       mockConfigService.get.mockImplementation((key: string) => {
         if (key === 'BOORU_OUTBOUND_PROXY_CONFIG') {
           return JSON.stringify({
@@ -260,9 +260,9 @@ describe('BooruService', () => {
         mockParams,
         { ...baseQueries, baseEndpoint: 'e621.net' } as booruQueriesDTO
       )
-      const proxiedUrl = buildPostUrl(api)
+      const outboundUrl = buildPostUrl(api)
 
-      expect(proxiedUrl.searchParams.get('userAgent')).toBe('forward')
+      expect(outboundUrl.origin).toBe('https://e621.net')
     })
 
     it('should proxy configured provider tag URLs with the same policy', () => {
