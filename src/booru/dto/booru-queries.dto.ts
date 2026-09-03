@@ -52,8 +52,7 @@ function transformTagsQueryValue(value: unknown): unknown {
 abstract class booruEndpointsDTO {
   @IsFQDN()
   @IsNotEmpty()
-  @IsOptional()
-  readonly baseEndpoint?: IBooruEndpoints['base']
+  readonly baseEndpoint!: IBooruEndpoints['base']
 
   @IsString()
   @IsNotEmpty()

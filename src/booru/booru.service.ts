@@ -626,8 +626,9 @@ export class BooruService {
   }
 
   private resolveTargetDomain(params: BooruEndpointParamsDTO, queries: booruQueriesDTO): string {
-    if (typeof queries.baseEndpoint === 'string' && queries.baseEndpoint.trim().length > 0) {
-      return queries.baseEndpoint
+    const baseEndpoint = queries.baseEndpoint as string | undefined
+    if (typeof baseEndpoint === 'string' && baseEndpoint.trim().length > 0) {
+      return baseEndpoint
     }
 
     return this.getDefaultDomainForBooruType(params.booruType)

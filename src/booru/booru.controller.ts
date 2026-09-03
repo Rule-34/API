@@ -44,11 +44,11 @@ export class BooruController {
 
   private attachAuthContext(
     request: BooruHttpRequest,
-    baseEndpoint: string | undefined,
+    baseEndpoint: string,
     authResolution: ResolvedAuthCredentials
   ): void {
     const authContext: BooruAuthContext = {
-      ...(baseEndpoint !== undefined ? { baseEndpoint } : {}),
+      baseEndpoint,
       source: authResolution.source
     }
 

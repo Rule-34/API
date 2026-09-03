@@ -2,7 +2,7 @@ import type { IncomingHttpHeaders } from 'node:http'
 import type { ResolvedAuthCredentials } from '../booru.service'
 
 export interface BooruAuthContext {
-  baseEndpoint?: string
+  baseEndpoint: string
   credential?: { user: string; password: string }
   source: ResolvedAuthCredentials['source']
 }
