@@ -94,10 +94,9 @@ export class BooruService {
     resolvedAuthOverride?: ResolvedAuthCredentials
   ): BuiltBooruApi {
     const booruClass = this.getApiClassByType(params.booruType)
-    const targetDomain = this.resolveTargetDomain(params, queries)
 
     const endpoints: IBooruEndpoints = {
-      base: targetDomain,
+      base: queries.baseEndpoint,
       ...(queries.postsEndpoint !== undefined ? { posts: queries.postsEndpoint } : {}),
       ...(queries.randomPostsEndpoint !== undefined ? { randomPosts: queries.randomPostsEndpoint } : {}),
       ...(queries.singlePostEndpoint !== undefined ? { singlePost: queries.singlePostEndpoint } : {}),
@@ -186,8 +185,8 @@ export class BooruService {
       options.auth = authResolution.auth
     }
 
-    const forwardProxy = this.getForwardProxyForDomain(targetDomain)
-    if (forwardProxy !== undefined) {
+    const forwardProxy = this.getForwardProxyForDomain(queries.baseEndpoint)
+    if (forwardProxy) {
       options.proxy = forwardProxy
     }
 
@@ -197,7 +196,7 @@ export class BooruService {
       undefined,
       options
     )
-    this.applyOutboundProxy(Api, targetDomain)
+    this.applyOutboundProxy(Api, queries.baseEndpoint)
 
     return {
       api: Api,
@@ -228,8 +227,7 @@ export class BooruService {
     queries: booruQueriesDTO,
     operation: (api: BooruTypes, authResolution: ResolvedAuthCredentials) => Promise<T>
   ): Promise<T> {
-    const targetDomain = this.resolveTargetDomain(params, queries)
-    const domainStats = this.authManager.getDomainStats(targetDomain)
+    const domainStats = this.authManager.getDomainStats(queries.baseEndpoint)
 
     if (domainStats.total === 0) {
       // No managed credentials configured for this domain: execute once without auth.
@@ -241,10 +239,10 @@ export class BooruService {
     const attemptedCredentials = new Set<string>()
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const selectedCredential = await this.authManager.reserveAvailableCredential(targetDomain)
+      const selectedCredential = await this.authManager.reserveAvailableCredential(queries.baseEndpoint)
 
       if (!selectedCredential) {
-        throw this.createPoolUnavailableError(targetDomain)
+        throw this.createPoolUnavailableError(queries.baseEndpoint)
       }
 
       const authResolution: ResolvedAuthCredentials = {
@@ -261,7 +259,7 @@ export class BooruService {
       const credentialKey = JSON.stringify([selectedCredential.user, selectedCredential.password])
 
       if (attemptedCredentials.has(credentialKey)) {
-        throw this.createPoolUnavailableError(targetDomain)
+        throw this.createPoolUnavailableError(queries.baseEndpoint)
       }
 
       try {
@@ -274,7 +272,7 @@ export class BooruService {
         const httpError = error
 
         const authFailure: AuthFailureEvent = {
-          domain: targetDomain,
+          domain: queries.baseEndpoint,
           user: selectedCredential.user,
           password: selectedCredential.password,
           error: this.stringifyHttpError(httpError),
@@ -294,7 +292,7 @@ export class BooruService {
       }
     }
 
-    throw this.createPoolUnavailableError(targetDomain)
+    throw this.createPoolUnavailableError(queries.baseEndpoint)
   }
 
   private getManagedRetryCap(): number {
@@ -623,42 +621,6 @@ export class BooruService {
 
   private isPlainObject(value: unknown): value is Record<string, unknown> {
     return value !== null && typeof value === 'object' && !Array.isArray(value)
-  }
-
-  private resolveTargetDomain(params: BooruEndpointParamsDTO, queries: booruQueriesDTO): string {
-    const baseEndpoint = queries.baseEndpoint as string | undefined
-    if (typeof baseEndpoint === 'string' && baseEndpoint.trim().length > 0) {
-      return baseEndpoint
-    }
-
-    return this.getDefaultDomainForBooruType(params.booruType)
-  }
-
-  private getDefaultDomainForBooruType(booruType: BooruTypesStringEnum): string {
-    switch (booruType) {
-      case BooruTypesStringEnum.DANBOORU:
-      case BooruTypesStringEnum.DANBOORU2:
-        return 'danbooru.donmai.us'
-
-      case BooruTypesStringEnum.MOEBOORU:
-        return 'yande.re'
-
-      case BooruTypesStringEnum.GELBOORU:
-      case BooruTypesStringEnum.GELBOORU_COM:
-        return 'gelbooru.com'
-
-      case BooruTypesStringEnum.RULE_34_XXX:
-        return 'rule34.xxx'
-
-      case BooruTypesStringEnum.RULE34_PAHEAL_NET:
-        return 'rule34.paheal.net'
-
-      case BooruTypesStringEnum.E621_NET:
-        return 'e621.net'
-
-      case BooruTypesStringEnum.REALBOORU_COM:
-        return 'realbooru.com'
-    }
   }
 
   private getApiClassByType(booruType: BooruTypesStringEnum) {
