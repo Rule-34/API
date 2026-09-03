@@ -186,7 +186,7 @@ export class BooruService {
     }
 
     const forwardProxy = this.getForwardProxyForDomain(queries.baseEndpoint)
-    if (forwardProxy) {
+    if (typeof forwardProxy === 'string' && forwardProxy.length > 0) {
       options.proxy = forwardProxy
     }
 
