@@ -59,6 +59,18 @@ describe('booruQueryValuesPostsDTO request handling', () => {
     expect(body.tags).toEqual(['artist:foo', 'rating:safe', 'score:>100'])
   })
 
+  it('should accept requests without baseEndpoint query parameter', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/dto-test/posts?tags=solo&limit=5'
+    })
+
+    const body = JSON.parse(response.body) as unknown as TagsResponseBody
+
+    expect(response.statusCode).toBe(200)
+    expect(body.tags).toEqual(['solo'])
+  })
+
   it('should reject empty tags created after pipe splitting', async () => {
     const response = await app.inject({
       method: 'GET',
