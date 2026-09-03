@@ -195,7 +195,6 @@ describe('BooruService', () => {
         auth_user: 'query_user',
         auth_pass: 'query_pass'
       } as booruQueriesDTO
-
       const result = service.buildApiWithContext(mockParams, queries)
 
       expect(result.authResolution.source).toBe('query')
@@ -203,6 +202,24 @@ describe('BooruService', () => {
         user: 'query_user',
         password: 'query_pass'
       })
+    })
+
+    it('should resolve default base domain for e621.net when baseEndpoint is omitted', () => {
+      const api = service.buildApiClass(
+        { booruType: BooruTypesStringEnum.E621_NET },
+        {} as booruQueriesDTO
+      )
+      const endpoints = (api as unknown as { endpoints: { base?: string } }).endpoints
+      expect(endpoints.base).toBe('e621.net')
+    })
+
+    it('should resolve default base domain for gelbooru.com when baseEndpoint is omitted', () => {
+      const api = service.buildApiClass(
+        { booruType: BooruTypesStringEnum.GELBOORU_COM },
+        {} as booruQueriesDTO
+      )
+      const endpoints = (api as unknown as { endpoints: { base?: string } }).endpoints
+      expect(endpoints.base).toBe('gelbooru.com')
     })
   })
 
@@ -279,6 +296,27 @@ describe('BooruService', () => {
       const api = service.buildApiClass(
         mockParams,
         { ...baseQueries, baseEndpoint: 'e621.net' } as booruQueriesDTO
+      )
+
+      expect((api as unknown as { options: { proxy?: string } }).options.proxy).toBe(
+        'http://smart-proxy.akbal.dev:24000/'
+      )
+    })
+
+    it('should attach forward proxy options when baseEndpoint is omitted and matches default booruType domain', () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'BOORU_FORWARD_PROXY_CONFIG') {
+          return JSON.stringify({
+            'e621.net': 'http://smart-proxy.akbal.dev:24000/'
+          })
+        }
+
+        return undefined
+      })
+
+      const api = service.buildApiClass(
+        { booruType: BooruTypesStringEnum.E621_NET },
+        {} as booruQueriesDTO
       )
 
       expect((api as unknown as { options: { proxy?: string } }).options.proxy).toBe(
