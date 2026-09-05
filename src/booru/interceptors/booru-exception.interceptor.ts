@@ -98,11 +98,13 @@ export class BooruErrorsInterceptor implements NestInterceptor {
               () =>
                 new HttpException(
                   {
-                    statusCode: HttpStatus.TOO_MANY_REQUESTS,
+                    statusCode: HttpStatus.BAD_GATEWAY,
+                    error: 'Bad Gateway',
                     message: sanitizedMessage,
+                    upstreamStatusCode: HttpStatus.TOO_MANY_REQUESTS,
                     retryAfterSeconds
                   },
-                  HttpStatus.TOO_MANY_REQUESTS
+                  HttpStatus.BAD_GATEWAY
                 )
             )
           }

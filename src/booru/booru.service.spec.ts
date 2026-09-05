@@ -256,10 +256,7 @@ describe('BooruService', () => {
         return undefined
       })
 
-      const api = service.buildApiClass(
-        mockParams,
-        { ...baseQueries, baseEndpoint: 'e621.net' } as booruQueriesDTO
-      )
+      const api = service.buildApiClass(mockParams, { ...baseQueries, baseEndpoint: 'e621.net' } as booruQueriesDTO)
       const outboundUrl = buildPostUrl(api)
 
       expect(outboundUrl.origin).toBe('https://e621.net')
@@ -276,10 +273,7 @@ describe('BooruService', () => {
         return undefined
       })
 
-      const api = service.buildApiClass(
-        mockParams,
-        { ...baseQueries, baseEndpoint: 'e621.net' } as booruQueriesDTO
-      )
+      const api = service.buildApiClass(mockParams, { ...baseQueries, baseEndpoint: 'e621.net' } as booruQueriesDTO)
 
       expect((api as unknown as { options: { proxy?: string } }).options.proxy).toBe(
         'http://smart-proxy.akbal.dev:24000/'
@@ -300,9 +294,7 @@ describe('BooruService', () => {
         baseEndpoint: 'e621.net'
       } as booruQueriesDTO
 
-      expect(() => service.buildApiClass(mockParams, queries)).toThrow(
-        'Failed to parse BOORU_FORWARD_PROXY_CONFIG'
-      )
+      expect(() => service.buildApiClass(mockParams, queries)).toThrow('Failed to parse BOORU_FORWARD_PROXY_CONFIG')
     })
 
     it('should throw when BOORU_FORWARD_PROXY_CONFIG contains an invalid proxy URL', () => {
@@ -340,9 +332,7 @@ describe('BooruService', () => {
         baseEndpoint: 'e621.net'
       } as booruQueriesDTO
 
-      expect(() => service.buildApiClass(mockParams, queries)).toThrow(
-        'Invalid BOORU_FORWARD_PROXY_CONFIG'
-      )
+      expect(() => service.buildApiClass(mockParams, queries)).toThrow('Invalid BOORU_FORWARD_PROXY_CONFIG')
     })
 
     it('should proxy configured provider tag URLs with the same policy', () => {

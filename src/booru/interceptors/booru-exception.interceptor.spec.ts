@@ -195,7 +195,7 @@ describe('BooruErrorsInterceptor', () => {
     expect(body).not.toContain('secret123')
   })
 
-  it('should map rate-limit errors to 429 and put the credential in cooldown', async () => {
+  it('should map upstream rate-limit errors to 502 Bad Gateway with upstream status and put the credential in cooldown', async () => {
     const response = await request(app.getHttpServer()).get('/test-booru-errors/rate-limit').query({
       baseEndpoint: 'https://www.gelbooru.com/index.php?page=dapi',
       auth_user: 'www-gel-user'
@@ -203,7 +203,13 @@ describe('BooruErrorsInterceptor', () => {
 
     const disabledCredentials = authManager.getDisabledCredentials()
 
-    expect(response.status).toBe(429)
+    expect(response.status).toBe(502)
+    expect(response.body).toMatchObject({
+      statusCode: 502,
+      error: 'Bad Gateway',
+      upstreamStatusCode: 429,
+      retryAfterSeconds: 30
+    })
     expect(response.headers['retry-after']).toBe('30')
     expect(
       disabledCredentials.some(
@@ -297,7 +303,7 @@ describe('BooruErrorsInterceptor', () => {
         baseEndpoint: 'https://www.gelbooru.com/index.php?page=dapi',
         auth_user: 'www-gel-user'
       })
-      expect(response.status).toBe(429)
+      expect(response.status).toBe(502)
       expect(response.headers['cache-control']).toBe('no-store, no-cache, must-revalidate')
     })
 
