@@ -54,7 +54,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
         const sanitizedMessage = this.sanitizeErrorMessage(getErrorMessage(error))
 
         if (error instanceof ManagedCredentialPoolUnavailableError) {
-          const retryAfterSeconds = this.getValidatedRetryAfterSeconds(error.retryAfterSeconds)
+          const retryAfterSeconds = this.getRetryAfterSeconds(error)
 
           if (retryAfterSeconds !== undefined) {
             response?.header('Retry-After', `${retryAfterSeconds}`)
@@ -89,7 +89,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
           }
 
           if (this.isRateLimitError(error)) {
-            const retryAfterSeconds = this.getValidatedRetryAfterSeconds(this.getRetryAfterSeconds(error))
+            const retryAfterSeconds = this.getRetryAfterSeconds(error)
             if (retryAfterSeconds !== undefined) {
               response?.header('Retry-After', `${retryAfterSeconds}`)
             }
@@ -292,23 +292,16 @@ export class BooruErrorsInterceptor implements NestInterceptor {
   }
 
   private getRetryAfterSeconds(error: unknown): number | undefined {
-    if (error instanceof HttpError && typeof error.retryAfterSeconds === 'number') {
-      return error.retryAfterSeconds
+    if (
+      (error instanceof HttpError || error instanceof ManagedCredentialPoolUnavailableError) &&
+      typeof error.retryAfterSeconds === 'number' &&
+      Number.isFinite(error.retryAfterSeconds) &&
+      error.retryAfterSeconds >= 0
+    ) {
+      return Math.floor(error.retryAfterSeconds)
     }
 
     return undefined
-  }
-
-  private getValidatedRetryAfterSeconds(value: unknown): number | undefined {
-    if (typeof value !== 'number' || !Number.isFinite(value)) {
-      return undefined
-    }
-
-    if (value < 0) {
-      return undefined
-    }
-
-    return Math.floor(value)
   }
 
   private extractDomainFromUrl(url: string): string {
