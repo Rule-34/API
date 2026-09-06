@@ -190,12 +190,7 @@ export class BooruService {
       options.proxy = forwardProxy
     }
 
-    const domain = this.normalizeOutboundProxyDomain(queries.baseEndpoint)
-    if (domain === 'e621.net' || domain === 'e926.net') {
-      options.userAgent = 'Universal-Booru-Wrapper/0.15.26 (by AlejandroAkbal on e621)'
-    } else {
-      options.userAgent = 'Universal-Booru-Wrapper/0.15.26 (r34.app)'
-    }
+    options.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
 
     const Api = new booruClass(
       endpoints,
