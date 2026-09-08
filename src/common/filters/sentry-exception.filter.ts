@@ -1,5 +1,7 @@
-import { ArgumentsHost, Catch, HttpException } from '@nestjs/common'
-import { BaseExceptionFilter, HttpAdapterHost } from '@nestjs/core'
+import type { ArgumentsHost } from '@nestjs/common'
+import { Catch, HttpException, HttpStatus } from '@nestjs/common'
+import type { HttpAdapterHost } from '@nestjs/core'
+import { BaseExceptionFilter } from '@nestjs/core'
 import * as Sentry from '@sentry/nestjs'
 
 @Catch()
@@ -22,6 +24,24 @@ export class SentryExceptionFilter extends BaseExceptionFilter {
   }
 
   private shouldCapture(exception: unknown): boolean {
-    return !(exception instanceof HttpException && exception.getStatus() < 500)
+    if (exception instanceof HttpException) {
+      const status = exception.getStatus()
+
+      // Ignore 4xx client errors
+      if (status < 500) {
+        return false
+      }
+
+      // Ignore upstream external gateway / booru service outages (502, 503, 504)
+      if (
+        status === Number(HttpStatus.BAD_GATEWAY) ||
+        status === Number(HttpStatus.SERVICE_UNAVAILABLE) ||
+        status === Number(HttpStatus.GATEWAY_TIMEOUT)
+      ) {
+        return false
+      }
+    }
+
+    return true
   }
 }
