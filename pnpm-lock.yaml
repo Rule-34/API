@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@alejandroakbal/universal-booru-wrapper':
-        specifier: ^0.15.26
-        version: 0.15.26
+        specifier: ^0.15.28
+        version: 0.15.28
       '@fastify/helmet':
         specifier: ^13.0.2
         version: 13.0.2
@@ -114,8 +114,8 @@ importers:
 
 packages:
 
-  '@alejandroakbal/universal-booru-wrapper@0.15.26':
-    resolution: {integrity: sha512-j6wFAo803hMZ48FYvoq/QEo60p7FzI6EmHwIZYra/6TvRclc9RGcPWdPEy7lCEuBM2aE0B9Ry4MYYahFQCKtSQ==, tarball: https://npm.pkg.github.com/download/@AlejandroAkbal/universal-booru-wrapper/0.15.26/7d0778f6e55803c17437ee5e6ad727278c64a4e7}
+  '@alejandroakbal/universal-booru-wrapper@0.15.28':
+    resolution: {integrity: sha512-/xZ0ZQvVB9p5nAqRDSuLS8gwpoNTOD+pqVH4Le9qytH7rex0PizfOmkckGr5QZJOlZzE4C9bs+QvpyPg65GRZw==, tarball: https://npm.pkg.github.com/download/@AlejandroAkbal/universal-booru-wrapper/0.15.28/30302ccc7467d1d8ace14627e56cec9ea211b6a4}
     engines: {node: 16.x}
 
   '@ampproject/remapping@2.3.0':
@@ -3591,7 +3591,7 @@ packages:
 
 snapshots:
 
-  '@alejandroakbal/universal-booru-wrapper@0.15.26':
+  '@alejandroakbal/universal-booru-wrapper@0.15.28':
     dependencies:
       camaro: 6.2.5
       debug: 4.4.3
@@ -5349,7 +5349,7 @@ snapshots:
 
   agent-base@6.0.2:
     dependencies:
-      debug: 4.4.0
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -6170,7 +6170,7 @@ snapshots:
   https-proxy-agent@5.0.1:
     dependencies:
       agent-base: 6.0.2
-      debug: 4.4.0
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
