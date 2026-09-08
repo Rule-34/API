@@ -1,8 +1,13 @@
 import type { ArgumentsHost } from '@nestjs/common'
 import { Catch, HttpException, HttpStatus } from '@nestjs/common'
-import type { HttpAdapterHost } from '@nestjs/core'
-import { BaseExceptionFilter } from '@nestjs/core'
+import { BaseExceptionFilter, HttpAdapterHost } from '@nestjs/core'
 import * as Sentry from '@sentry/nestjs'
+
+const UPSTREAM_OUTAGE_STATUSES: readonly number[] = [
+  HttpStatus.BAD_GATEWAY as number,
+  HttpStatus.SERVICE_UNAVAILABLE as number,
+  HttpStatus.GATEWAY_TIMEOUT as number
+]
 
 @Catch()
 export class SentryExceptionFilter extends BaseExceptionFilter {
@@ -27,17 +32,13 @@ export class SentryExceptionFilter extends BaseExceptionFilter {
     if (exception instanceof HttpException) {
       const status = exception.getStatus()
 
-      // Ignore 4xx client errors
+      // 4xx client errors are expected request rejections, not server defects
       if (status < 500) {
         return false
       }
 
-      // Ignore upstream external gateway / booru service outages (502, 503, 504)
-      if (
-        status === Number(HttpStatus.BAD_GATEWAY) ||
-        status === Number(HttpStatus.SERVICE_UNAVAILABLE) ||
-        status === Number(HttpStatus.GATEWAY_TIMEOUT)
-      ) {
+      // 502/503/504 upstream provider failures are external outages, not application bugs
+      if (UPSTREAM_OUTAGE_STATUSES.includes(status)) {
         return false
       }
     }
