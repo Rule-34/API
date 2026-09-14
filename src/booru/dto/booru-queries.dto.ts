@@ -238,7 +238,7 @@ export class booruQueryValuesRandomPostsDTO extends booruQueryValuesPostsDTO {}
 export class booruQueryValuesSinglePostDTO extends booruQueriesDTO {
   @IsInt()
   @Min(0)
-  @Max(99999)
+  @Max(Number.MAX_SAFE_INTEGER)
   @Transform(({ value }: { value: unknown }) => parseIntegerQueryValue(value))
   @IsOptional()
   readonly ID?: SinglePostQueryValues['id']
