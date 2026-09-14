@@ -1,6 +1,7 @@
 allowBuilds:
   '@nestjs/core': true
   nice-napi: true
+  protobufjs: true
   unrs-resolver: true
 minimumReleaseAgeExclude:
   - '@alejandroakbal/universal-booru-wrapper'
