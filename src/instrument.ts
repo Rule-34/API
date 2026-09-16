@@ -12,26 +12,28 @@ Sentry.init({
 })
 
 const otelEndpoint = process.env['OTEL_EXPORTER_OTLP_ENDPOINT']
-if (otelEndpoint) {
-  const headers = process.env['OTEL_EXPORTER_OTLP_HEADERS']
-    ? Object.fromEntries(
-        process.env['OTEL_EXPORTER_OTLP_HEADERS']
-          .split(',')
-          .map((h) => {
-            const idx = h.indexOf('=')
-            return idx !== -1 ? [h.slice(0, idx).trim(), h.slice(idx + 1).trim()] : [h.trim(), '']
-          })
-          .filter(([k, v]) => k && v)
-      )
-    : undefined
+if (otelEndpoint !== undefined && otelEndpoint !== '') {
+  const otelHeaders = process.env['OTEL_EXPORTER_OTLP_HEADERS']
+  const headers =
+    otelHeaders !== undefined && otelHeaders !== ''
+      ? Object.fromEntries(
+          otelHeaders
+            .split(',')
+            .map((h): [string, string] => {
+              const idx = h.indexOf('=')
+              return idx !== -1 ? [h.slice(0, idx).trim(), h.slice(idx + 1).trim()] : [h.trim(), '']
+            })
+            .filter(([k, v]) => k !== '' && v !== '')
+        )
+      : undefined
 
   const traceExporter = new OTLPTraceExporter({
     url: `${otelEndpoint.replace(/\/+$/, '')}/v1/traces`,
-    headers
+    ...(headers !== undefined ? { headers } : {})
   })
 
   const sdk = new NodeSDK({
-    serviceName: process.env['OTEL_SERVICE_NAME'] || 'api.r34.app',
+    serviceName: process.env['OTEL_SERVICE_NAME'] ?? 'api.r34.app',
     traceExporter,
     instrumentations: [getNodeAutoInstrumentations()]
   })
