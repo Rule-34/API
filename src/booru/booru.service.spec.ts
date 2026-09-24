@@ -399,6 +399,34 @@ describe('BooruService', () => {
       expect(directUrl.searchParams.get('api_key')).toBe('pass_1')
     })
 
+    it('should allow bypassing proxies with the NONE magic string', () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'BOORU_OUTBOUND_PROXY_CONFIG') {
+          return JSON.stringify({
+            'gelbooru.com': {
+              baseUrl: 'NONE'
+            }
+          })
+        }
+
+        return undefined
+      })
+
+      const queries = {
+        ...baseQueries,
+        baseEndpoint: 'gelbooru.com',
+        auth_user: 'managed_1',
+        auth_pass: 'pass_1'
+      } as booruQueriesDTO
+
+      const directUrl = buildPostUrl(service.buildApiClass(mockParams, queries))
+
+      expect(directUrl.origin).toBe('https://gelbooru.com')
+      expect(directUrl.searchParams.get('tags')).toBe('diana')
+      expect(directUrl.searchParams.get('user_id')).toBe('managed_1')
+      expect(directUrl.searchParams.get('api_key')).toBe('pass_1')
+    })
+
     it('should rotate through multiple configured provider proxies', () => {
       mockConfigService.get.mockImplementation((key: string) => {
         if (key === 'BOORU_OUTBOUND_PROXY_CONFIG') {
@@ -411,6 +439,9 @@ describe('BooruService', () => {
               {
                 baseUrl: 'https://cors-proxy.refinedsoftware00.workers.dev/',
                 targetParam: 'q'
+              },
+              {
+                baseUrl: 'NONE'
               }
             ]
           })
@@ -429,10 +460,12 @@ describe('BooruService', () => {
       const firstUrl = buildPostUrl(service.buildApiClass(mockParams, queries))
       const secondUrl = buildPostUrl(service.buildApiClass(mockParams, queries))
       const thirdUrl = buildPostUrl(service.buildApiClass(mockParams, queries))
+      const fourthUrl = buildPostUrl(service.buildApiClass(mockParams, queries))
 
       expect(firstUrl.origin).toBe('https://cors-proxy2.rule34.workers.dev')
       expect(secondUrl.origin).toBe('https://cors-proxy.refinedsoftware00.workers.dev')
-      expect(thirdUrl.origin).toBe('https://cors-proxy2.rule34.workers.dev')
+      expect(thirdUrl.origin).toBe('https://gelbooru.com')
+      expect(fourthUrl.origin).toBe('https://cors-proxy2.rule34.workers.dev')
     })
 
     it('should not rotate proxies while building an API that never fetches', () => {
@@ -447,6 +480,9 @@ describe('BooruService', () => {
               {
                 baseUrl: 'https://cors-proxy.refinedsoftware00.workers.dev/',
                 targetParam: 'q'
+              },
+              {
+                baseUrl: 'NONE'
               }
             ]
           })

@@ -42,7 +42,7 @@ interface BooruQueryIdentifierDefaults {
 }
 
 interface BooruOutboundProxyPolicy {
-  baseUrl: string
+  baseUrl: string | 'NONE'
   targetParam: string
 }
 
@@ -427,7 +427,7 @@ export class BooruService {
         const upstreamUrl = originalMethod.apply(api, args) as URL
         const proxyPolicy = this.getOutboundProxyPolicy(domain)
 
-        if (proxyPolicy === undefined) {
+        if (proxyPolicy === undefined || proxyPolicy.baseUrl === 'NONE') {
           return upstreamUrl
         }
 
@@ -533,6 +533,10 @@ export class BooruService {
 
     const baseUrl = policy['baseUrl']
     const targetParam = policy['targetParam'] ?? 'q'
+
+    if (baseUrl === 'NONE') {
+      return { baseUrl, targetParam: 'q' }
+    }
 
     if (typeof baseUrl !== 'string' || !URL.canParse(baseUrl)) {
       throw new Error(`Invalid BOORU_OUTBOUND_PROXY_CONFIG baseUrl for ${domain}`)
