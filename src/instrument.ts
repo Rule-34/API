@@ -8,7 +8,8 @@ const sentryEnabled = ['1', 'true'].includes((process.env['SENTRY_ENABLED'] ?? '
 
 Sentry.init({
   enabled: sentryEnabled,
-  dsn: process.env['SENTRY_DSN']
+  dsn: process.env['SENTRY_DSN'],
+  transportOptions: { keepAlive: true }
 })
 
 const otelEndpoint = process.env['OTEL_EXPORTER_OTLP_ENDPOINT']
