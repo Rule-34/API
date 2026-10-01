@@ -97,6 +97,57 @@ describe('BooruController', () => {
     jest.restoreAllMocks()
   })
 
+  describe('request validation', () => {
+    it.each([
+      {
+        name: 'an invalid booruType',
+        url: '/booru/bogus.example/posts?limit=1&baseEndpoint=e621.net',
+        detail: 'booruType must be one of the following values'
+      },
+      {
+        name: 'a missing baseEndpoint',
+        url: '/booru/e621.net/posts?limit=1',
+        detail: 'baseEndpoint should not be empty'
+      },
+      {
+        name: 'an unknown query parameter',
+        url: '/booru/e621.net/posts?limit=1&baseEndpoint=e621.net&bogusParam=1',
+        detail: 'property bogusParam should not exist'
+      }
+    ])('returns 400 with validation details for $name', async ({ url, detail }) => {
+      const res = await request(app.getHttpServer()).get(url)
+
+      expect(res.status).toBe(400)
+      expect(res.body).toMatchObject({
+        statusCode: 400,
+        error: 'Bad Request'
+      })
+      const validationMessages = (res.body as unknown as { message: string[] }).message
+      expect(validationMessages.some((message) => message.includes(detail))).toBe(true)
+      expect(res.headers['cache-control']).toBe('no-store, no-cache, must-revalidate')
+      expect(mockBooruService.buildApiClass).not.toHaveBeenCalled()
+    })
+
+    it('redacts credentials in validation details', async () => {
+      const res = await request(app.getHttpServer()).get('/booru/e621.net/posts').query({
+        baseEndpoint: 'e621.net',
+        'api_key=fixture-credential': '1'
+      })
+
+      expect(res.status).toBe(400)
+      const validationMessages = (res.body as unknown as { message: string[] }).message
+      expect(validationMessages).toContain('property api_key=REDACTED should not exist')
+      expect(JSON.stringify(res.body)).not.toContain('fixture-credential')
+    })
+
+    it('still accepts a valid domain-like booruType', async () => {
+      const res = await request(app.getHttpServer()).get('/booru/e621.net/posts?limit=1&baseEndpoint=e621.net')
+
+      expect(res.status).toBe(200)
+      expect(mockBooruService.buildApiClass).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe('Cache-Control headers', () => {
     it('posts endpoint returns public cache header', async () => {
       const res = await request(app.getHttpServer())

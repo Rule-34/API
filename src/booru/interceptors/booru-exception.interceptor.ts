@@ -112,6 +112,18 @@ export class BooruErrorsInterceptor implements NestInterceptor {
           return throwError(() => new ServiceUnavailableException(undefined, sanitizedMessage))
         }
 
+        if (error instanceof HttpException) {
+          const sanitizedResponse = this.sanitizeResponseValue(error.getResponse()) as string | object
+          const sanitizedError = new HttpException(sanitizedResponse, error.getStatus())
+          sanitizedError.name = error.name
+
+          if (error.stack !== undefined && error.stack !== '') {
+            sanitizedError.stack = this.sanitizeErrorMessage(error.stack)
+          }
+
+          return throwError(() => sanitizedError)
+        }
+
         // For unknown errors, also sanitize the message
         const sanitizedError = new Error(sanitizedMessage)
 
@@ -129,7 +141,7 @@ export class BooruErrorsInterceptor implements NestInterceptor {
   }
 
   /**
-   * Sanitizes error messages by removing sensitive authentication parameters from URLs
+   * Sanitizes authentication parameters in URLs and standalone key=value tokens
    */
   private sanitizeErrorMessage(message: string): string {
     if (!message) {
@@ -138,7 +150,31 @@ export class BooruErrorsInterceptor implements NestInterceptor {
 
     const urlPattern = /https?:\/\/[^\s]+/gi
 
-    return message.replace(urlPattern, (url) => this.sanitizeUrl(url))
+    let sanitizedMessage = message.replace(urlPattern, (url) => this.sanitizeUrl(url))
+
+    for (const key of this.sensitiveParams) {
+      const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const pattern = new RegExp(`(^|[^a-zA-Z0-9_])(${escapedKey}=)[^\\s&#]*`, 'gi')
+      sanitizedMessage = sanitizedMessage.replace(pattern, '$1$2REDACTED')
+    }
+
+    return sanitizedMessage
+  }
+
+  private sanitizeResponseValue(value: unknown): unknown {
+    if (typeof value === 'string') {
+      return this.sanitizeErrorMessage(value)
+    }
+
+    if (Array.isArray(value)) {
+      return value.map((item) => this.sanitizeResponseValue(item))
+    }
+
+    if (value !== null && typeof value === 'object') {
+      return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, this.sanitizeResponseValue(item)]))
+    }
+
+    return value
   }
 
   /**

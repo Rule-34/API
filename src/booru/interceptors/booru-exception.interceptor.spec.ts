@@ -1,8 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { ConfigModule } from '@nestjs/config'
-import { Controller, Get, Request, UseInterceptors } from '@nestjs/common'
+import {
+  BadRequestException,
+  CallHandler,
+  Controller,
+  ExecutionContext,
+  Get,
+  HttpException,
+  Request,
+  UseInterceptors
+} from '@nestjs/common'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import request from 'supertest'
+import { firstValueFrom, throwError } from 'rxjs'
 import { EmptyDataError, HttpError } from '@alejandroakbal/universal-booru-wrapper'
 import { BooruErrorsInterceptor } from './booru-exception.interceptor'
 import { BooruAuthManagerService } from '../services/booru-auth-manager.service'
@@ -32,6 +42,19 @@ class TestBooruErrorsController {
     throw new EmptyDataError(
       'Request failed for https://gelbooru.com/index.php?page=dapi&user_id=12345&api_key=secret123&limit=10'
     )
+  }
+
+  @Get('client-error')
+  getClientError() {
+    throw new BadRequestException({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: [
+        'Invalid URL https://gelbooru.com/index.php?api_key=fixture-key&user_id=fixture-id',
+        'Invalid auth_user=fixture-user and auth_pass=fixture-pass'
+      ],
+      details: { source: 'query', hint: 'Check token=fixture-token' }
+    })
   }
 
   @Get('auth-failure')
@@ -172,6 +195,47 @@ describe('BooruErrorsInterceptor', () => {
     expect(body).toContain('limit=10')
     expect(body).not.toContain('12345')
     expect(body).not.toContain('secret123')
+  })
+
+  it('preserves an HttpException status and body while sanitizing validation messages', async () => {
+    const response = await request(app.getHttpServer()).get('/test-booru-errors/client-error')
+    const body = JSON.stringify(response.body)
+
+    expect(response.status).toBe(400)
+    expect(response.body).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: [
+        'Invalid URL https://gelbooru.com/index.php?api_key=REDACTED&user_id=REDACTED',
+        'Invalid auth_user=REDACTED and auth_pass=REDACTED'
+      ],
+      details: { source: 'query', hint: 'Check token=REDACTED' }
+    })
+    expect(body).not.toContain('fixture-')
+    expect(response.headers['cache-control']).toBe('no-store, no-cache, must-revalidate')
+  })
+
+  it('preserves an HttpException string body and sanitizes its stack', async () => {
+    const error = new HttpException('Invalid https://gelbooru.com/?auth_pass=fixture-pass', 422)
+    error.stack = 'HttpException: Invalid auth_user=fixture-user https://gelbooru.com/?api_key=fixture-key'
+
+    const context = {
+      switchToHttp: () => ({ getResponse: () => ({ header: jest.fn() }) })
+    } as unknown as ExecutionContext
+    const next: CallHandler = { handle: () => throwError(() => error) }
+    const interceptor = app.get(BooruErrorsInterceptor)
+    const interceptedError: unknown = await firstValueFrom(interceptor.intercept(context, next)).catch(
+      (caught: unknown) => caught
+    )
+
+    expect(interceptedError).toBeInstanceOf(HttpException)
+    const preserved = interceptedError as HttpException
+    expect(preserved.getStatus()).toBe(422)
+    expect(preserved.getResponse()).toBe('Invalid https://gelbooru.com/?auth_pass=REDACTED')
+    expect(preserved.message).toBe('Invalid https://gelbooru.com/?auth_pass=REDACTED')
+    expect(preserved.stack).toContain('auth_user=REDACTED')
+    expect(preserved.stack).toContain('api_key=REDACTED')
+    expect(preserved.stack).not.toContain('fixture-')
   })
 
   it('should report auth failures with preserved www subdomains from a real request', async () => {
