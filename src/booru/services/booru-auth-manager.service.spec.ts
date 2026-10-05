@@ -247,8 +247,8 @@ describe('BooruAuthManagerService', () => {
       total: 2,
       available: 1,
       disabled: 1,
-      cooldown: 0,
-      permanentDisabled: 1
+      cooldown: 1,
+      permanentDisabled: 0
     })
   })
 
@@ -268,8 +268,8 @@ describe('BooruAuthManagerService', () => {
       total: 2,
       available: 0,
       disabled: 2,
-      cooldown: 0,
-      permanentDisabled: 2
+      cooldown: 2,
+      permanentDisabled: 0
     })
   })
 
@@ -648,6 +648,97 @@ describe('BooruAuthManagerService', () => {
     expect(snapshots).toHaveLength(1)
     expect(snapshot?.domain).toBe('gelbooru.com')
     expect(credential?.user).toBe('gel-user')
-    expect(credential?.state).toBe('permanent')
+    // A lone edge 403 must not retire the credential — it only backs it off.
+    expect(credential?.state).toBe('cooldown')
+  })
+
+  describe('auth failure backoff', () => {
+    const forbiddenFailure = () => ({
+      domain: 'rule34.xxx',
+      user: 'canonical-user',
+      password: 'canonical-pass',
+      error: 'request to https://rule34.xxx/index.php failed, status: 403',
+      timestamp: new Date()
+    })
+
+    function currentCredential(): DisabledCredential | undefined {
+      return service.getDisabledCredentials().find((credential) => credential.domain === 'rule34.xxx')
+    }
+
+    function cooldownSecondsOf(credential: DisabledCredential | undefined): number {
+      if (credential?.state !== 'cooldown') {
+        throw new Error(`expected a cooldown credential, received ${String(credential?.state)}`)
+      }
+
+      return (credential.cooldownUntil.getTime() - credential.disabledAt.getTime()) / 1000
+    }
+
+    function advancePastCooldown(): void {
+      const credential = currentCredential()
+
+      if (credential?.state === 'cooldown') {
+        jest.setSystemTime(credential.cooldownUntil.getTime() + 1)
+      }
+    }
+
+    beforeEach(() => {
+      jest.useFakeTimers()
+      jest.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it('backs off an edge 403 instead of permanently disabling the credential', () => {
+      service.reportAuthFailure(forbiddenFailure())
+
+      const stats = service.getDomainStats('rule34.xxx')
+
+      expect(currentCredential()?.state).toBe('cooldown')
+      expect(stats.permanentDisabled).toBe(0)
+      expect(stats.cooldown).toBe(1)
+    })
+
+    it('escalates the cooldown while the failures continue', () => {
+      service.reportAuthFailure(forbiddenFailure())
+      const firstCooldownSeconds = cooldownSecondsOf(currentCredential())
+
+      advancePastCooldown()
+      service.reportAuthFailure(forbiddenFailure())
+      const secondCooldownSeconds = cooldownSecondsOf(currentCredential())
+
+      expect(currentCredential()?.state).toBe('cooldown')
+      expect(secondCooldownSeconds).toBeGreaterThan(firstCooldownSeconds)
+    })
+
+    it('retires the credential only once the failures keep repeating', () => {
+      let permanentAfterAttempts = 0
+
+      for (let attempt = 1; attempt <= 12; attempt += 1) {
+        service.reportAuthFailure(forbiddenFailure())
+
+        if (currentCredential()?.state === 'permanent') {
+          permanentAfterAttempts = attempt
+          break
+        }
+
+        advancePastCooldown()
+      }
+
+      expect(permanentAfterAttempts).toBeGreaterThan(1)
+      expect(service.getDomainStats('rule34.xxx').permanentDisabled).toBe(1)
+    })
+
+    it('forgets failures that fall outside the strike window', () => {
+      service.reportAuthFailure(forbiddenFailure())
+      advancePastCooldown()
+      jest.setSystemTime(Date.now() + 16 * 60 * 1_000)
+
+      service.reportAuthFailure(forbiddenFailure())
+
+      expect(service.getDomainStats('rule34.xxx').permanentDisabled).toBe(0)
+      expect(currentCredential()?.state).toBe('cooldown')
+    })
   })
 })

@@ -29,8 +29,19 @@ interface ReservationResponse {
 export class BooruAuthManagerService implements OnModuleInit {
   private static readonly HTTP_STATUS_PATTERN = /(?:status(?:\s*code|_code)?|http)\s*[:=]?\s*(\d{3})|\b(\d{3})\b/i
   private static readonly IPC_RESERVATION_TIMEOUT_MS = 1_000
+  /**
+   * Consecutive non-rate-limit failures tolerated before a credential is retired.
+   * A 403 from an edge (WAF/CDN) is indistinguishable from a genuine ban at the HTTP layer,
+   * so a single blocked window must never retire a credential that still works.
+   */
+  private static readonly AUTH_FAILURE_STRIKE_THRESHOLD = 5
+  /** Strikes older than this window stop counting — the credential proved itself in between. */
+  private static readonly AUTH_FAILURE_STRIKE_WINDOW_MS = 15 * 60 * 1_000
+  private static readonly AUTH_FAILURE_BACKOFF_BASE_SECONDS = 30
+  private static readonly AUTH_FAILURE_BACKOFF_MAX_SECONDS = 15 * 60
 
   private readonly disabledCredentials = new Map<string, { disabledAt: number; reason: string }>()
+  private readonly authFailureStrikes = new Map<string, { strikes: number; lastFailureAt: number }>()
   private readonly cooldownCredentials = new Map<
     string,
     { disabledAt: number; cooldownUntil: number; reason: string }
@@ -187,13 +198,7 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
 
     const isRateLimit = failureKind === 'rate_limited'
-    const fallbackCooldownSeconds = this.getRateLimitFallbackSeconds(
-      normalizedDomain,
-      authFailure.user,
-      authFailure.password
-    )
-    const cooldownSeconds = Math.max(1, authFailure.retryAfterSeconds ?? fallbackCooldownSeconds)
-    const cooldownUntil = new Date(Date.now() + cooldownSeconds * 1000)
+    const credentialKey = createCredentialKey(normalizedDomain, authFailure.user, authFailure.password)
     const baseCredential = {
       domain: normalizedDomain,
       user: authFailure.user,
@@ -202,22 +207,52 @@ export class BooruAuthManagerService implements OnModuleInit {
       ...(authFailure.password !== undefined ? { password: authFailure.password } : {})
     }
 
-    const disabledCredential: DisabledCredential = isRateLimit
-      ? {
-          ...baseCredential,
-          state: 'cooldown',
-          cooldownUntil
-        }
-      : {
+    let disabledCredential: DisabledCredential
+    let action: string
+
+    if (isRateLimit) {
+      const fallbackCooldownSeconds = this.getRateLimitFallbackSeconds(
+        normalizedDomain,
+        authFailure.user,
+        authFailure.password
+      )
+      const cooldownSeconds = Math.max(1, authFailure.retryAfterSeconds ?? fallbackCooldownSeconds)
+
+      disabledCredential = {
+        ...baseCredential,
+        state: 'cooldown',
+        cooldownUntil: new Date(Date.now() + cooldownSeconds * 1000)
+      }
+      action = `cooldown for ${cooldownSeconds}s`
+    } else {
+      // A 403/401 coming from an edge (WAF/CDN) looks identical to a real ban, so back off with
+      // an escalating cooldown instead of retiring the credential on first sight. Only repeated,
+      // closely-spaced failures count as proof that the credential itself is dead.
+      const strikes = this.recordAuthFailureStrike(credentialKey)
+
+      if (strikes >= BooruAuthManagerService.AUTH_FAILURE_STRIKE_THRESHOLD) {
+        this.authFailureStrikes.delete(credentialKey)
+        disabledCredential = {
           ...baseCredential,
           state: 'permanent'
         }
+        action = `permanently disabled after ${strikes} consecutive failures`
+      } else {
+        const backoffSeconds = this.getAuthFailureBackoffSeconds(strikes)
+
+        disabledCredential = {
+          ...baseCredential,
+          state: 'cooldown',
+          cooldownUntil: new Date(Date.now() + backoffSeconds * 1000)
+        }
+        action = `cooldown for ${backoffSeconds}s (failure ${strikes}/${BooruAuthManagerService.AUTH_FAILURE_STRIKE_THRESHOLD})`
+      }
+    }
 
     this.disableCredentialLocally(disabledCredential)
     this.broadcastDisabledCredential(disabledCredential)
 
     const stats = this.getDomainStats(normalizedDomain)
-    const action = isRateLimit ? `cooldown for ${cooldownSeconds}s` : 'permanently disabled'
 
     console.error(`❌ Auth failure for ${normalizedDomain}:${sanitizedUser} - ${sanitizedError} (${action})`)
     console.warn(
@@ -733,6 +768,30 @@ export class BooruAuthManagerService implements OnModuleInit {
     }
 
     return null
+  }
+
+  /**
+   * Counts consecutive non-rate-limit failures for one credential. Strikes expire after
+   * AUTH_FAILURE_STRIKE_WINDOW_MS, so a credential that serves successfully again in between
+   * restarts from zero instead of accumulating towards retirement forever.
+   */
+  private recordAuthFailureStrike(credentialKey: string): number {
+    const now = Date.now()
+    const previous = this.authFailureStrikes.get(credentialKey)
+    const strikes =
+      previous !== undefined && now - previous.lastFailureAt <= BooruAuthManagerService.AUTH_FAILURE_STRIKE_WINDOW_MS
+        ? previous.strikes + 1
+        : 1
+
+    this.authFailureStrikes.set(credentialKey, { strikes, lastFailureAt: now })
+
+    return strikes
+  }
+
+  private getAuthFailureBackoffSeconds(strikes: number): number {
+    const exponentialSeconds = BooruAuthManagerService.AUTH_FAILURE_BACKOFF_BASE_SECONDS * 2 ** Math.max(0, strikes - 1)
+
+    return Math.min(exponentialSeconds, BooruAuthManagerService.AUTH_FAILURE_BACKOFF_MAX_SECONDS)
   }
 
   private getRateLimitFallbackSeconds(domain: string, user: string, password?: string): number {
