@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@alejandroakbal/universal-booru-wrapper':
-        specifier: ^0.15.29
-        version: 0.15.29
+        specifier: ^0.15.30
+        version: 0.15.30
       '@fastify/helmet':
         specifier: ^13.0.2
         version: 13.0.2
@@ -132,8 +132,8 @@ importers:
 
 packages:
 
-  '@alejandroakbal/universal-booru-wrapper@0.15.29':
-    resolution: {integrity: sha512-+/axrZQEs9yw+q0wuTxPnBxspYmpJiO+zTOZ+tumWmaPClips/njzTWsaQEDo+wvqaDLz1T4PjMTVKgt+YEiyA==, tarball: https://npm.pkg.github.com/download/@AlejandroAkbal/universal-booru-wrapper/0.15.29/68f03997630937c43109039778c891e036db818b}
+  '@alejandroakbal/universal-booru-wrapper@0.15.30':
+    resolution: {integrity: sha512-FFakqbZAqkJJ7dmhTgjwGot6p5B+mwASnU/emar5QoCXN9TibAj6suHk5BeM57QM/5lvMXWm8q3CKLfKCmks0g==, tarball: https://npm.pkg.github.com/download/@AlejandroAkbal/universal-booru-wrapper/0.15.30/28ff866caa26adf57fa92a8749933335810d5880}
     engines: {node: 16.x}
 
   '@ampproject/remapping@2.3.0':
@@ -4165,7 +4165,7 @@ packages:
 
 snapshots:
 
-  '@alejandroakbal/universal-booru-wrapper@0.15.29':
+  '@alejandroakbal/universal-booru-wrapper@0.15.30':
     dependencies:
       camaro: 6.7.3
       debug: 4.4.3
@@ -4540,7 +4540,7 @@ snapshots:
   '@eslint/config-array@0.23.5':
     dependencies:
       '@eslint/object-schema': 3.0.5
-      debug: 4.4.0
+      debug: 4.4.3
       minimatch: 10.2.5
     transitivePeerDependencies:
       - supports-color
@@ -8541,7 +8541,7 @@ snapshots:
     dependencies:
       component-emitter: 1.3.1
       cookiejar: 2.1.4
-      debug: 4.4.0
+      debug: 4.4.3
       fast-safe-stringify: 2.1.1
       form-data: 4.0.5
       formidable: 3.5.4
