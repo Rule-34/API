@@ -4,9 +4,9 @@ import { BaseExceptionFilter, HttpAdapterHost } from '@nestjs/core'
 import * as Sentry from '@sentry/nestjs'
 
 const UPSTREAM_OUTAGE_STATUSES: readonly number[] = [
-  HttpStatus.BAD_GATEWAY as number,
-  HttpStatus.SERVICE_UNAVAILABLE as number,
-  HttpStatus.GATEWAY_TIMEOUT as number
+  HttpStatus.BAD_GATEWAY,
+  HttpStatus.SERVICE_UNAVAILABLE,
+  HttpStatus.GATEWAY_TIMEOUT
 ]
 
 @Catch()
